@@ -1,0 +1,4 @@
+gait_speed_test:
+  ros__parameters:
+    mode: "distance" # "time" or "distance"
+    value: 4.0 # seconds or meters
