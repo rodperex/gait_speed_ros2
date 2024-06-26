@@ -3,8 +3,8 @@
     <!-- ////////// -->
     <BehaviorTree ID="BehaviorTree">
         <Sequence>
-            <SubTree ID="find_patient"/>
-            <SubTree ID="gait_speed_dist"/>
+            <SubTree ID="find_patient" __shared_blackboard="true"/>
+            <SubTree ID="gait_speed_dist" __shared_blackboard="true"/>
         </Sequence>
     </BehaviorTree>
     <!-- ////////// -->
