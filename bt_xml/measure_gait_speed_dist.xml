@@ -13,7 +13,7 @@
             <Inverter>
                 <ReactiveSequence>
                     <Condition ID="IsDetected" confidence="0.6" frames="" interest="person" max_depth="2" max_entities="1" order="depth_nearest"/>
-                    <Condition ID="IsMyPatient"/>
+                    <Condition ID="isMyPerson"/>
                     <Action ID="Spin"/>
                 </ReactiveSequence>
             </Inverter>
@@ -24,13 +24,13 @@
         <Sequence>
             <Action ID="StartTest" distance="{d}"/>
             <SetBlackboard output_key="gait_speed_distance" value="{d}"/>
-            <ReactiveFallback>
-                <Condition ID="DistanceReached" distance="{d}"/>
+            <ReactiveSequence>
                 <Inverter>
-                    <Condition ID="IsMyPatient"/>
-                </Inverter>
-                <Action ID="Follow"/>
-            </ReactiveFallback>
+                    <Condition ID="DistanceReached" distance="{d}"/>
+                </Inverter>    
+                <Condition ID="isMyPerson"/>
+                <Action ID="FollowPerson"/>
+            </ReactiveSequence>
             <Action ID="EndTest" time="{t}"/>
             <SetBlackboard output_key="gait_speed_time" value="{t}"/>
         </Sequence>
@@ -43,7 +43,7 @@
         <Action ID="EndTest">
             <output_port name="time">Time needed to complete the gait speed test</output_port>
         </Action>
-        <Action ID="Follow"/>
+        <Action ID="FollowPerson"/>
         <Condition ID="IsDetected">
             <input_port default="0.6" name="confidence"/>
             <output_port name="frames"/>
@@ -52,7 +52,7 @@
             <input_port default="1" name="max_entities"/>
             <input_port default="depth_nearest" name="order"/>
         </Condition>
-        <Condition ID="IsMyPatient"/>
+        <Condition ID="isMyPerson"/>
         <Action ID="Spin"/>
         <Action ID="StartTest">
             <input_port name="distance">Distance for the gait speed test</input_port>

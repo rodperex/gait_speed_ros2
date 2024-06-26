@@ -28,7 +28,11 @@ MeasureGaitSpeedDist::MeasureGaitSpeedDist()
   BT::BehaviorTreeFactory factory;
   BT::SharedLibrary loader;
 
-  // factory.registerFromPlugin(loader.getOSName("is_detected"));
+  factory.registerFromPlugin(loader.getOSName("is_detected_bt_node"));
+  factory.registerFromPlugin(loader.getOSName("is_my_person_bt_node"));
+  factory.registerFromPlugin(loader.getOSName("start_test_bt_node"));
+  factory.registerFromPlugin(loader.getOSName("end_test_bt_node"));
+
 
   auto blackboard = BT::Blackboard::create();
   node_ = rclcpp::Node::make_shared("bt_node");

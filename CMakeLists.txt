@@ -22,6 +22,25 @@ set(dependencies
 
 include_directories(include)
 
+add_library(is_my_person_bt_node SHARED src/gait_speed_ros2/bt_nodes/isMyPerson.cpp)
+add_library(distance_reached_bt_node SHARED src/gait_speed_ros2/bt_nodes/DistanceReached.cpp)
+add_library(start_test_bt_node SHARED src/gait_speed_ros2/bt_nodes/StartTest.cpp)
+add_library(end_test_bt_node SHARED src/gait_speed_ros2/bt_nodes/EndTest.cpp)
+
+
+list(APPEND plugin_libs
+  is_my_person_bt_node
+  distance_reached_bt_node
+  start_test_bt_node
+  end_test_bt_node
+)
+
+foreach(bt_plugin ${plugin_libs})
+  ament_target_dependencies(${bt_plugin} ${dependencies})
+  target_compile_definitions(${bt_plugin} PRIVATE BT_PLUGIN_EXPORT)
+endforeach()
+
+
 add_library(${PROJECT_NAME} SHARED
   src/gait_speed_ros2/behaviors/gait_speed_dist.cpp
   src/gait_speed_ros2/behaviors/measure_gait_speed_dist.cpp

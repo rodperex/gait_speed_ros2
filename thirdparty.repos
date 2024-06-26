@@ -3,3 +3,7 @@ repositories:
     type: git
     url: https://github.com/fmrico/cascade_lifecycle
     version: main
+  thirdparty/perception_bt_nodes_irl:
+    type: git
+    url: https://github.com/rodperex/perception_bt_nodes_irl
+    version: main
