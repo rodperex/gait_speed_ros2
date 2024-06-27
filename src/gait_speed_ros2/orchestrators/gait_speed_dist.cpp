@@ -24,7 +24,12 @@ GaitSpeedDist::GaitSpeedDist(BT::Blackboard::Ptr blackboard)
   status_received_("FAILURE"),
   blackboard_(blackboard)
 {
-  RCLCPP_INFO(get_logger(), "GaitSpeedDist constructor");
+  this->declare_parameter<float>("value", 4.0);
+  double distance = this->get_parameter("value").as_double();
+
+  blackboard_->set("distance", distance);
+
+  RCLCPP_INFO(get_logger(), "GaitSpeedDist constructor: %f meters", distance);
 
   status_sub_ = create_subscription<std_msgs::msg::String>(
     "behavior_status", 10, std::bind(&GaitSpeedDist::status_callback, this, _1));

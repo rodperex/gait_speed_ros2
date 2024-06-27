@@ -11,3 +11,7 @@ repositories:
     type: git
     url: https://github.com/rodperex/motion_bt_nodes_irl
     version: main
+  thirdparty/hri_bt_nodes_irl:
+    type: git
+    url: https://github.com/rodperex/hri_bt_nodes_irl
+    version: main

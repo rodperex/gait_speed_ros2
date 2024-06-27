@@ -23,7 +23,6 @@ StartTest::StartTest(const std::string & xml_tag_name, const BT::NodeConfigurati
   tf_buffer_(),
   tf_listener_(tf_buffer_)
 {
-    getInput("distance", distance_);
     config().blackboard->get("node", node_);
 }
 
@@ -41,7 +40,6 @@ StartTest::tick()
         rclcpp::Time start_time = node_->now();
         
         config().blackboard->set("start_time", start_time);
-        config().blackboard->set("distance", distance_);
         config().blackboard->set("odom2bf0", odom2bf0);
     
         return BT::NodeStatus::SUCCESS;

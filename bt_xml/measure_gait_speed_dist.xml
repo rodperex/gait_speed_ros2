@@ -36,7 +36,6 @@
     <!-- ////////// -->
     <BehaviorTree ID="gait_speed_dist">
         <Sequence>
-            <SetBlackboard output_key="{d}" value="6"/>
             <ReactiveSequence>
                 <Inverter>
                     <Condition ID="DistanceReached"/>
@@ -45,7 +44,6 @@
                 <Action ID="FollowPerson"/>
             </ReactiveSequence>
             <Action ID="EndTest"/>
-            <SetBlackboard output_key="gait_speed_time" value="{t}"/>
         </Sequence>
     </BehaviorTree>
     <!-- ////////// -->
@@ -86,7 +84,6 @@
         </Action>
         <Action ID="Spin"/>
         <Action ID="StartTest">
-            <input_port name="distance">Distance for the gait speed test</input_port>
         </Action>
         <SubTree ID="find_person"/>
         <SubTree ID="find_waving_person"/>
