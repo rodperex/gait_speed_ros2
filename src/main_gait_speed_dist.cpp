@@ -12,7 +12,7 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-#include "gait_speed_ros2/orchestrators/gait_speed_dist.hpp"
+#include "gait_speed_ros2/orchestrators/gait_speed.hpp"
 
 #include "gait_speed_ros2/behaviors/behavior_runner.hpp"
 
@@ -30,7 +30,7 @@ int main(int argc, char * argv[])
   blackboard->set("node", node);
 
   // orchestrator
-  auto gait_speed_node = std::make_shared<gait_speed::GaitSpeedDist>(blackboard);
+  auto gait_speed_node = std::make_shared<gait_speed::GaitSpeed>(blackboard);
 
   // behaviors
   std::vector<std::string> plugins;

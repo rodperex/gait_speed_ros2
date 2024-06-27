@@ -13,38 +13,47 @@
 // limitations under the License.
 
 
-#include "gait_speed_ros2/orchestrators/gait_speed_dist.hpp"
+#include "gait_speed_ros2/orchestrators/gait_speed.hpp"
 
 namespace gait_speed
 {
 
-GaitSpeedDist::GaitSpeedDist(BT::Blackboard::Ptr blackboard)
+GaitSpeed::GaitSpeed(BT::Blackboard::Ptr blackboard)
 : CascadeLifecycleNode("gait_speed_node"),
   state_(INIT),
   status_received_("FAILURE"),
   blackboard_(blackboard)
 {
   this->declare_parameter<float>("value", 4.0);
-  double distance = this->get_parameter("value").as_double();
+  this->declare_parameter<std::string>("mode", "distance");
 
-  blackboard_->set("distance", distance);
+  mode_ = this->get_parameter("mode").as_string();
+  double value = this->get_parameter("value").as_double();
 
-  RCLCPP_INFO(get_logger(), "GaitSpeedDist constructor: %f meters", distance);
+  if (mode_ == "distance") {
+    RCLCPP_INFO(get_logger(), "GaitSpeed constructor: %f meters", value);
+    blackboard_->set("distance", value);
+  } else if (mode_ == "time") {
+    RCLCPP_INFO(get_logger(), "GaitSpeed constructor: %f seconds", value);
+    blackboard_->set("time", value);
+  }
+
+  blackboard_->set("mode", mode_); // to create a generic TargetReached BT node
 
   status_sub_ = create_subscription<std_msgs::msg::String>(
-    "behavior_status", 10, std::bind(&GaitSpeedDist::status_callback, this, _1));
+    "behavior_status", 10, std::bind(&GaitSpeed::status_callback, this, _1));
 
   result_pub_ = create_publisher<std_msgs::msg::Float64>("gait_speed_result", 10);
 }
 
 void
-GaitSpeedDist::status_callback(std_msgs::msg::String::UniquePtr msg)
+GaitSpeed::status_callback(std_msgs::msg::String::UniquePtr msg)
 {
   last_status_ = msg.get()->data;
 }
 
 void
-GaitSpeedDist::control_cycle()
+GaitSpeed::control_cycle()
 {
   std_msgs::msg::Float64 result_msg;
 
@@ -101,7 +110,7 @@ GaitSpeedDist::control_cycle()
 }
 
 void
-GaitSpeedDist::go_to_state(int state)
+GaitSpeed::go_to_state(int state)
 {
   clear_activation();
   state_ = state;
@@ -125,20 +134,20 @@ GaitSpeedDist::go_to_state(int state)
 }
 
 bool
-GaitSpeedDist::check_behavior_finished()
+GaitSpeed::check_behavior_finished()
 {
   return last_status_ != "RUNNING";
 }
 
 
 rclcpp_lifecycle::node_interfaces::LifecycleNodeInterface::CallbackReturn
-GaitSpeedDist::on_activate(const rclcpp_lifecycle::State & previous_state)
+GaitSpeed::on_activate(const rclcpp_lifecycle::State & previous_state)
 {
   (void)previous_state;
-  RCLCPP_INFO(get_logger(), "GaitSpeedDist on_activate");
+  RCLCPP_INFO(get_logger(), "GaitSpeed on_activate");
 
   timer_ =
-    create_wall_timer(50ms, std::bind(&GaitSpeedDist::control_cycle, this));
+    create_wall_timer(50ms, std::bind(&GaitSpeed::control_cycle, this));
 
   result_pub_->on_activate();
 
@@ -146,10 +155,10 @@ GaitSpeedDist::on_activate(const rclcpp_lifecycle::State & previous_state)
 }
 
 rclcpp_lifecycle::node_interfaces::LifecycleNodeInterface::CallbackReturn
-GaitSpeedDist::on_deactivate(const rclcpp_lifecycle::State & previous_state)
+GaitSpeed::on_deactivate(const rclcpp_lifecycle::State & previous_state)
 {
   (void)previous_state;
-  RCLCPP_INFO(get_logger(), "GaitSpeedDist on_deactivate");
+  RCLCPP_INFO(get_logger(), "GaitSpeed on_deactivate");
 
   timer_ = nullptr;
 

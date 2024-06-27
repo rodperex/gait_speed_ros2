@@ -52,9 +52,7 @@ endforeach()
 
 
 add_library(${PROJECT_NAME} SHARED
-  src/gait_speed_ros2/orchestrators/gait_speed_dist.cpp
-  # src/gait_speed_ros2/behaviors/measure_gait_speed_dist.cpp
-  # src/gait_speed_ros2/behaviors/find_person.cpp
+  src/gait_speed_ros2/orchestrators/gait_speed.cpp
   src/gait_speed_ros2/behaviors/behavior_runner.cpp
 )
 ament_target_dependencies(${PROJECT_NAME} ${dependencies})

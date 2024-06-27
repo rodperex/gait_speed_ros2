@@ -29,10 +29,10 @@ namespace gait_speed
 using namespace std::chrono_literals;
 using std::placeholders::_1;
 
-class GaitSpeedDist : public rclcpp_cascade_lifecycle::CascadeLifecycleNode
+class GaitSpeed : public rclcpp_cascade_lifecycle::CascadeLifecycleNode
 {
 public:
-  GaitSpeedDist(BT::Blackboard::Ptr blackboard);
+  GaitSpeed(BT::Blackboard::Ptr blackboard);
 
 private:
   void control_cycle();
@@ -57,6 +57,8 @@ private:
   rclcpp::Subscription<std_msgs::msg::String>::SharedPtr status_sub_;
   std::string status_received_, last_status_;
   BT::Blackboard::Ptr blackboard_;
+  
+  std::string mode_;
 
   rclcpp_lifecycle::LifecyclePublisher<std_msgs::msg::Float64>::SharedPtr result_pub_;
 
