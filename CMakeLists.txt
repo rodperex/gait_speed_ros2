@@ -14,6 +14,9 @@ find_package(behaviortree_cpp_v3 REQUIRED)
 find_package(std_msgs REQUIRED)
 find_package(perception_system REQUIRED)
 find_package(perception_system_interfaces REQUIRED)
+find_package(tf2_geometry_msgs REQUIRED)
+find_package(tf2 REQUIRED)
+find_package(tf2_ros REQUIRED)
 
 set(dependencies
   rclcpp
@@ -22,6 +25,9 @@ set(dependencies
   std_msgs
   perception_system
   perception_system_interfaces
+  tf2_geometry_msgs
+  tf2
+  tf2_ros
 )
 
 include_directories(include)

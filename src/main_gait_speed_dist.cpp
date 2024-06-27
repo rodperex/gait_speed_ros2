@@ -23,7 +23,8 @@ int main(int argc, char * argv[])
   rclcpp::init(argc, argv);
   rclcpp::executors::MultiThreadedExecutor exec(rclcpp::ExecutorOptions(), 2);   // set number of threads to whatever needed
 
-  auto node = rclcpp::Node::make_shared("gait_speed_node");
+  auto node = std::make_shared<rclcpp_cascade_lifecycle::CascadeLifecycleNode>("gait_speed_node");
+
 
   auto blackboard = BT::Blackboard::create();
   blackboard->set("node", node);
@@ -34,7 +35,7 @@ int main(int argc, char * argv[])
   // behaviors
   std::vector<std::string> plugins;
   
-  plugins = {"is_detected_bt_node", "is_my_person_bt_node", "start_test_bt_node", "end_test_bt_node"};
+  plugins = {"is_detected_bt_node", "is_my_person_bt_node", "end_test_bt_node"};
   auto measure_gait_speed_node = std::make_shared<gait_speed::BehaviorRunner>(
     blackboard,
     "measure_gait_speed",
@@ -42,22 +43,22 @@ int main(int argc, char * argv[])
     plugins
     );
 
-  plugins = {"plugin1", "plugin2"};
-  auto find_person_node = std::make_shared<gait_speed::BehaviorRunner>(
-    blackboard,
-    "find_person",
-    "/bt_xml/find_person.xml",
-    plugins
-    );
+  // plugins = {"plugin1", "plugin2"};
+  // auto find_person_node = std::make_shared<gait_speed::BehaviorRunner>(
+  //   blackboard,
+  //   "find_person",
+  //   "/bt_xml/find_person.xml",
+  //   plugins
+  //   );
 
   exec.add_node(gait_speed_node->get_node_base_interface());
   exec.add_node(measure_gait_speed_node->get_node_base_interface());
-  exec.add_node(find_person_node->get_node_base_interface());
+  // exec.add_node(find_person_node->get_node_base_interface());
 
   gait_speed_node->trigger_transition(lifecycle_msgs::msg::Transition::TRANSITION_CONFIGURE);
   measure_gait_speed_node->trigger_transition(lifecycle_msgs::msg::Transition::TRANSITION_CONFIGURE);
-  find_person_node->trigger_transition(lifecycle_msgs::msg::Transition::TRANSITION_CONFIGURE);
-
+  // find_person_node->trigger_transition(lifecycle_msgs::msg::Transition::TRANSITION_CONFIGURE);
+  
   exec.spin();
 
   rclcpp::shutdown();

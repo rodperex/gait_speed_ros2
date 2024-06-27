@@ -20,6 +20,28 @@ namespace gait_speed
 EndTest::EndTest(const std::string & xml_tag_name, const BT::NodeConfiguration & conf)
 : BT::ActionNodeBase(xml_tag_name, conf)
 {
+    config().blackboard->get("node", node_);
+}
+
+BT::NodeStatus
+EndTest::tick()
+{
+    rclcpp::Time start_time;
+    config().blackboard->get("start_time", start_time);
+
+    rclcpp::Duration duration = node_->now() - start_time;
+    
+    float seconds = duration.nanoseconds() / 1e9;
+
+    if (seconds > 0) {
+        RCLCPP_INFO(node_->get_logger(), "Test finished. Time: %f", seconds);
+        config().blackboard->set("gait_speed_result", seconds);
+        return BT::NodeStatus::SUCCESS;
+    } else {
+        RCLCPP_WARN(node_->get_logger(), "Test finished with error");
+        return BT::NodeStatus::FAILURE;
+    }
 
 }
+
 }  // namespace gait_speed

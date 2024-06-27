@@ -22,6 +22,7 @@ IsMyPerson::IsMyPerson(const std::string & xml_tag_name, const BT::NodeConfigura
   threshold_(0.5)
 {
   getInput("person_id", person_id_);
+  config().blackboard->get("node", node_);
 }
 
 BT::NodeStatus

@@ -36,8 +36,7 @@
     <!-- ////////// -->
     <BehaviorTree ID="gait_speed_dist">
         <Sequence>
-            <Action ID="StartTest" distance="{d}"/>
-            <SetBlackboard output_key="gait_speed_distance" value="{d}"/>
+            <SetBlackboard output_key="{d}" value="6"/>
             <ReactiveSequence>
                 <Inverter>
                     <Condition ID="DistanceReached" distance="{d}"/>

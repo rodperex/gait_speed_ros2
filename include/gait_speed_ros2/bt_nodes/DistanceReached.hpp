@@ -17,8 +17,14 @@
 #define DISTANCE_REACHED_HPP_
 
 #include "rclcpp/rclcpp.hpp"
+#include "rclcpp_cascade_lifecycle/rclcpp_cascade_lifecycle.hpp"
+
 #include "behaviortree_cpp_v3/behavior_tree.h"
 #include "behaviortree_cpp_v3/bt_factory.h"
+
+#include <tf2_ros/transform_listener.h>
+#include <tf2_ros/buffer.h>
+#include "tf2_geometry_msgs/tf2_geometry_msgs.hpp"
 
 namespace gait_speed
 {
@@ -31,8 +37,22 @@ class DistanceReached : public BT::ConditionNode
 public:
   DistanceReached(const std::string & xml_tag_name, const BT::NodeConfiguration & conf);
 
-private:
+  BT::NodeStatus tick();
 
+  static BT::PortsList providedPorts()
+  {
+    return BT::PortsList(
+      {
+      });
+  }
+
+private:
+  std::shared_ptr<rclcpp_cascade_lifecycle::CascadeLifecycleNode> node_;
+  
+  float distance_;
+  tf2::BufferCore tf_buffer_;
+  tf2_ros::TransformListener tf_listener_;
+  
 };
 
 } // namespace gait_speed

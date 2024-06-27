@@ -17,6 +17,8 @@
 #define END_TEST_HPP_
 
 #include "rclcpp/rclcpp.hpp"
+#include "rclcpp_cascade_lifecycle/rclcpp_cascade_lifecycle.hpp"
+
 #include "behaviortree_cpp_v3/behavior_tree.h"
 #include "behaviortree_cpp_v3/bt_factory.h"
 
@@ -31,8 +33,18 @@ class EndTest : public BT::ActionNodeBase
 public:
   EndTest(const std::string & xml_tag_name, const BT::NodeConfiguration & conf);
 
-private:
+  BT::NodeStatus tick();
 
+  static BT::PortsList providedPorts()
+  {
+    return BT::PortsList(
+      {
+        BT::InputPort<std::int64_t>("distance"),
+      });
+  }
+
+private:
+  std::shared_ptr<rclcpp_cascade_lifecycle::CascadeLifecycleNode> node_;
 };
 
 } // namespace gait_speed

@@ -20,8 +20,40 @@ namespace gait_speed
 DistanceReached::DistanceReached(
   const std::string & xml_tag_name,
   const BT::NodeConfiguration & conf)
-: BT::ConditionNode(xml_tag_name, conf)
+: BT::ConditionNode(xml_tag_name, conf),
+  distance_(0.0),
+  tf_buffer_(),
+  tf_listener_(tf_buffer_)
 {
+  config().blackboard->get("node", node_);
+  config().blackboard->get("distance", distance_);
+}
 
+BT::NodeStatus
+DistanceReached::tick()
+{
+  try
+  {
+    tf2::Stamped<tf2::Transform> odom2bf0;
+    config().blackboard->get("odom2bf0", odom2bf0);
+
+    auto odom2bf_msg = tf_buffer_.lookupTransform("odom", "base_link", tf2::TimePointZero);
+    tf2::Stamped<tf2::Transform> odom2bf;
+    tf2::fromMsg(odom2bf_msg, odom2bf);
+
+    auto bf02bf = odom2bf0.inverse() * odom2bf;
+    float distance_traveled = bf02bf.getOrigin().length();
+
+    if (distance_traveled >= distance_) {
+      return BT::NodeStatus::SUCCESS;
+    }
+
+    return BT::NodeStatus::FAILURE;
+  }
+  catch (tf2::TransformException &ex)
+  {
+      RCLCPP_WARN(node_->get_logger(), "%s", ex.what());
+      return BT::NodeStatus::FAILURE;
+  }
 }
 }  // namespace gait_speed
