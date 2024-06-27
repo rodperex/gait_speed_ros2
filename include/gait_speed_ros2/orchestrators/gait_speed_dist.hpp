@@ -38,7 +38,7 @@ private:
   void control_cycle();
   void status_callback(std_msgs::msg::String::UniquePtr msg);
   void go_to_state(int state);
-   bool check_behavior_finished();
+  bool check_behavior_finished();
   
   rclcpp_lifecycle::node_interfaces::LifecycleNodeInterface::CallbackReturn
   on_activate(const rclcpp_lifecycle::State & previous_state);
@@ -50,9 +50,8 @@ private:
   static const int FIND = 1;
   static const int EXPLAIN = 2;
   static const int PREPARE = 3;
-  static const int VERIFY_PREPARE = 4;
-  static const int MEASURE = 5;
-  static const int STOP = 6;
+  static const int MEASURE = 4;
+  static const int STOP = 5;
 
   rclcpp::TimerBase::SharedPtr timer_;
   rclcpp::Subscription<std_msgs::msg::String>::SharedPtr status_sub_;

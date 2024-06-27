@@ -47,37 +47,32 @@ GaitSpeedDist::control_cycle()
   switch (state_) {
     case INIT:
       if (check_behavior_finished()) {
-        go_to_state(FIND);
-      } else if (last_status_ == "FAILURE") {
-        go_to_state(STOP);
-      }
+        if (last_status_ == "SUCCESS") {
+          go_to_state(FIND);
+        } else {
+          go_to_state(STOP);
+        }
+      } 
       break;
     case FIND:
-      if (check_behavior_finished()) {
-        go_to_state(EXPLAIN);
-      } else if (last_status_ == "FAILURE") {
-        go_to_state(STOP);
+      if (last_status_ == "SUCCESS") {
+          go_to_state(FIND);
+      } else {
+          go_to_state(STOP);
       }
       break;
     case EXPLAIN:
-      if (check_behavior_finished()) {
-        go_to_state(PREPARE);
-      } else if (last_status_ == "FAILURE") {
-        go_to_state(STOP);
+      if (last_status_ == "SUCCESS") {
+          go_to_state(FIND);
+      } else {
+          go_to_state(STOP);
       }
       break;
     case PREPARE:
-      if (check_behavior_finished()) {
-        go_to_state(VERIFY_PREPARE);
-      } else if (last_status_ == "FAILURE") {
-        go_to_state(STOP);
-      }
-      break;
-    case VERIFY_PREPARE:
-      if (check_behavior_finished()) {
-        go_to_state(MEASURE);
-      } else if (last_status_ == "FAILURE") {
-        go_to_state(STOP);
+      if (last_status_ == "SUCCESS") {
+          go_to_state(FIND);
+      } else {
+          go_to_state(STOP);
       }
       break;
     case MEASURE:
@@ -117,9 +112,6 @@ GaitSpeedDist::go_to_state(int state)
     case PREPARE:
       add_activation("prepare_gait_speed");
       break;
-    case VERIFY_PREPARE:
-      add_activation("verify_prepare_gait_speed");
-      break;
     case MEASURE:
       add_activation("measure_gait_speed_dist");
       break;
@@ -131,7 +123,7 @@ GaitSpeedDist::go_to_state(int state)
 bool
 GaitSpeedDist::check_behavior_finished()
 {
-  return last_status_ == "SUCCESS";
+  return last_status_ != "RUNNING";
 }
 
 
