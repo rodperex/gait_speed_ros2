@@ -31,11 +31,11 @@ int main(int argc, char * argv[])
 
   // orchestrator
   auto gait_speed_node = std::make_shared<gait_speed::GaitSpeedDist>(blackboard);
-  
+
   // behaviors
   auto find_person_node = std::make_shared<gait_speed::FindPerson>(blackboard);
   auto measure_gait_speed_node = std::make_shared<gait_speed::MeasureGaitSpeedDist>(blackboard);
-  
+
 
   exec.add_node(gait_speed_node->get_node_base_interface());
   exec.add_node(measure_gait_speed_node->get_node_base_interface());
@@ -43,7 +43,7 @@ int main(int argc, char * argv[])
 
   gait_speed_node->trigger_transition(lifecycle_msgs::msg::Transition::TRANSITION_CONFIGURE);
   measure_gait_speed_node->trigger_transition(lifecycle_msgs::msg::Transition::TRANSITION_CONFIGURE);
-  
+
   exec.spin();
 
   rclcpp::shutdown();

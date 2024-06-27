@@ -20,6 +20,6 @@ namespace gait_speed
 EndTest::EndTest(const std::string & xml_tag_name, const BT::NodeConfiguration & conf)
 : BT::ActionNodeBase(xml_tag_name, conf)
 {
-  
+
 }
 }  // namespace gait_speed

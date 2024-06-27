@@ -17,9 +17,11 @@
 
 namespace gait_speed
 {
-DistanceReached::DistanceReached(const std::string & xml_tag_name, const BT::NodeConfiguration & conf)
+DistanceReached::DistanceReached(
+  const std::string & xml_tag_name,
+  const BT::NodeConfiguration & conf)
 : BT::ConditionNode(xml_tag_name, conf)
 {
-  
+
 }
 }  // namespace gait_speed

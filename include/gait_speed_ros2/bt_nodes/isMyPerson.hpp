@@ -32,14 +32,15 @@ using namespace std::chrono_literals;
 using std::placeholders::_1;
 using pl = perception_system::PerceptionListener;
 
-class IsMyPerson : public BT::ConditionNode{
+class IsMyPerson : public BT::ConditionNode
+{
 public:
   IsMyPerson(const std::string & xml_tag_name, const BT::NodeConfiguration & conf);
 
   BT::NodeStatus tick();
 
   static BT::PortsList providedPorts()
-  { 
+  {
     return BT::PortsList(
       {
         BT::InputPort<std::int64_t>("person_id"),
@@ -48,10 +49,10 @@ public:
 
 private:
   std::shared_ptr<rclcpp_cascade_lifecycle::CascadeLifecycleNode> node_;
-  
+
   std::int64_t person_id_;
   float threshold_;
-  
+
 };
 
 } // namespace gait_speed

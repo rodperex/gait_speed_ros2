@@ -33,7 +33,7 @@ GaitSpeedDist::GaitSpeedDist(BT::Blackboard::Ptr blackboard)
   blackboard_ = blackboard;
 }
 
-void 
+void
 GaitSpeedDist::status_callback(std_msgs::msg::String::UniquePtr msg)
 {
   last_status_ = msg.get()->data;
@@ -52,33 +52,33 @@ GaitSpeedDist::control_cycle()
         } else {
           go_to_state(STOP);
         }
-      } 
+      }
       break;
     case FIND:
       if (last_status_ == "SUCCESS") {
-          go_to_state(EXPLAIN);
+        go_to_state(EXPLAIN);
       } else {
-          go_to_state(STOP);
+        go_to_state(STOP);
       }
       break;
     case EXPLAIN:
       if (last_status_ == "SUCCESS") {
-          go_to_state(PREPARE);
+        go_to_state(PREPARE);
       } else {
-          go_to_state(STOP);
+        go_to_state(STOP);
       }
       break;
     case PREPARE:
       if (last_status_ == "SUCCESS") {
-          go_to_state(MEASURE);
+        go_to_state(MEASURE);
       } else {
-          go_to_state(STOP);
+        go_to_state(STOP);
       }
       break;
     case MEASURE:
       if (check_behavior_finished()) {
         go_to_state(STOP);
-      } 
+      }
       break;
     case STOP:
       clear_activation();
@@ -137,7 +137,7 @@ GaitSpeedDist::on_activate(const rclcpp_lifecycle::State & previous_state)
     create_wall_timer(50ms, std::bind(&GaitSpeedDist::control_cycle, this));
 
   result_pub_->on_activate();
-  
+
   return rclcpp_lifecycle::node_interfaces::LifecycleNodeInterface::CallbackReturn::SUCCESS;
 }
 

@@ -26,7 +26,8 @@ namespace gait_speed
 using namespace std::chrono_literals;
 using std::placeholders::_1;
 
-class DistanceReached : public BT::ConditionNode{
+class DistanceReached : public BT::ConditionNode
+{
 public:
   DistanceReached(const std::string & xml_tag_name, const BT::NodeConfiguration & conf);
 

@@ -39,7 +39,7 @@ private:
   void status_callback(std_msgs::msg::String::UniquePtr msg);
   void go_to_state(int state);
   bool check_behavior_finished();
-  
+
   rclcpp_lifecycle::node_interfaces::LifecycleNodeInterface::CallbackReturn
   on_activate(const rclcpp_lifecycle::State & previous_state);
   rclcpp_lifecycle::node_interfaces::LifecycleNodeInterface::CallbackReturn

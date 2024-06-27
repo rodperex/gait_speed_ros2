@@ -88,7 +88,7 @@ FindPerson::on_deactivate(const rclcpp_lifecycle::State & previous_state)
 
   timer_ = nullptr;
   status_pub_->on_deactivate();
-  
+
   return rclcpp_lifecycle::node_interfaces::LifecycleNodeInterface::CallbackReturn::SUCCESS;
 }
 

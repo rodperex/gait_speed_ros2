@@ -26,7 +26,8 @@ namespace gait_speed
 using namespace std::chrono_literals;
 using std::placeholders::_1;
 
-class EndTest : public BT::ActionNodeBase{
+class EndTest : public BT::ActionNodeBase
+{
 public:
   EndTest(const std::string & xml_tag_name, const BT::NodeConfiguration & conf);
 
