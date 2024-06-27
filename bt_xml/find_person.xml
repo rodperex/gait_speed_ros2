@@ -3,8 +3,9 @@
     <!-- ////////// -->
     <BehaviorTree ID="BehaviorTree">
         <Sequence>
+            <SubTree ID="find_waving_person" __shared_blackboard="true"/>
+            <Action ID="MoveTo" distance_tolerance="0.5" is_truncated="true" tf_frame="{tf_patient}"/>
             <SubTree ID="find_person" __shared_blackboard="true"/>
-            <SubTree ID="gait_speed_dist" __shared_blackboard="true"/>
         </Sequence>
     </BehaviorTree>
     <!-- ////////// -->

@@ -13,44 +13,56 @@
 // limitations under the License.
 
 
-#ifndef MEASURE_GAITSPEED__DIST_HPP_
-#define MEASURE_GAITSPEED__DIST_HPP_
+#ifndef GAITSPEED__DIST_HPP_
+#define GAITSPEED__DIST_HPP_
 
 #include "rclcpp/rclcpp.hpp"
 #include "rclcpp_cascade_lifecycle/rclcpp_cascade_lifecycle.hpp"
-#include "behaviortree_cpp_v3/behavior_tree.h"
-#include "behaviortree_cpp_v3/bt_factory.h"
-#include "behaviortree_cpp_v3/utils/shared_library.h"
-#include "ament_index_cpp/get_package_share_directory.hpp"
 #include "std_msgs/msg/string.hpp"
+#include "std_msgs/msg/float64.hpp"
+
+#include "behaviortree_cpp_v3/behavior_tree.h"
 
 namespace gait_speed
 {
 
 using namespace std::chrono_literals;
+using std::placeholders::_1;
 
-class MeasureGaitSpeedDist : public rclcpp_cascade_lifecycle::CascadeLifecycleNode
+class GaitSpeedDist : public rclcpp_cascade_lifecycle::CascadeLifecycleNode
 {
 public:
-  MeasureGaitSpeedDist(BT::Blackboard::Ptr blackboard);
+  GaitSpeedDist(BT::Blackboard::Ptr blackboard);
 
 private:
   void control_cycle();
+  void status_callback(std_msgs::msg::String::UniquePtr msg);
+  void go_to_state(int state);
+   bool check_behavior_finished();
   
   rclcpp_lifecycle::node_interfaces::LifecycleNodeInterface::CallbackReturn
   on_activate(const rclcpp_lifecycle::State & previous_state);
   rclcpp_lifecycle::node_interfaces::LifecycleNodeInterface::CallbackReturn
   on_deactivate(const rclcpp_lifecycle::State & previous_state);
 
+  int state_;
+  static const int INIT = 0;
+  static const int FIND = 1;
+  static const int EXPLAIN = 2;
+  static const int PREPARE = 3;
+  static const int VERIFY_PREPARE = 4;
+  static const int MEASURE = 5;
+  static const int STOP = 6;
+
   rclcpp::TimerBase::SharedPtr timer_;
-  rclcpp::Node::SharedPtr node_;
-  BT::Tree tree_;
+  rclcpp::Subscription<std_msgs::msg::String>::SharedPtr status_sub_;
+  std::string status_received_, last_status_;
   BT::Blackboard::Ptr blackboard_;
 
-  rclcpp_lifecycle::LifecyclePublisher<std_msgs::msg::String>::SharedPtr status_pub_;
+  rclcpp_lifecycle::LifecyclePublisher<std_msgs::msg::Float64>::SharedPtr result_pub_;
 
 };
 
 } // namespace gait_speed
 
-#endif  // MEASURE_GAITSPEED__DIST_HPP_
+#endif  // GAITSPEED__DIST_HPP_

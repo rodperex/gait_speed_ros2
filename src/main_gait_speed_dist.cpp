@@ -12,8 +12,10 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-#include "gait_speed_ros2/behaviors/gait_speed_dist.hpp"
+#include "gait_speed_ros2/orchestrators/gait_speed_dist.hpp"
+
 #include "gait_speed_ros2/behaviors/measure_gait_speed_dist.hpp"
+#include "gait_speed_ros2/behaviors/find_person.hpp"
 
 #include "rclcpp/rclcpp.hpp"
 
@@ -22,11 +24,22 @@ int main(int argc, char * argv[])
   rclcpp::init(argc, argv);
   rclcpp::executors::MultiThreadedExecutor exec(rclcpp::ExecutorOptions(), 2);   // set number of threads to whatever needed
 
-  auto gait_speed_node = std::make_shared<gait_speed::GaitSpeedDist>();
-  auto measure_gait_speed_node = std::make_shared<gait_speed::MeasureGaitSpeedDist>();
+  auto node = rclcpp::Node::make_shared("gait_speed_node");
+
+  auto blackboard = BT::Blackboard::create();
+  blackboard->set("node", node);
+
+  // orchestrator
+  auto gait_speed_node = std::make_shared<gait_speed::GaitSpeedDist>(blackboard);
+  
+  // behaviors
+  auto find_person_node = std::make_shared<gait_speed::FindPerson>(blackboard);
+  auto measure_gait_speed_node = std::make_shared<gait_speed::MeasureGaitSpeedDist>(blackboard);
+  
 
   exec.add_node(gait_speed_node->get_node_base_interface());
   exec.add_node(measure_gait_speed_node->get_node_base_interface());
+  exec.add_node(find_person_node->get_node_base_interface());
 
   gait_speed_node->trigger_transition(lifecycle_msgs::msg::Transition::TRANSITION_CONFIGURE);
   measure_gait_speed_node->trigger_transition(lifecycle_msgs::msg::Transition::TRANSITION_CONFIGURE);

@@ -12,12 +12,16 @@ find_package(rclcpp REQUIRED)
 find_package(rclcpp_cascade_lifecycle REQUIRED)
 find_package(behaviortree_cpp_v3 REQUIRED)
 find_package(std_msgs REQUIRED)
+find_package(perception_system REQUIRED)
+find_package(perception_system_interfaces REQUIRED)
 
 set(dependencies
   rclcpp
   rclcpp_cascade_lifecycle
   behaviortree_cpp_v3
   std_msgs
+  perception_system
+  perception_system_interfaces
 )
 
 include_directories(include)
@@ -42,8 +46,9 @@ endforeach()
 
 
 add_library(${PROJECT_NAME} SHARED
-  src/gait_speed_ros2/behaviors/gait_speed_dist.cpp
+  src/gait_speed_ros2/orchestrators/gait_speed_dist.cpp
   src/gait_speed_ros2/behaviors/measure_gait_speed_dist.cpp
+  src/gait_speed_ros2/behaviors/find_person.cpp
 )
 ament_target_dependencies(${PROJECT_NAME} ${dependencies})
 

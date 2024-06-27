@@ -13,24 +13,28 @@
 // limitations under the License.
 
 
-#include "gait_speed_ros2/behaviors/gait_speed_dist.hpp"
+#include "gait_speed_ros2/orchestrators/gait_speed_dist.hpp"
 
 namespace gait_speed
 {
 
-GaitSpeedDist::GaitSpeedDist()
+GaitSpeedDist::GaitSpeedDist(BT::Blackboard::Ptr blackboard)
 : CascadeLifecycleNode("gait_speed_test"),
   state_(INIT),
-  status_received_(false)
+  status_received_("FAILURE")
 {
   RCLCPP_INFO(get_logger(), "GaitSpeedDist constructor");
 
-  status_sub_ = create_subscription<std_msgs::msg::Bool>(
-    "gait_speed_status", 10, std::bind(&GaitSpeedDist::status_callback, this, _1));
+  status_sub_ = create_subscription<std_msgs::msg::String>(
+    "behavior_status", 10, std::bind(&GaitSpeedDist::status_callback, this, _1));
+
+  result_pub_ = create_publisher<std_msgs::msg::Float64>("gait_speed_result", 10);
+
+  blackboard_ = blackboard;
 }
 
 void 
-GaitSpeedDist::status_callback(std_msgs::msg::Bool::UniquePtr msg)
+GaitSpeedDist::status_callback(std_msgs::msg::String::UniquePtr msg)
 {
   last_status_ = msg.get()->data;
 }
@@ -38,44 +42,59 @@ GaitSpeedDist::status_callback(std_msgs::msg::Bool::UniquePtr msg)
 void
 GaitSpeedDist::control_cycle()
 {
+  std_msgs::msg::Float64 result_msg;
+
   switch (state_) {
     case INIT:
-      if (check_init_2_explain()) {
-        go_to_state(EXPLAIN);
-      }
-      break;
-    case EXPLAIN:
-      if (check_explain_2_prepare()) {
-        go_to_state(PREPARE);
-      }
-      break;
-    case PREPARE:
-      if (check_prepare_2_verify_prepare()) {
-        go_to_state(VERIFY_PREPARE);
-      }
-      break;
-    case VERIFY_PREPARE:
-      if (check_verify_prepare_2_start()) {
-        go_to_state(START);
-      }
-      break;
-    case START:
-      add_activation("measure_gait_speed_dist");
-      if (check_start_2_walk()) {
-        go_to_state(WALK);
-      }
-      break;
-    case WALK:
-      if (check_walk_2_stop()) {
+      if (check_behavior_finished()) {
+        go_to_state(FIND);
+      } else if (last_status_ == "FAILURE") {
         go_to_state(STOP);
       }
       break;
+    case FIND:
+      if (check_behavior_finished()) {
+        go_to_state(EXPLAIN);
+      } else if (last_status_ == "FAILURE") {
+        go_to_state(STOP);
+      }
+      break;
+    case EXPLAIN:
+      if (check_behavior_finished()) {
+        go_to_state(PREPARE);
+      } else if (last_status_ == "FAILURE") {
+        go_to_state(STOP);
+      }
+      break;
+    case PREPARE:
+      if (check_behavior_finished()) {
+        go_to_state(VERIFY_PREPARE);
+      } else if (last_status_ == "FAILURE") {
+        go_to_state(STOP);
+      }
+      break;
+    case VERIFY_PREPARE:
+      if (check_behavior_finished()) {
+        go_to_state(MEASURE);
+      } else if (last_status_ == "FAILURE") {
+        go_to_state(STOP);
+      }
+      break;
+    case MEASURE:
+      if (check_behavior_finished()) {
+        go_to_state(STOP);
+      } 
+      break;
     case STOP:
-      if (last_status_) {
+      clear_activation();
+      if (last_status_ == "SUCCESS") {
+        blackboard_->get("gait_speed_time", result_msg.data);
         RCLCPP_INFO(get_logger(), "Gait speed test finished successfully");
       } else {
+        result_msg.data = -1;
         RCLCPP_ERROR(get_logger(), "Gait speed test failed");
       }
+      result_pub_->publish(result_msg);
       break;
     default:
       break;
@@ -85,44 +104,36 @@ GaitSpeedDist::control_cycle()
 void
 GaitSpeedDist::go_to_state(int state)
 {
+  clear_activation();
   state_ = state;
+
+  switch (state_) {
+    case FIND:
+      add_activation("find_person");
+      break;
+    case EXPLAIN:
+      add_activation("explain_gait_speed");
+      break;
+    case PREPARE:
+      add_activation("prepare_gait_speed");
+      break;
+    case VERIFY_PREPARE:
+      add_activation("verify_prepare_gait_speed");
+      break;
+    case MEASURE:
+      add_activation("measure_gait_speed_dist");
+      break;
+    default:
+      break;
+  }
 }
 
 bool
-GaitSpeedDist::check_init_2_explain()
+GaitSpeedDist::check_behavior_finished()
 {
-  return true;
+  return last_status_ == "SUCCESS";
 }
 
-bool
-GaitSpeedDist::check_explain_2_prepare()
-{
-  return true;
-}
-
-bool
-GaitSpeedDist::check_prepare_2_verify_prepare()
-{
-  return true;
-}
-
-bool
-GaitSpeedDist::check_verify_prepare_2_start()
-{
-  return true;
-}
-
-bool
-GaitSpeedDist::check_start_2_walk()
-{
-  return true;
-}
-
-bool
-GaitSpeedDist::check_walk_2_stop()
-{
-  return true;
-}
 
 rclcpp_lifecycle::node_interfaces::LifecycleNodeInterface::CallbackReturn
 GaitSpeedDist::on_activate(const rclcpp_lifecycle::State & previous_state)
@@ -132,6 +143,8 @@ GaitSpeedDist::on_activate(const rclcpp_lifecycle::State & previous_state)
 
   timer_ =
     create_wall_timer(50ms, std::bind(&GaitSpeedDist::control_cycle, this));
+
+  result_pub_->on_activate();
   
   return rclcpp_lifecycle::node_interfaces::LifecycleNodeInterface::CallbackReturn::SUCCESS;
 }
@@ -143,6 +156,8 @@ GaitSpeedDist::on_deactivate(const rclcpp_lifecycle::State & previous_state)
   RCLCPP_INFO(get_logger(), "GaitSpeedDist on_deactivate");
 
   timer_ = nullptr;
+
+  result_pub_->on_deactivate();
 
   return rclcpp_lifecycle::node_interfaces::LifecycleNodeInterface::CallbackReturn::SUCCESS;
 }

@@ -13,56 +13,44 @@
 // limitations under the License.
 
 
-#ifndef GAITSPEED__DIST_HPP_
-#define GAITSPEED__DIST_HPP_
+#ifndef FIND_PERSON__HPP_
+#define FIND_PERSON__HPP_
 
 #include "rclcpp/rclcpp.hpp"
 #include "rclcpp_cascade_lifecycle/rclcpp_cascade_lifecycle.hpp"
-#include "std_msgs/msg/bool.hpp"
+#include "behaviortree_cpp_v3/behavior_tree.h"
+#include "behaviortree_cpp_v3/bt_factory.h"
+#include "behaviortree_cpp_v3/utils/shared_library.h"
+#include "ament_index_cpp/get_package_share_directory.hpp"
+#include "std_msgs/msg/string.hpp"
 
 namespace gait_speed
 {
 
 using namespace std::chrono_literals;
-using std::placeholders::_1;
 
-class GaitSpeedDist : public rclcpp_cascade_lifecycle::CascadeLifecycleNode
+class FindPerson : public rclcpp_cascade_lifecycle::CascadeLifecycleNode
 {
 public:
-  GaitSpeedDist();
+  FindPerson(BT::Blackboard::Ptr blackboard);
 
 private:
   void control_cycle();
-  void status_callback(std_msgs::msg::Bool::UniquePtr msg);
-  void go_to_state(int state);
-  bool check_init_2_explain();
-  bool check_explain_2_prepare();
-  bool check_prepare_2_verify_prepare();
-  bool check_verify_prepare_2_start();
-  bool check_start_2_walk();
-  bool check_walk_2_stop();
   
-
   rclcpp_lifecycle::node_interfaces::LifecycleNodeInterface::CallbackReturn
   on_activate(const rclcpp_lifecycle::State & previous_state);
   rclcpp_lifecycle::node_interfaces::LifecycleNodeInterface::CallbackReturn
   on_deactivate(const rclcpp_lifecycle::State & previous_state);
 
-  int state_;
-  static const int INIT = 0;
-  static const int EXPLAIN = 1;
-  static const int PREPARE = 2;
-  static const int VERIFY_PREPARE = 3;
-  static const int START = 4;
-  static const int WALK = 5;
-  static const int STOP = 6;
-
   rclcpp::TimerBase::SharedPtr timer_;
-  rclcpp::Subscription<std_msgs::msg::Bool>::SharedPtr status_sub_;
-  bool status_received_, last_status_;
+  rclcpp::Node::SharedPtr node_;
+  BT::Tree tree_;
+  BT::Blackboard::Ptr blackboard_;
+
+  rclcpp_lifecycle::LifecyclePublisher<std_msgs::msg::String>::SharedPtr status_pub_;
 
 };
 
 } // namespace gait_speed
 
-#endif  // GAITSPEED__DIST_HPP_
+#endif  // FIND_PERSON__HPP_

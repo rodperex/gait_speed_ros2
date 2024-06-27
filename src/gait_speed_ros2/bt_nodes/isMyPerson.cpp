@@ -18,8 +18,34 @@
 namespace gait_speed
 {
 IsMyPerson::IsMyPerson(const std::string & xml_tag_name, const BT::NodeConfiguration & conf)
-: BT::ConditionNode(xml_tag_name, conf)
+: BT::ConditionNode(xml_tag_name, conf),
+  threshold_(0.5)
 {
-  
+  getInput("person_id", person_id_);
 }
+
+BT::NodeStatus
+IsMyPerson::tick()
+{
+  pl::getInstance(node_)->set_interest("person", true);
+  pl::getInstance(node_)->update(30);
+  pl::getInstance(node_)->publicTFinterest();
+
+  std::vector<perception_system_interfaces::msg::Detection> detections;
+  detections = pl::getInstance(node_)->get_by_type("person");
+
+  if (detections.empty()) {
+    RCLCPP_WARN(node_->get_logger(), "No detections");
+    return BT::NodeStatus::FAILURE;
+  }
+
+  auto best_detection = detections[0];
+
+  if (perception_system::diffIDs(person_id_, best_detection.color_person) > threshold_) {
+    return BT::NodeStatus::FAILURE;
+  }
+
+  return BT::NodeStatus::SUCCESS;
+}
+
 }  // namespace gait_speed
