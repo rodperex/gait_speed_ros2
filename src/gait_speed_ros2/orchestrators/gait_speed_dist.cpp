@@ -56,21 +56,21 @@ GaitSpeedDist::control_cycle()
       break;
     case FIND:
       if (last_status_ == "SUCCESS") {
-          go_to_state(FIND);
+          go_to_state(EXPLAIN);
       } else {
           go_to_state(STOP);
       }
       break;
     case EXPLAIN:
       if (last_status_ == "SUCCESS") {
-          go_to_state(FIND);
+          go_to_state(PREPARE);
       } else {
           go_to_state(STOP);
       }
       break;
     case PREPARE:
       if (last_status_ == "SUCCESS") {
-          go_to_state(FIND);
+          go_to_state(MEASURE);
       } else {
           go_to_state(STOP);
       }
