@@ -23,7 +23,7 @@ int main(int argc, char * argv[])
   rclcpp::init(argc, argv);
   rclcpp::executors::MultiThreadedExecutor exec(rclcpp::ExecutorOptions(), 2);   // set number of threads to whatever needed
 
-  auto node = std::make_shared<rclcpp_cascade_lifecycle::CascadeLifecycleNode>("gait_speed_node");
+  auto node = std::make_shared<rclcpp_cascade_lifecycle::CascadeLifecycleNode>("bt_node");
 
 
   auto blackboard = BT::Blackboard::create();
@@ -35,7 +35,16 @@ int main(int argc, char * argv[])
   // behaviors
   std::vector<std::string> plugins;
   
-  plugins = {"is_detected_bt_node", "is_my_person_bt_node", "end_test_bt_node"};
+  plugins = {
+    "follow_person_bt_node",
+    "look_at_bt_node",
+    "filter_entity_bt_node",
+    "pan_bt_node",
+    "start_test_bt_node",
+    "is_detected_bt_node",
+    "distance_reached_bt_node",
+    "is_my_person_bt_node",
+    "end_test_bt_node"};
   auto measure_gait_speed_node = std::make_shared<gait_speed::BehaviorRunner>(
     blackboard,
     "measure_gait_speed",
@@ -43,7 +52,15 @@ int main(int argc, char * argv[])
     plugins
     );
 
-  // plugins = {"plugin1", "plugin2"};
+  // plugins = {
+  //   "is_waving_bt_node",
+  //   "pan_bt_node",
+  //   "spin_bt_node",
+  //   "move_to_bt_node",
+  //   "is_detected_bt_node",
+  //   "filter_entity_bt_node",
+  //   "look_at_bt_node"
+  //   };
   // auto find_person_node = std::make_shared<gait_speed::BehaviorRunner>(
   //   blackboard,
   //   "find_person",

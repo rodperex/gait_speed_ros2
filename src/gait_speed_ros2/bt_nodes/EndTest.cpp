@@ -44,4 +44,14 @@ EndTest::tick()
 
 }
 
+void
+EndTest::halt()
+{
+}
+
 }  // namespace gait_speed
+
+BT_REGISTER_NODES(factory)
+{
+  factory.registerNodeType<gait_speed::EndTest>("EndTest");
+}

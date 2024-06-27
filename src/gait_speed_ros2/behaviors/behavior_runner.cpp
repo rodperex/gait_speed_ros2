@@ -41,7 +41,7 @@ BehaviorRunner::BehaviorRunner(
     factory.registerFromPlugin(loader.getOSName(plugin));
   }
 
-  blackboard_->get<rclcpp::Node::SharedPtr>("node", node_);
+  blackboard_->get("node", node_);
 
   tree_ = factory.createTreeFromFile(xml_file, blackboard_);
 

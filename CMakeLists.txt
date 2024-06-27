@@ -53,8 +53,8 @@ endforeach()
 
 add_library(${PROJECT_NAME} SHARED
   src/gait_speed_ros2/orchestrators/gait_speed_dist.cpp
-  src/gait_speed_ros2/behaviors/measure_gait_speed_dist.cpp
-  src/gait_speed_ros2/behaviors/find_person.cpp
+  # src/gait_speed_ros2/behaviors/measure_gait_speed_dist.cpp
+  # src/gait_speed_ros2/behaviors/find_person.cpp
   src/gait_speed_ros2/behaviors/behavior_runner.cpp
 )
 ament_target_dependencies(${PROJECT_NAME} ${dependencies})
@@ -64,6 +64,7 @@ ament_target_dependencies(gait_speed_dist ${dependencies})
 target_link_libraries(gait_speed_dist ${PROJECT_NAME})
 
 install(TARGETS
+  ${plugin_libs}
   ${PROJECT_NAME}
   gait_speed_dist
   ARCHIVE DESTINATION lib
@@ -80,4 +81,5 @@ if(BUILD_TESTING)
 endif()
 
 ament_export_dependencies(${dependencies})
+# ament_export_targets(${PROJECT_NAME} HAS_LIBRARY_TARGET)
 ament_package()

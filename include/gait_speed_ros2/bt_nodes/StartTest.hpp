@@ -38,6 +38,7 @@ public:
   StartTest(const std::string & xml_tag_name, const BT::NodeConfiguration & conf);
 
   BT::NodeStatus tick();
+  void halt();
 
   static BT::PortsList providedPorts()
   {

@@ -19,7 +19,7 @@ namespace gait_speed
 {
 
 GaitSpeedDist::GaitSpeedDist(BT::Blackboard::Ptr blackboard)
-: CascadeLifecycleNode("gait_speed_test"),
+: CascadeLifecycleNode("gait_speed_node"),
   state_(INIT),
   status_received_("FAILURE"),
   blackboard_(blackboard)

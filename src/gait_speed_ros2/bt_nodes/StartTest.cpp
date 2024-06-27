@@ -54,4 +54,13 @@ StartTest::tick()
     
 }
 
+void
+StartTest::halt()
+{
+}
+
 }  // namespace gait_speed
+
+BT_REGISTER_NODES(factory) {
+  factory.registerNodeType<gait_speed::StartTest>("StartTest");
+}
