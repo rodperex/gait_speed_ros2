@@ -19,7 +19,8 @@ namespace gait_speed
 {
 
 FindPerson::FindPerson(BT::Blackboard::Ptr blackboard)
-: CascadeLifecycleNode("find_person")
+: CascadeLifecycleNode("find_person"),
+  blackboard_(blackboard)
 {
   RCLCPP_INFO(get_logger(), "FindPerson constructor");
 
@@ -27,8 +28,6 @@ FindPerson::FindPerson(BT::Blackboard::Ptr blackboard)
   std::string xml_file = pkg_path + "/bt_xml/find_person.xml";
   BT::BehaviorTreeFactory factory;
   BT::SharedLibrary loader;
-
-  blackboard_ = blackboard;
 
   // factory.registerFromPlugin(loader.getOSName("..."));
 

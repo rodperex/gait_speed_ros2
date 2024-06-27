@@ -21,7 +21,8 @@ namespace gait_speed
 GaitSpeedDist::GaitSpeedDist(BT::Blackboard::Ptr blackboard)
 : CascadeLifecycleNode("gait_speed_test"),
   state_(INIT),
-  status_received_("FAILURE")
+  status_received_("FAILURE"),
+  blackboard_(blackboard)
 {
   RCLCPP_INFO(get_logger(), "GaitSpeedDist constructor");
 
@@ -29,8 +30,6 @@ GaitSpeedDist::GaitSpeedDist(BT::Blackboard::Ptr blackboard)
     "behavior_status", 10, std::bind(&GaitSpeedDist::status_callback, this, _1));
 
   result_pub_ = create_publisher<std_msgs::msg::Float64>("gait_speed_result", 10);
-
-  blackboard_ = blackboard;
 }
 
 void

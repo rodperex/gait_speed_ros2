@@ -13,36 +13,43 @@
 // limitations under the License.
 
 
-#include "gait_speed_ros2/behaviors/measure_gait_speed_dist.hpp"
+#include "gait_speed_ros2/behaviors/behavior_runner.hpp"
 
 namespace gait_speed
 {
 
-MeasureGaitSpeedDist::MeasureGaitSpeedDist(BT::Blackboard::Ptr blackboard)
-: CascadeLifecycleNode("measure_gait_speed_dist"),
+BehaviorRunner::BehaviorRunner(
+  BT::Blackboard::Ptr blackboard,
+  const std::string &name,
+  const std::string &xml_path,
+  const std::vector<std::string> &plugins)  // commented out to avoid compilation error
+  : CascadeLifecycleNode(name),
   blackboard_(blackboard)
 {
-  RCLCPP_INFO(get_logger(), "MeasureGaitSpeedDist constructor");
+  RCLCPP_INFO(get_logger(), "BehaviorRunner constructor (%s)", name.c_str());
+  
 
   std::string pkg_path = ament_index_cpp::get_package_share_directory("gait_speed_ros2");
-  std::string xml_file = pkg_path + "/bt_xml/measure_gait_speed_dist.xml";
+  std::string xml_file = pkg_path + xml_path;
+
+  RCLCPP_DEBUG(get_logger(), "XML file: %s", xml_file.c_str());
+
   BT::BehaviorTreeFactory factory;
   BT::SharedLibrary loader;
 
-  factory.registerFromPlugin(loader.getOSName("is_detected_bt_node"));
-  factory.registerFromPlugin(loader.getOSName("is_my_person_bt_node"));
-  factory.registerFromPlugin(loader.getOSName("start_test_bt_node"));
-  factory.registerFromPlugin(loader.getOSName("end_test_bt_node"));
+  for (const auto & plugin : plugins) {
+    factory.registerFromPlugin(loader.getOSName(plugin));
+  }
 
   blackboard_->get<rclcpp::Node::SharedPtr>("node", node_);
 
-  tree_ = factory.createTreeFromFile(xml_file, blackboard);
+  tree_ = factory.createTreeFromFile(xml_file, blackboard_);
 
   status_pub_ = create_publisher<std_msgs::msg::String>("behavior_status", 10);
 }
 
 void
-MeasureGaitSpeedDist::control_cycle()
+BehaviorRunner::control_cycle()
 {
   std_msgs::msg::String msg;
   BT::NodeStatus status = tree_.rootNode()->executeTick();
@@ -68,24 +75,24 @@ MeasureGaitSpeedDist::control_cycle()
 }
 
 rclcpp_lifecycle::node_interfaces::LifecycleNodeInterface::CallbackReturn
-MeasureGaitSpeedDist::on_activate(const rclcpp_lifecycle::State & previous_state)
+BehaviorRunner::on_activate(const rclcpp_lifecycle::State & previous_state)
 {
   (void)previous_state;
-  RCLCPP_INFO(get_logger(), "MeasureMGaitSpeedDist on_activate");
+  RCLCPP_INFO(get_logger(), "BehaviorRunner on_activate");
 
   status_pub_->on_activate();
 
   timer_ =
-    create_wall_timer(50ms, std::bind(&MeasureGaitSpeedDist::control_cycle, this));
+    create_wall_timer(50ms, std::bind(&BehaviorRunner::control_cycle, this));
 
   return rclcpp_lifecycle::node_interfaces::LifecycleNodeInterface::CallbackReturn::SUCCESS;
 }
 
 rclcpp_lifecycle::node_interfaces::LifecycleNodeInterface::CallbackReturn
-MeasureGaitSpeedDist::on_deactivate(const rclcpp_lifecycle::State & previous_state)
+BehaviorRunner::on_deactivate(const rclcpp_lifecycle::State & previous_state)
 {
   (void)previous_state;
-  RCLCPP_INFO(get_logger(), "MeasureMGaitSpeedDist on_deactivate");
+  RCLCPP_INFO(get_logger(), "BehaviorRunner on_deactivate");
 
   timer_ = nullptr;
   status_pub_->on_deactivate();

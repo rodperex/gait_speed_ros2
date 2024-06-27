@@ -14,8 +14,7 @@
 
 #include "gait_speed_ros2/orchestrators/gait_speed_dist.hpp"
 
-#include "gait_speed_ros2/behaviors/measure_gait_speed_dist.hpp"
-#include "gait_speed_ros2/behaviors/find_person.hpp"
+#include "gait_speed_ros2/behaviors/behavior_runner.hpp"
 
 #include "rclcpp/rclcpp.hpp"
 
@@ -33,9 +32,23 @@ int main(int argc, char * argv[])
   auto gait_speed_node = std::make_shared<gait_speed::GaitSpeedDist>(blackboard);
 
   // behaviors
-  auto find_person_node = std::make_shared<gait_speed::FindPerson>(blackboard);
-  auto measure_gait_speed_node = std::make_shared<gait_speed::MeasureGaitSpeedDist>(blackboard);
+  std::vector<std::string> plugins;
+  
+  plugins = {"is_detected_bt_node", "is_my_person_bt_node", "start_test_bt_node", "end_test_bt_node"};
+  auto measure_gait_speed_node = std::make_shared<gait_speed::BehaviorRunner>(
+    blackboard,
+    "measure_gait_speed",
+    "/bt_xml/measure_gait_speed_dist.xml",
+    plugins
+    );
 
+  plugins = {"plugin1", "plugin2"};
+  auto find_person_node = std::make_shared<gait_speed::BehaviorRunner>(
+    blackboard,
+    "find_person",
+    "/bt_xml/find_person.xml",
+    plugins
+    );
 
   exec.add_node(gait_speed_node->get_node_base_interface());
   exec.add_node(measure_gait_speed_node->get_node_base_interface());
