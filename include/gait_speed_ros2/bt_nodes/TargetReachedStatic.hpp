@@ -13,8 +13,8 @@
 // limitations under the License.
 
 
-#ifndef DISTANCE_REACHED_HPP_
-#define DISTANCE_REACHED_HPP_
+#ifndef TARGET_REACHED_STATIC_HPP_
+#define TARGET_REACHED_STATIC_HPP_
 
 #include "rclcpp/rclcpp.hpp"
 #include "rclcpp_cascade_lifecycle/rclcpp_cascade_lifecycle.hpp"
@@ -32,10 +32,10 @@ namespace gait_speed
 using namespace std::chrono_literals;
 using std::placeholders::_1;
 
-class DistanceReached : public BT::ConditionNode
+class TargetReachedStatic : public BT::ConditionNode
 {
 public:
-  DistanceReached(const std::string & xml_tag_name, const BT::NodeConfiguration & conf);
+  TargetReachedStatic(const std::string & xml_tag_name, const BT::NodeConfiguration & conf);
 
   BT::NodeStatus tick();
 
@@ -47,14 +47,18 @@ public:
   }
 
 private:
+  float get_distance_travelled();
+  float get_time_elapsed();
+
   std::shared_ptr<rclcpp_cascade_lifecycle::CascadeLifecycleNode> node_;
   
-  float distance_;
+  float target_;
   tf2::BufferCore tf_buffer_;
   tf2_ros::TransformListener tf_listener_;
+  std::string mode_;
   
 };
 
 } // namespace gait_speed
 
-#endif  // DISTANCE_REACHED_HPP_
+#endif  // TARGET_REACHED_STATIC_HPP_

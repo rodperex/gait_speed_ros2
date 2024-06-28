@@ -37,10 +37,15 @@ StartTest::tick()
         tf2::Stamped<tf2::Transform> odom2bf0;
         tf2::fromMsg(odom2bf0_msg, odom2bf0);
 
+        // auto odom2person_msg = tf_buffer_.lookupTransform("odom", "person_0", tf2::TimePointZero);
+        // tf2::Stamped<tf2::Transform> odom2person;
+        // tf2::fromMsg(odom2person_msg, odom2person);
+
         rclcpp::Time start_time = node_->now();
         
         config().blackboard->set("start_time", start_time);
         config().blackboard->set("odom2bf0", odom2bf0);
+        // config().blackboard->set("odom2person_at_start", odom2person);
     
         return BT::NodeStatus::SUCCESS;
     }
