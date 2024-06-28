@@ -38,7 +38,7 @@
         <Sequence>
             <ReactiveSequence>
                 <Inverter>
-                    <Condition ID="DistanceReached"/>
+                    <Condition ID="TargetReached"/>
                 </Inverter>
                 <!-- <Condition ID="isMyPerson" person_id=""/> -->
                 <Action ID="FollowPerson"/>
@@ -48,7 +48,7 @@
     </BehaviorTree>
     <!-- ////////// -->
     <TreeNodesModel>
-        <Condition ID="DistanceReached">
+        <Condition ID="TargetReached">
         </Condition>
         <Action ID="EndTest">
         </Action>

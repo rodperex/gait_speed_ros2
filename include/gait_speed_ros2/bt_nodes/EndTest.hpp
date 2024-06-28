@@ -40,7 +40,6 @@ public:
   {
     return BT::PortsList(
       {
-        BT::InputPort<std::int64_t>("distance"),
       });
   }
 
