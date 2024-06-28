@@ -1,8 +1,10 @@
 # gait_speed_ros2
 
-Gait speed calculation using ROS 2
+Gait speed calculation using ROS 2.
 
-Modalities:
+This repo is WORK IN PROGRESS...
+
+## Modalities:
 
 * Robot moves with the older person as they walk
   * In this case, if the robot sees an obstacle between the person and itself, it means it will be avoided, so the test will be cancelled
