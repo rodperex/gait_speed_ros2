@@ -13,8 +13,8 @@
 // limitations under the License.
 
 
-#ifndef END_TEST_HPP_
-#define END_TEST_HPP_
+#ifndef TARGET_REACHED_HPP_
+#define TARGET_REACHED_HPP_
 
 #include "rclcpp/rclcpp.hpp"
 #include "rclcpp_cascade_lifecycle/rclcpp_cascade_lifecycle.hpp"
@@ -22,34 +22,43 @@
 #include "behaviortree_cpp_v3/behavior_tree.h"
 #include "behaviortree_cpp_v3/bt_factory.h"
 
+#include <tf2_ros/transform_listener.h>
+#include <tf2_ros/buffer.h>
+#include "tf2_geometry_msgs/tf2_geometry_msgs.hpp"
+
 namespace gait_speed
 {
 
 using namespace std::chrono_literals;
 using std::placeholders::_1;
 
-class EndTest : public BT::ActionNodeBase
+class TargetReached : public BT::ConditionNode
 {
 public:
-  EndTest(const std::string & xml_tag_name, const BT::NodeConfiguration & conf);
+  TargetReached(const std::string & xml_tag_name, const BT::NodeConfiguration & conf);
 
   BT::NodeStatus tick();
-  void halt();
 
   static BT::PortsList providedPorts()
   {
     return BT::PortsList(
       {
-        BT::InputPort<std::int64_t>("distance"),
       });
   }
 
 private:
-  std::shared_ptr<rclcpp_cascade_lifecycle::CascadeLifecycleNode> node_;
+  float get_distance_travelled();
+  float get_time_elapsed();
 
+  std::shared_ptr<rclcpp_cascade_lifecycle::CascadeLifecycleNode> node_;
+  
+  float target_;
+  tf2::BufferCore tf_buffer_;
+  tf2_ros::TransformListener tf_listener_;
   std::string mode_;
+  
 };
 
 } // namespace gait_speed
 
-#endif  // END_TEST_HPP_
+#endif  // TARGET_REACHED_HPP_

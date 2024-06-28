@@ -34,6 +34,7 @@ include_directories(include)
 
 add_library(is_my_person_bt_node SHARED src/gait_speed_ros2/bt_nodes/isMyPerson.cpp)
 add_library(distance_reached_bt_node SHARED src/gait_speed_ros2/bt_nodes/DistanceReached.cpp)
+add_library(target_reached_bt_node SHARED src/gait_speed_ros2/bt_nodes/TargetReached.cpp)
 add_library(start_test_bt_node SHARED src/gait_speed_ros2/bt_nodes/StartTest.cpp)
 add_library(end_test_bt_node SHARED src/gait_speed_ros2/bt_nodes/EndTest.cpp)
 
@@ -41,6 +42,7 @@ add_library(end_test_bt_node SHARED src/gait_speed_ros2/bt_nodes/EndTest.cpp)
 list(APPEND plugin_libs
   is_my_person_bt_node
   distance_reached_bt_node
+  target_reached_bt_node
   start_test_bt_node
   end_test_bt_node
 )

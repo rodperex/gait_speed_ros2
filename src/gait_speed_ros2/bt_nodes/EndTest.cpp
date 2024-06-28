@@ -21,27 +21,33 @@ EndTest::EndTest(const std::string & xml_tag_name, const BT::NodeConfiguration &
 : BT::ActionNodeBase(xml_tag_name, conf)
 {
     config().blackboard->get("node", node_);
+    config().blackboard->get("mode", mode_);
 }
 
 BT::NodeStatus
 EndTest::tick()
 {
-    rclcpp::Time start_time;
-    config().blackboard->get("start_time", start_time);
+    if (mode_ == "distance") {
+        float time_elapsed;
+        config().blackboard->get("time_elapsed", time_elapsed);
 
-    rclcpp::Duration duration = node_->now() - start_time;
-    
-    float seconds = duration.nanoseconds() / 1e9;
-
-    if (seconds > 0) {
-        RCLCPP_INFO(node_->get_logger(), "Test finished. Time: %f", seconds);
-        config().blackboard->set("gait_speed_result", seconds);
-        return BT::NodeStatus::SUCCESS;
+        if (time_elapsed > 0) {
+            RCLCPP_INFO(node_->get_logger(), "Test finished. Time: %f seconds", time_elapsed);
+            config().blackboard->set("gait_speed_result", time_elapsed);
+            return BT::NodeStatus::SUCCESS;
+        }
     } else {
-        RCLCPP_WARN(node_->get_logger(), "Test finished with error");
-        return BT::NodeStatus::FAILURE;
-    }
+        float distance_travelled;
+        config().blackboard->get("distance_travelled", distance_travelled);
 
+        if (distance_travelled > 0) {
+            RCLCPP_INFO(node_->get_logger(), "Test finished. Distance: %f meters", distance_travelled);
+            config().blackboard->set("gait_speed_result", distance_travelled);
+            return BT::NodeStatus::SUCCESS;
+        }
+    }
+    RCLCPP_WARN(node_->get_logger(), "Test finished with error");
+    return BT::NodeStatus::FAILURE;
 }
 
 void

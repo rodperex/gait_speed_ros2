@@ -32,12 +32,10 @@ GaitSpeed::GaitSpeed(BT::Blackboard::Ptr blackboard)
 
   if (mode_ == "distance") {
     RCLCPP_INFO(get_logger(), "GaitSpeed constructor: %f meters", value);
-    blackboard_->set("distance", value);
   } else if (mode_ == "time") {
     RCLCPP_INFO(get_logger(), "GaitSpeed constructor: %f seconds", value);
-    blackboard_->set("time", value);
   }
-
+  blackboard_->set("target", value);
   blackboard_->set("mode", mode_); // to create a generic TargetReached BT node
 
   status_sub_ = create_subscription<std_msgs::msg::String>(
