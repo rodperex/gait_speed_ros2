@@ -59,6 +59,7 @@ private:
   BT::Blackboard::Ptr blackboard_;
   
   std::string mode_;
+  bool robot_moves_;
 
   rclcpp_lifecycle::LifecyclePublisher<std_msgs::msg::Float64>::SharedPtr result_pub_;
 

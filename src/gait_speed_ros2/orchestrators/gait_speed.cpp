@@ -26,9 +26,11 @@ GaitSpeed::GaitSpeed(BT::Blackboard::Ptr blackboard)
 {
   this->declare_parameter<float>("value", 4.0);
   this->declare_parameter<std::string>("mode", "distance");
+  this->declare_parameter<bool>("robot_moves", false);
 
   mode_ = this->get_parameter("mode").as_string();
   double value = this->get_parameter("value").as_double();
+  robot_moves_ = this->get_parameter("robot_moves").as_bool();
 
   if (mode_ == "distance") {
     RCLCPP_INFO(get_logger(), "GaitSpeed constructor: %f meters", value);
@@ -124,7 +126,11 @@ GaitSpeed::go_to_state(int state)
       add_activation("prepare_gait_speed");
       break;
     case MEASURE:
-      add_activation("measure_gait_speed_dist");
+      if (robot_moves_) {
+        add_activation("measure_gait_speed_dist");
+      } else {
+        add_activation("measure_gait_speed_dist_static");
+      }
       break;
     default:
       break;

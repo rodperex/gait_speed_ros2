@@ -45,7 +45,7 @@ int main(int argc, char * argv[])
     "distance_reached_bt_node",
     "is_my_person_bt_node",
     "end_test_bt_node"};
-  auto measure_gait_speed_node = std::make_shared<gait_speed::BehaviorRunner>(
+  auto measure_node = std::make_shared<gait_speed::BehaviorRunner>(
     blackboard,
     "measure_gait_speed",
     "/bt_xml/measure_gait_speed_dist.xml",
@@ -69,11 +69,11 @@ int main(int argc, char * argv[])
   //   );
 
   exec.add_node(gait_speed_node->get_node_base_interface());
-  exec.add_node(measure_gait_speed_node->get_node_base_interface());
+  exec.add_node(measure_node->get_node_base_interface());
   // exec.add_node(find_person_node->get_node_base_interface());
 
   gait_speed_node->trigger_transition(lifecycle_msgs::msg::Transition::TRANSITION_CONFIGURE);
-  measure_gait_speed_node->trigger_transition(lifecycle_msgs::msg::Transition::TRANSITION_CONFIGURE);
+  measure_node->trigger_transition(lifecycle_msgs::msg::Transition::TRANSITION_CONFIGURE);
   // find_person_node->trigger_transition(lifecycle_msgs::msg::Transition::TRANSITION_CONFIGURE);
   
   exec.spin();
