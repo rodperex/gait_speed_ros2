@@ -81,11 +81,20 @@ int main(int argc, char * argv[])
   while (rclcpp::ok()) {
     exec.spin_some();
     
-    if (orch->get_current_state().id() == lifecycle_msgs::msg::State::PRIMARY_STATE_INACTIVE) {
-      RCLCPP_INFO(node->get_logger(), "Orchestrator inactive. Exiting...");
+    if (orch->get_state() == example::Example2::STOP) {
+      RCLCPP_INFO(node->get_logger(), "Orchestrator stopped. Exiting...");
+      
+      orch->trigger_transition(lifecycle_msgs::msg::Transition::TRANSITION_DEACTIVATE);
+
+      if (listen->get_current_state().id() != lifecycle_msgs::msg::State::PRIMARY_STATE_INACTIVE) {
+        listen->trigger_transition(lifecycle_msgs::msg::Transition::TRANSITION_DEACTIVATE);
+      }
+
+      if (repeat->get_current_state().id() != lifecycle_msgs::msg::State::PRIMARY_STATE_INACTIVE) {
+        repeat->trigger_transition(lifecycle_msgs::msg::Transition::TRANSITION_DEACTIVATE);
+      }
       break;
     }
-
   }
 
   RCLCPP_INFO(node->get_logger(), "Orchestrator state: %s", orch->get_current_state().label().c_str());

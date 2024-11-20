@@ -30,7 +30,7 @@ Example2::Example2(BT::Blackboard::Ptr blackboard)
 
   result_pub_ = create_publisher<std_msgs::msg::Float64>("result", 10);
   
-  go_to_state(state_);
+  go_to_state(state_); // First activation declared while creating the node
 
   RCLCPP_INFO(get_logger(), "Example2 created. State: %d", state_);
 
@@ -132,9 +132,6 @@ Example2::go_to_state(int state)
     default:
       state_ = STOP;
       RCLCPP_INFO(get_logger(), "Deactivating");
-      // deactivate();
-      // trigger_transition(lifecycle_msgs::msg::Transition::TRANSITION_DEACTIVATE);
-      on_deactivate(get_current_state());
       break;
   }
 }
@@ -175,9 +172,6 @@ Example2::on_deactivate(const rclcpp_lifecycle::State & previous_state)
   timer_ = nullptr;
 
   result_pub_->on_deactivate();
-
-  // trigger_transition(lifecycle_msgs::msg::Transition::TRANSITION_DEACTIVATE);
-
 
   return rclcpp_lifecycle::node_interfaces::LifecycleNodeInterface::CallbackReturn::SUCCESS;
 }

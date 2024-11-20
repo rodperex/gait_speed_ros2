@@ -33,6 +33,11 @@ class Example2 : public rclcpp_cascade_lifecycle::CascadeLifecycleNode
 {
 public:
   Example2(BT::Blackboard::Ptr blackboard);
+  int get_state() {return state_;}
+
+  static const int LISTEN = 0;
+  static const int REPEAT = 1;
+  static const int STOP = 2;
 
 private:
   void control_cycle();
@@ -46,9 +51,6 @@ private:
   on_deactivate(const rclcpp_lifecycle::State & previous_state);
 
   int state_;
-  static const int LISTEN = 0;
-  static const int REPEAT = 1;
-  static const int STOP = 2;
   
   rclcpp::TimerBase::SharedPtr timer_;
   rclcpp::Subscription<std_msgs::msg::String>::SharedPtr status_sub_;
