@@ -1,0 +1,30 @@
+<?xml version="1.0"?>
+<root main_tree_to_execute="BehaviorTree">
+    <!-- ////////// -->
+    <BehaviorTree ID="BehaviorTree">
+        <Sequence>
+            <Action ID="NavigateTo" distance_tolerance="0.0" tf_frame="" will_finish="true"  x="3.17" y="0.63"/>
+            <Action ID="NavigateThrough" tf_frame="map" style="circular-l" n_poses="10" k_radius="0.2"/>
+        </Sequence>
+    </BehaviorTree>
+    <!-- ////////// -->
+    <TreeNodesModel>
+        <Action ID="NavigateThrough">
+            <input_port name="tf_frame"/>
+            <input_port name="style"/>
+            <input_port name="n_poses"/>
+            <input_port name="k_radius"/>
+            <input_port name="x"/>
+            <input_port name="y"/>
+        </Action>
+        <Action ID="NavigateTo">
+            <input_port name="distance_tolerance"/>
+            <input_port name="tf_frame"/>
+            <input_port name="will_finish"/>
+            <input_port name="x"/>
+            <input_port name="y"/>
+        </Action>
+    </TreeNodesModel>
+    <!-- ////////// -->
+</root>
+

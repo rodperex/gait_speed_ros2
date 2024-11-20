@@ -55,14 +55,14 @@ TargetReached::get_distance_travelled()
 {
   try
     {
-      tf2::Stamped<tf2::Transform> odom2person_at_start;
-      config().blackboard->get("odom2person_at_start", odom2person_at_start);
+      tf2::Stamped<tf2::Transform> odom2patient_at_start;
+      config().blackboard->get("map2start", odom2patient_at_start);
 
-      auto odom2person_msg = tf_buffer_.lookupTransform("odom", "person_0", tf2::TimePointZero);
-      tf2::Stamped<tf2::Transform> odom2person;
-      tf2::fromMsg(odom2person_msg, odom2person);
+      auto odom2patient_msg = tf_buffer_.lookupTransform("odom", "patient", tf2::TimePointZero);
+      tf2::Stamped<tf2::Transform> odom2patient;
+      tf2::fromMsg(odom2patient_msg, odom2patient);
 
-      auto person_at_start2person = odom2person_at_start.inverse() * odom2person;
+      auto person_at_start2person = odom2patient_at_start.inverse() * odom2patient;
       return person_at_start2person.getOrigin().length();
     }
     catch (tf2::TransformException &ex)

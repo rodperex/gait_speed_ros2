@@ -3,15 +3,32 @@ repositories:
     type: git
     url: https://github.com/fmrico/cascade_lifecycle
     version: main
-  thirdparty/perception_bt_nodes_irl:
+  thirdparty/bt_nodes:
     type: git
-    url: https://github.com/rodperex/perception_bt_nodes_irl
+    url: https://github.com/rodperex/bt_nodes.git
     version: main
-  thirdparty/motion_bt_nodes_irl:
+  thirdparty/llama_ros:
     type: git
-    url: https://github.com/rodperex/motion_bt_nodes_irl
+    url: https://github.com/mgonzs13/llama_ros.git
     version: main
-  thirdparty/hri_bt_nodes_irl:
+  thirdparty/whisper_ros:
     type: git
-    url: https://github.com/rodperex/hri_bt_nodes_irl
+    url: https://github.com/mgonzs13/whisper_ros.git
+    version: main
+  thirdparty/audio_common:
+    type: git
+    url: https://github.com/mgonzs13/audio_common.git
+    version: main
+  thirdparty/tts_ros:
+    type: git
+    url: https://github.com/mgonzs13/tts_ros.git
+    version: main
+
+  subsystems/perception_system:
+    type: git
+    url: https://github.com/jmguerreroh/perception_system.git
+    version: jazzy
+  subsystems/navigation_system:
+    type: git
+    url: https://github.com/Juancams/navigation_system.git
     version: main

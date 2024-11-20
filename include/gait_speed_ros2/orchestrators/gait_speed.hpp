@@ -61,6 +61,8 @@ private:
   std::string mode_;
   bool robot_moves_;
 
+  bool started_ = false;
+
   rclcpp_lifecycle::LifecyclePublisher<std_msgs::msg::Float64>::SharedPtr result_pub_;
 
 };

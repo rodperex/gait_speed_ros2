@@ -10,10 +10,13 @@
   <buildtool_depend>ament_cmake</buildtool_depend>
 
   <depend>rclcpp</depend>
+  <depend>ament_index_cpp</depend>
   <depend>rclcpp_cascade_lifecycle</depend>
-  <depend>std_msgs</depend>
-  <depend>perception_system</depend>
   <depend>perception_system_interfaces</depend>
+  <depend>perception_system</depend>
+  <depend>perception_bt_nodes</depend>
+  <depend>std_msgs</depend>
+  <depend>motion_bt_nodes</depend>
   
   <test_depend>ament_lint_auto</test_depend>
   <test_depend>ament_lint_common</test_depend>

@@ -1,0 +1,20 @@
+<?xml version="1.0"?>
+<root main_tree_to_execute="BehaviorTree">
+    <!-- ////////// -->
+    <BehaviorTree ID="BehaviorTree">
+        <Sequence>
+            <Action ID="Speak" params="{listened_text}" speech_text="Has dicho: []"/>
+        </Sequence>
+    </BehaviorTree>
+    <!-- ////////// -->
+    <TreeNodesModel>
+        <Action ID="Listen">
+            <output_port name="listened_text">What was heard</output_port>
+        </Action>
+        <Action ID="Speak">
+            <input_port name="params"/>
+            <input_port name="speech_text"/>
+        </Action>
+    </TreeNodesModel>
+    <!-- ////////// -->
+</root>

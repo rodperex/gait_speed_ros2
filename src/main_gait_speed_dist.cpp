@@ -21,10 +21,12 @@
 int main(int argc, char * argv[])
 {
   rclcpp::init(argc, argv);
-  rclcpp::executors::MultiThreadedExecutor exec(rclcpp::ExecutorOptions(), 2);   // set number of threads to whatever needed
-
+  // rclcpp::executors::MultiThreadedExecutor exec(rclcpp::ExecutorOptions(), 2);   // set number of threads to whatever needed
+  rclcpp::executors::SingleThreadedExecutor exec;
+  // cambiar a eventExecutor
   auto node = std::make_shared<rclcpp_cascade_lifecycle::CascadeLifecycleNode>("bt_node");
-
+  node->trigger_transition(lifecycle_msgs::msg::Transition::TRANSITION_CONFIGURE);
+  node->trigger_transition(lifecycle_msgs::msg::Transition::TRANSITION_ACTIVATE);
 
   auto blackboard = BT::Blackboard::create();
   blackboard->set("node", node);
@@ -36,45 +38,60 @@ int main(int argc, char * argv[])
   std::vector<std::string> plugins;
   
   plugins = {
-    "follow_person_bt_node",
-    "look_at_bt_node",
-    "filter_entity_bt_node",
-    "pan_bt_node",
+    "is_pointing_bt_node",
+    "rotate_bt_node",
+    "identify_person_bt_node",
+    "navigate_to_bt_node"
+  };
+
+  auto find_person_node = std::make_shared<gait_speed::BehaviorRunner>(
+    blackboard,
+    "find_person",
+    "/bt_xml/find_person.xml",
+    plugins
+  );
+
+  plugins = {
+    "speak_bt_node",
+    "dialog_confirmation_bt_node"
+  };
+
+  auto explain_gait_speed_node = std::make_shared<gait_speed::BehaviorRunner>(
+    blackboard,
+    "explain_gait_speed",
+    "/bt_xml/explain.xml",
+    plugins
+  );
+
+  
+  plugins = {
     "start_test_bt_node",
-    "is_detected_bt_node",
-    "distance_reached_bt_node",
-    "is_my_person_bt_node",
+    "rotate_bt_node",
+    "identify_person_bt_node",
+    "speak_bt_node",
+    "check_end_test_bt_node",
     "end_test_bt_node"};
+
   auto measure_node = std::make_shared<gait_speed::BehaviorRunner>(
     blackboard,
     "measure_gait_speed",
-    "/bt_xml/measure_gait_speed_dist.xml",
+    "/bt_xml/measure_dist.xml",
     plugins
-    );
-
-  // plugins = {
-  //   "is_waving_bt_node",
-  //   "pan_bt_node",
-  //   "spin_bt_node",
-  //   "move_to_bt_node",
-  //   "is_detected_bt_node",
-  //   "filter_entity_bt_node",
-  //   "look_at_bt_node"
-  //   };
-  // auto find_person_node = std::make_shared<gait_speed::BehaviorRunner>(
-  //   blackboard,
-  //   "find_person",
-  //   "/bt_xml/find_person.xml",
-  //   plugins
-  //   );
+  );
 
   exec.add_node(gait_speed_node->get_node_base_interface());
+  
+  exec.add_node(node->get_node_base_interface());
+
+  exec.add_node(gait_speed_node->get_node_base_interface());
+  exec.add_node(find_person_node->get_node_base_interface());
+  exec.add_node(explain_gait_speed_node->get_node_base_interface());
   exec.add_node(measure_node->get_node_base_interface());
-  // exec.add_node(find_person_node->get_node_base_interface());
 
   gait_speed_node->trigger_transition(lifecycle_msgs::msg::Transition::TRANSITION_CONFIGURE);
+  find_person_node->trigger_transition(lifecycle_msgs::msg::Transition::TRANSITION_CONFIGURE);
+  explain_gait_speed_node->trigger_transition(lifecycle_msgs::msg::Transition::TRANSITION_CONFIGURE);
   measure_node->trigger_transition(lifecycle_msgs::msg::Transition::TRANSITION_CONFIGURE);
-  // find_person_node->trigger_transition(lifecycle_msgs::msg::Transition::TRANSITION_CONFIGURE);
   
   exec.spin();
 

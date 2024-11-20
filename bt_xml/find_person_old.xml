@@ -3,20 +3,16 @@
     <!-- ////////// -->
     <BehaviorTree ID="BehaviorTree">
         <Sequence>
-            <SubTree ID="find_person" __shared_blackboard="true"/>
-            <SubTree ID="gait_speed_dist" __shared_blackboard="true"/>
+            <SubTree ID="find_waving_person_rotating"/>
+            <SubTree ID="gait_speed_dist"/>
         </Sequence>
     </BehaviorTree>
     <!-- ////////// -->
-    <BehaviorTree ID="find_person">
-        <Sequence>
-            <ReactiveFallback>
-                <Condition ID="IsDetected" confidence="0.6" frames="" interest="person" max_depth="2" max_entities="1" order="depth_nearest"/>
-                <Action ID="Pan" period="10" pitch_angle="0" range="45"/>
-            </ReactiveFallback>
-            <Action ID="FilterEntity" frame="person_0" lambda="0.1"/>
-            <Action ID="LookAt" tf_frame="person_0_filtered"/>
-        </Sequence>
+    <BehaviorTree ID="find_person_rotating">
+        <ReactiveFallback>
+            <Condition ID="IsDetected" confidence="0.6" frames="" interest="person" max_depth="2" max_entities="1" order="depth_nearest"/>
+            <Action ID="Rotate" angle="360" speed="0.1"/>
+        </ReactiveFallback>
     </BehaviorTree>
     <!-- ////////// -->
     <BehaviorTree ID="find_waving_person">
@@ -34,23 +30,30 @@
         </Fallback>
     </BehaviorTree>
     <!-- ////////// -->
+    <BehaviorTree ID="find_waving_person_rotating">
+        <Timeout msec="15000">
+            <ReactiveFallback>
+                <Action ID="IsWaving" cam_frame="head_front_camera_link_color_optical_frame" person_frame="{tf_patient}"/>
+                <Action ID="Rotate" angle="-1" speed="0.1"/>
+            </ReactiveFallback>
+        </Timeout>
+    </BehaviorTree>
+    <!-- ////////// -->
     <BehaviorTree ID="gait_speed_dist">
         <Sequence>
             <ReactiveSequence>
                 <Inverter>
                     <Condition ID="TargetReached"/>
                 </Inverter>
-                <!-- <Condition ID="isMyPerson" person_id=""/> -->
                 <Action ID="FollowPerson"/>
             </ReactiveSequence>
-            <Action ID="EndTest"/>
+            <Action ID="EndTest" time=""/>
         </Sequence>
     </BehaviorTree>
     <!-- ////////// -->
     <TreeNodesModel>
-        <Condition ID="TargetReached">
-        </Condition>
         <Action ID="EndTest">
+            <output_port name="time">Time needed to complete the gait speed test</output_port>
         </Action>
         <Action ID="FilterEntity">
             <inout_port name="frame"/>
@@ -82,11 +85,20 @@
             <inout_port name="pitch_angle"/>
             <inout_port name="range"/>
         </Action>
+        <Action ID="Rotate">
+            <input_port name="angle"/>
+            <input_port name="speed"/>
+        </Action>
         <Action ID="Spin"/>
         <Action ID="StartTest">
+            <input_port name="distance">Distance for the gait speed test</input_port>
         </Action>
-        <SubTree ID="find_person"/>
+        <Condition ID="TargetReached"/>
+        <SubTree ID="find_person_rotating">
+            <input_port default="true" name="__shared_blackboard">If false  , the Subtree has an isolated blackboard and needs port remapping</input_port>
+        </SubTree>
         <SubTree ID="find_waving_person"/>
+        <SubTree ID="find_waving_person_rotating"/>
         <SubTree ID="gait_speed_dist"/>
         <Condition ID="isMyPerson">
             <input_port name="person_id"/>

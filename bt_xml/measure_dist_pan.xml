@@ -1,0 +1,117 @@
+<?xml version="1.0"?>
+<root main_tree_to_execute="BehaviorTree">
+    <!-- ////////// -->
+    <BehaviorTree ID="BehaviorTree">
+        <ReactiveSequence>
+            <ReactiveFallback>
+                <Timeout msec="15000">
+                    <SubTree ID="find_person_panning" __shared_blackboard="false"/>
+                </Timeout>
+                <SubTree ID="find_person_moving" __shared_blackboard="false"/>
+            </ReactiveFallback>
+            <Condition ID="TargetReached" patient_frame="patient_filtered"/>
+            <Action ID="EndTest"/>
+        </ReactiveSequence>
+    </BehaviorTree>
+    <!-- ////////// -->
+    <BehaviorTree ID="find_person_moving">
+        <Sequence>
+            <ReactiveFallback>
+                <Condition ID="IsDetected" confidence="0.8" frames="" interest="patient" max_depth="2" max_entities="1" order="depth_nearest"/>
+                <Action ID="Pan" period="10" pitch_angle="0" range="45"/>
+                <Action ID="MoveTo" distance_tolerance="1" is_truncated="" tf_frame="patient_filtered"/>
+            </ReactiveFallback>
+            <Action ID="FilterEntity" frame="patient" lambda="0.1"/>
+            <Action ID="LookAt" tf_frame="patient_filtered"/>
+        </Sequence>
+    </BehaviorTree>
+    <!-- ////////// -->
+    <BehaviorTree ID="find_person_panning">
+        <Sequence>
+            <ReactiveFallback>
+                <Condition ID="IsDetected" confidence="0.8" frames="" interest="patient" max_depth="2" max_entities="1" order="depth_nearest"/>
+                <Action ID="Pan" period="10" pitch_angle="0" range="45"/>
+            </ReactiveFallback>
+            <Action ID="FilterEntity" frame="patient" lambda="0.1"/>
+            <Action ID="LookAt" tf_frame="patient_filtered"/>
+        </Sequence>
+    </BehaviorTree>
+    <!-- ////////// -->
+    <BehaviorTree ID="find_waving_person">
+        <Fallback>
+            <Timeout msec="15000">
+                <ReactiveFallback>
+                    <Action ID="IsWaving" cam_frame="head_front_camera_link_color_optical_frame" person_frame="{tf_patient}"/>
+                    <Action ID="Pan" period="10" pitch_angle="0" range="45"/>
+                </ReactiveFallback>
+            </Timeout>
+            <ReactiveFallback>
+                <Action ID="IsWaving" cam_frame="head_front_camera_link_color_optical_frame" person_frame="{tf_person}"/>
+                <Action ID="Spin"/>
+            </ReactiveFallback>
+        </Fallback>
+    </BehaviorTree>
+    <!-- ////////// -->
+    <BehaviorTree ID="gait_speed_dist">
+        <Sequence>
+            <ReactiveSequence>
+                <Inverter>
+                    <Condition ID="TargetReached" patient_frame=""/>
+                </Inverter>
+                <Action ID="FollowPerson"/>
+            </ReactiveSequence>
+            <Action ID="EndTest"/>
+        </Sequence>
+    </BehaviorTree>
+    <!-- ////////// -->
+    <TreeNodesModel>
+        <Action ID="EndTest"/>
+        <Action ID="FilterEntity">
+            <inout_port name="frame"/>
+            <inout_port name="lambda"/>
+        </Action>
+        <Action ID="FollowPerson"/>
+        <Condition ID="IsDetected">
+            <input_port default="0.6" name="confidence"/>
+            <output_port name="frames"/>
+            <input_port default="person" name="interest"/>
+            <input_port default="2" name="max_depth"/>
+            <input_port default="1" name="max_entities"/>
+            <input_port default="depth_nearest" name="order"/>
+        </Condition>
+        <Action ID="IsWaving">
+            <input_port name="cam_frame"/>
+            <output_port name="person_frame"/>
+        </Action>
+        <Action ID="LookAt">
+            <inout_port name="tf_frame"/>
+        </Action>
+        <Action ID="MoveTo">
+            <input_port name="distance_tolerance"/>
+            <input_port name="is_truncated"/>
+            <input_port name="tf_frame"/>
+        </Action>
+        <Action ID="Pan">
+            <inout_port name="period"/>
+            <inout_port name="pitch_angle"/>
+            <inout_port name="range"/>
+        </Action>
+        <Action ID="Spin"/>
+        <Action ID="StartTest"/>
+        <Condition ID="TargetReached">
+            <input_port name="patient_frame">Frame of the person that is being followed</input_port>
+        </Condition>
+        <SubTree ID="find_person_moving">
+            <input_port default="false" name="__shared_blackboard">If false (default), the Subtree has an isolated blackboard and needs port remapping</input_port>
+        </SubTree>
+        <SubTree ID="find_person_panning">
+            <input_port default="false" name="__shared_blackboard">If false (default), the Subtree has an isolated blackboard and needs port remapping</input_port>
+        </SubTree>
+        <SubTree ID="find_waving_person"/>
+        <SubTree ID="gait_speed_dist"/>
+        <Condition ID="isMyPerson">
+            <input_port name="person_id"/>
+        </Condition>
+    </TreeNodesModel>
+    <!-- ////////// -->
+</root>

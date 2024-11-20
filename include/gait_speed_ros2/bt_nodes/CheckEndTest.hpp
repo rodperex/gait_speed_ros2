@@ -13,48 +13,53 @@
 // limitations under the License.
 
 
-#ifndef IS_MY_PERSON_HPP_
-#define IS_MY_PERSON_HPP_
+#ifndef CHECK_END_TEST_HPP_
+#define CHECK_END_TEST_HPP_
 
 #include "rclcpp/rclcpp.hpp"
 #include "rclcpp_cascade_lifecycle/rclcpp_cascade_lifecycle.hpp"
 
-#include "behaviortree_cpp_v3/behavior_tree.hpp"
-#include "behaviortree_cpp_v3/bt_factory.hpp"
-#include "perception_system/PerceptionListener.hpp"
-#include "perception_system_interfaces/msg/detection.hpp"
-#include "perception_system/PerceptionUtils.hpp"
+#include "behaviortree_cpp_v3/behavior_tree.h"
+#include "behaviortree_cpp_v3/bt_factory.h"
+
+#include <tf2_ros/transform_listener.h>
+#include <tf2_ros/buffer.h>
+#include "tf2_geometry_msgs/tf2_geometry_msgs.hpp"
 
 namespace gait_speed
 {
 
 using namespace std::chrono_literals;
 using std::placeholders::_1;
-using pl = perception_system::PerceptionListener;
 
-class IsMyPerson : public BT::ConditionNode
+class CheckEndTest : public BT::ActionNodeBase
 {
 public:
-  IsMyPerson(const std::string & xml_tag_name, const BT::NodeConfiguration & conf);
-
+  CheckEndTest(const std::string & xml_tag_name, const BT::NodeConfiguration & conf);
+  
   BT::NodeStatus tick();
+  void halt();
 
   static BT::PortsList providedPorts()
   {
     return BT::PortsList(
       {
-        BT::InputPort<std::int64_t>("person_id"),
       });
   }
 
 private:
+  float get_distance_travelled();
+  float get_time_elapsed();
+
   std::shared_ptr<rclcpp_cascade_lifecycle::CascadeLifecycleNode> node_;
-
-  std::int64_t person_id_;
-  float threshold_;
-
+  
+  float target_;
+  tf2::BufferCore tf_buffer_;
+  tf2_ros::TransformListener tf_listener_;
+  std::string mode_;
+  
 };
 
 } // namespace gait_speed
 
-#endif  // IS_MY_PERSON_HPP_
+#endif  // CHECK_END_TEST_HPP_

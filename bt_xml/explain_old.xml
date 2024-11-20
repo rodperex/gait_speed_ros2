@@ -1,0 +1,134 @@
+<?xml version="1.0"?>
+<root main_tree_to_execute="BehaviorTree">
+    <!-- ////////// -->
+    <BehaviorTree ID="BehaviorTree">
+        <Sequence>
+            <Action ID="Speak" param="" say_text="We are going to measure your gait speed. When I say GO, please start walking at your normal speed. I will tell you when to stop."/>
+            <Action ID="Speak" param="" say_text="Did you understand? Please say yes or no"/>
+            <SubTree ID="listen"__shared_blackboard="true"/>
+            <SubTree ID="confirm" __shared_blackboard="true"/>
+        </Sequence>
+    </BehaviorTree>
+    <!-- ////////// -->
+    <BehaviorTree ID="confirm">
+        <ReactiveSequence>
+            <RetryUntilSuccessful num_attempts="-1">
+                <Condition ID="IsDetected" confidence="0.6" frames="" interest="person" max_depth="2" max_entities="1" order="depth_nearest"/>
+            </RetryUntilSuccessful>
+            <Action ID="FilterEntity" frame="person_0" lambda="0.1"/>
+            <Action ID="DialogConfirmation"/>
+        </ReactiveSequence>
+    </BehaviorTree>
+    <!-- ////////// -->
+    <BehaviorTree ID="find_person">
+        <Sequence>
+            <ReactiveFallback>
+                <Condition ID="IsDetected" confidence="0.6" frames="" interest="person" max_depth="2" max_entities="1" order="depth_nearest"/>
+                <Action ID="Pan" period="10" pitch_angle="0" range="45"/>
+            </ReactiveFallback>
+            <Action ID="FilterEntity" frame="person_0" lambda="0.1"/>
+            <Action ID="LookAt" tf_frame="person_0_filtered"/>
+        </Sequence>
+    </BehaviorTree>
+    <!-- ////////// -->
+    <BehaviorTree ID="find_waving_person">
+        <Fallback>
+            <Timeout msec="15000">
+                <ReactiveFallback>
+                    <Action ID="IsWaving" cam_frame="head_front_camera_link_color_optical_frame" person_frame="{tf_patient}"/>
+                    <Action ID="Pan" period="10" pitch_angle="0" range="45"/>
+                </ReactiveFallback>
+            </Timeout>
+            <ReactiveFallback>
+                <Action ID="IsWaving" cam_frame="head_front_camera_link_color_optical_frame" person_frame="{tf_person}"/>
+                <Action ID="Spin"/>
+            </ReactiveFallback>
+        </Fallback>
+    </BehaviorTree>
+    <!-- ////////// -->
+    <BehaviorTree ID="gait_speed_dist">
+        <Sequence>
+            <Action ID="StartTest" distance="{d}"/>
+            <SetBlackboard output_key="gait_speed_distance" value="{d}"/>
+            <ReactiveSequence>
+                <Inverter>
+                    <Condition ID="DistanceReached" distance="{d}"/>
+                </Inverter>
+                <Condition ID="isMyPerson" person_id=""/>
+                <Action ID="FollowPerson"/>
+            </ReactiveSequence>
+            <Action ID="EndTest" time="{t}"/>
+            <SetBlackboard output_key="gait_speed_time" value="{t}"/>
+        </Sequence>
+    </BehaviorTree>
+    <!-- ////////// -->
+    <BehaviorTree ID="listen">
+        <ReactiveSequence>
+            <RetryUntilSuccessful num_attempts="-1">
+                <Condition ID="IsDetected" confidence="0.6" frames="" interest="person" max_depth="2" max_entities="1" order="depth_nearest"/>
+            </RetryUntilSuccessful>
+            <Action ID="FilterEntity" frame="person_0" lambda="0.1"/>
+            <Action ID="Listen" listen_text="{understood}"/>
+        </ReactiveSequence>
+    </BehaviorTree>
+    <!-- ////////// -->
+        <TreeNodesModel>
+            <Action ID="DialogConfirmation"/>
+            <Condition ID="DistanceReached">
+                <input_port name="distance"/>
+            </Condition>
+            <Action ID="EndTest">
+                <output_port name="time">Time needed to complete the gait speed test</output_port>
+            </Action>
+            <Action ID="FilterEntity">
+                <inout_port name="frame"/>
+                <inout_port name="lambda"/>
+            </Action>
+            <Action ID="FollowPerson"/>
+            <Condition ID="IsDetected">
+                <input_port default="0.6" name="confidence"/>
+                <output_port name="frames"/>
+                <input_port default="person" name="interest"/>
+                <input_port default="2" name="max_depth"/>
+                <input_port default="1" name="max_entities"/>
+                <input_port default="depth_nearest" name="order"/>
+            </Condition>
+            <Action ID="IsWaving">
+                <input_port name="cam_frame"/>
+                <output_port name="person_frame"/>
+            </Action>
+            <Action ID="Listen">
+                <inout_port name="listen_text"/>
+            </Action>
+            <Action ID="LookAt">
+                <inout_port name="tf_frame"/>
+            </Action>
+            <Action ID="MoveTo">
+                <input_port name="distance_tolerance"/>
+                <input_port name="is_truncated"/>
+                <input_port name="tf_frame"/>
+            </Action>
+            <Action ID="Pan">
+                <inout_port name="period"/>
+                <inout_port name="pitch_angle"/>
+                <inout_port name="range"/>
+            </Action>
+            <Action ID="Speak">
+                <input_port name="param"/>
+                <input_port name="say_text"/>
+            </Action>
+            <Action ID="Spin"/>
+            <Action ID="StartTest">
+                <input_port name="distance">Distance for the gait speed test</input_port>
+            </Action>
+            <SubTree ID="confirm"/>
+            <SubTree ID="find_person"/>
+            <SubTree ID="find_waving_person"/>
+            <SubTree ID="gait_speed_dist"/>
+            <Condition ID="isMyPerson">
+                <input_port name="person_id"/>
+            </Condition>
+            <SubTree ID="listen"/>
+        </TreeNodesModel>
+    <!-- ////////// -->
+</root>

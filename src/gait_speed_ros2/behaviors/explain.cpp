@@ -24,16 +24,10 @@ Explain::Explain(BT::Blackboard::Ptr blackboard)
 {
   RCLCPP_INFO(get_logger(), "Explain constructor");
 
-  std::string pkg_path = ament_index_cpp::get_package_share_directory("gait_speed_ros2");
-  std::string xml_file = pkg_path + "/bt_xml/explain.xml";
-  BT::BehaviorTreeFactory factory;
-  BT::SharedLibrary loader;
 
   // factory.registerFromPlugin(loader.getOSName("..."));
 
   blackboard_->get<rclcpp::Node::SharedPtr>("node", node_);
-
-  tree_ = factory.createTreeFromFile(xml_file, blackboard_);
 
   status_pub_ = create_publisher<std_msgs::msg::String>("behavior_status", 10);
 
@@ -70,6 +64,14 @@ Explain::on_activate(const rclcpp_lifecycle::State & previous_state)
 {
   (void)previous_state;
   RCLCPP_INFO(get_logger(), "Explain on_activate");
+
+  BT::BehaviorTreeFactory factory;
+  BT::SharedLibrary loader;
+  
+  std::string pkg_path = ament_index_cpp::get_package_share_directory("gait_speed_ros2");
+  std::string xml_file = pkg_path + "/bt_xml/explain.xml";
+
+  tree_ = factory.createTreeFromFile(xml_file, blackboard_);
 
   status_pub_->on_activate();
 

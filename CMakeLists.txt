@@ -8,23 +8,29 @@ endif()
 set(CMAKE_CXX_STANDARD 17)
 
 find_package(ament_cmake REQUIRED)
+find_package(ament_index_cpp REQUIRED)
 find_package(rclcpp REQUIRED)
 find_package(rclcpp_cascade_lifecycle REQUIRED)
 find_package(behaviortree_cpp_v3 REQUIRED)
 find_package(std_msgs REQUIRED)
-find_package(perception_system REQUIRED)
 find_package(perception_system_interfaces REQUIRED)
+find_package(perception_system REQUIRED)
+find_package(motion_bt_nodes REQUIRED)
+find_package(perception_bt_nodes REQUIRED)
 find_package(tf2_geometry_msgs REQUIRED)
 find_package(tf2 REQUIRED)
 find_package(tf2_ros REQUIRED)
 
 set(dependencies
   rclcpp
+  ament_index_cpp
   rclcpp_cascade_lifecycle
   behaviortree_cpp_v3
   std_msgs
-  perception_system
   perception_system_interfaces
+  perception_system
+  motion_bt_nodes
+  perception_bt_nodes
   tf2_geometry_msgs
   tf2
   tf2_ros
@@ -32,18 +38,14 @@ set(dependencies
 
 include_directories(include)
 
-add_library(is_my_person_bt_node SHARED src/gait_speed_ros2/bt_nodes/isMyPerson.cpp)
-add_library(target_reached_bt_node SHARED src/gait_speed_ros2/bt_nodes/TargetReached.cpp)
-add_library(target_reached_static_bt_node SHARED src/gait_speed_ros2/bt_nodes/TargetReachedStatic.cpp)
+add_library(check_end_test_bt_node SHARED src/gait_speed_ros2/bt_nodes/CheckEndTest.cpp)
 add_library(start_test_bt_node SHARED src/gait_speed_ros2/bt_nodes/StartTest.cpp)
 add_library(end_test_bt_node SHARED src/gait_speed_ros2/bt_nodes/EndTest.cpp)
 
 
 list(APPEND plugin_libs
-  is_my_person_bt_node
-  target_reached_bt_node
-  target_reached_static_bt_node
   start_test_bt_node
+  check_end_test_bt_node
   end_test_bt_node
 )
 
@@ -54,10 +56,20 @@ endforeach()
 
 
 add_library(${PROJECT_NAME} SHARED
+  src/gait_speed_ros2/orchestrators/example.cpp
+  src/gait_speed_ros2/orchestrators/example2.cpp
   src/gait_speed_ros2/orchestrators/gait_speed.cpp
   src/gait_speed_ros2/behaviors/behavior_runner.cpp
 )
 ament_target_dependencies(${PROJECT_NAME} ${dependencies})
+
+add_executable(example src/main_example.cpp)
+ament_target_dependencies(example ${dependencies})
+target_link_libraries(example ${PROJECT_NAME})
+
+add_executable(example2 src/main_example2.cpp)
+ament_target_dependencies(example2 ${dependencies})
+target_link_libraries(example2 ${PROJECT_NAME})
 
 add_executable(gait_speed_dist src/main_gait_speed_dist.cpp)
 ament_target_dependencies(gait_speed_dist ${dependencies})
@@ -66,6 +78,8 @@ target_link_libraries(gait_speed_dist ${PROJECT_NAME})
 install(TARGETS
   ${plugin_libs}
   ${PROJECT_NAME}
+  example
+  example2
   gait_speed_dist
   ARCHIVE DESTINATION lib
   LIBRARY DESTINATION lib

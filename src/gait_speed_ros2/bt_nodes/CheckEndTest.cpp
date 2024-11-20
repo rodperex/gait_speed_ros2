@@ -13,14 +13,14 @@
 // limitations under the License.
 
 
-#include "gait_speed_ros2/bt_nodes/TargetReached.hpp"
+#include "gait_speed_ros2/bt_nodes/CheckEndTest.hpp"
 
 namespace gait_speed
 {
-TargetReached::TargetReached(
+CheckEndTest::CheckEndTest(
   const std::string & xml_tag_name,
   const BT::NodeConfiguration & conf)
-: BT::ConditionNode(xml_tag_name, conf),
+: BT::ActionNodeBase(xml_tag_name, conf),
   target_(0.0),
   tf_buffer_(),
   tf_listener_(tf_buffer_)
@@ -31,7 +31,7 @@ TargetReached::TargetReached(
 }
 
 BT::NodeStatus
-TargetReached::tick()
+CheckEndTest::tick()
 {
   float target;
   if (mode_ == "distance") {
@@ -47,43 +47,44 @@ TargetReached::tick()
       return BT::NodeStatus::SUCCESS;
     }
   }
-  return BT::NodeStatus::FAILURE;
+  return BT::NodeStatus::RUNNING;
 }
 
 float
-TargetReached::get_distance_travelled()
+CheckEndTest::get_distance_travelled()
 {
   try
     {
-      tf2::Stamped<tf2::Transform> odom2bf0;
-      config().blackboard->get("odom2bf0", odom2bf0);
+      tf2::Stamped<tf2::Transform> odom2patient_at_start;
+      config().blackboard->get("map2start", odom2patient_at_start);
 
-      auto odom2bf_msg = tf_buffer_.lookupTransform("odom", "base_link", tf2::TimePointZero);
-      tf2::Stamped<tf2::Transform> odom2bf;
-      tf2::fromMsg(odom2bf_msg, odom2bf);
+      auto odom2patient_msg = tf_buffer_.lookupTransform("odom", "patient", tf2::TimePointZero);
+      tf2::Stamped<tf2::Transform> odom2patient;
+      tf2::fromMsg(odom2patient_msg, odom2patient);
 
-      auto bf02bf = odom2bf0.inverse() * odom2bf;
-      return bf02bf.getOrigin().length();
+      auto person_at_start2person = odom2patient_at_start.inverse() * odom2patient;
+      return person_at_start2person.getOrigin().length();
     }
     catch (tf2::TransformException &ex)
     {
       RCLCPP_WARN(node_->get_logger(), "%s", ex.what());
       return -1;
     }
+  return 0.0;
 }
 
 float
-TargetReached::get_time_elapsed()
+CheckEndTest::get_time_elapsed()
 {
   rclcpp::Time start_time, current_time;
   config().blackboard->get("start_time", start_time);
   current_time = node_->now();
   rclcpp::Duration duration = current_time - start_time;
-  return duration.seconds();
+  return duration.nanoseconds() / 1e9;
 
 }
 }  // namespace gait_speed
 
 BT_REGISTER_NODES(factory) {
-  factory.registerNodeType<gait_speed::TargetReached>("TargetReached");
+  factory.registerNodeType<gait_speed::CheckEndTest>("CheckEndTest");
 }

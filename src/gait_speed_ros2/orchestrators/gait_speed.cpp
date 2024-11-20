@@ -21,7 +21,7 @@ namespace gait_speed
 GaitSpeed::GaitSpeed(BT::Blackboard::Ptr blackboard)
 : CascadeLifecycleNode("gait_speed_node"),
   state_(INIT),
-  status_received_("FAILURE"),
+  last_status_(""),
   blackboard_(blackboard)
 {
   this->declare_parameter<float>("value", 4.0);
@@ -44,12 +44,18 @@ GaitSpeed::GaitSpeed(BT::Blackboard::Ptr blackboard)
     "behavior_status", 10, std::bind(&GaitSpeed::status_callback, this, _1));
 
   result_pub_ = create_publisher<std_msgs::msg::Float64>("gait_speed_result", 10);
+
+  go_to_state(state_);
 }
 
 void
 GaitSpeed::status_callback(std_msgs::msg::String::UniquePtr msg)
 {
   last_status_ = msg.get()->data;
+  
+  if (!started_) {
+    started_ = true;
+  }
 }
 
 void
@@ -57,10 +63,16 @@ GaitSpeed::control_cycle()
 {
   std_msgs::msg::Float64 result_msg;
 
+  if (!started_) {
+    RCLCPP_INFO(get_logger(), "Not started yet");
+    return;
+  }
+
   switch (state_) {
     case INIT:
       if (check_behavior_finished()) {
         if (last_status_ == "SUCCESS") {
+          started_ = false;
           go_to_state(FIND);
         } else {
           go_to_state(STOP);
@@ -69,6 +81,7 @@ GaitSpeed::control_cycle()
       break;
     case FIND:
       if (last_status_ == "SUCCESS") {
+        started_ = false;
         go_to_state(EXPLAIN);
       } else {
         go_to_state(STOP);
@@ -76,6 +89,7 @@ GaitSpeed::control_cycle()
       break;
     case EXPLAIN:
       if (last_status_ == "SUCCESS") {
+        started_ = false;
         go_to_state(PREPARE);
       } else {
         go_to_state(STOP);
@@ -83,6 +97,7 @@ GaitSpeed::control_cycle()
       break;
     case PREPARE:
       if (last_status_ == "SUCCESS") {
+        started_ = false;
         go_to_state(MEASURE);
       } else {
         go_to_state(STOP);
@@ -117,22 +132,37 @@ GaitSpeed::go_to_state(int state)
 
   switch (state_) {
     case FIND:
+      RCLCPP_INFO(get_logger(), "State: FIND");
       add_activation("find_person");
+      on_activate(get_current_state());
       break;
     case EXPLAIN:
+      RCLCPP_INFO(get_logger(), "State: EXPLAIN");
       add_activation("explain_gait_speed");
+      on_activate(get_current_state());
       break;
     case PREPARE:
+      RCLCPP_INFO(get_logger(), "State: PREPARE");
       add_activation("prepare_gait_speed");
+      on_activate(get_current_state());
       break;
     case MEASURE:
+      RCLCPP_INFO(get_logger(), "State: MEASURE");
       if (robot_moves_) {
         add_activation("measure_gait_speed_dist");
+        on_activate(get_current_state());
       } else {
         add_activation("measure_gait_speed_dist_static");
+        on_activate(get_current_state());
       }
       break;
     default:
+      state_ = STOP;
+      RCLCPP_INFO(get_logger(), "Deactivating");
+      cleanup();
+      deactivate();
+      // on_deactivate(get_current_state());
+      // rclcpp::shutdown();
       break;
   }
 }

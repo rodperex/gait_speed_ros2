@@ -13,51 +13,54 @@
 // limitations under the License.
 
 
-#ifndef BEHAVIOR_RUNNER__HPP_
-#define BEHAVIOR_RUNNER__HPP_
+#ifndef EXAMPLE_HPP_
+#define EXAMPLE_HPP_
 
 #include "rclcpp/rclcpp.hpp"
 #include "rclcpp_cascade_lifecycle/rclcpp_cascade_lifecycle.hpp"
+#include "std_msgs/msg/string.hpp"
+#include "std_msgs/msg/float64.hpp"
 
 #include "behaviortree_cpp_v3/behavior_tree.h"
-#include "behaviortree_cpp_v3/bt_factory.h"
-#include "behaviortree_cpp_v3/utils/shared_library.h"
-#include "ament_index_cpp/get_package_share_directory.hpp"
-#include "std_msgs/msg/string.hpp"
 
-namespace gait_speed
+namespace example
 {
 
 using namespace std::chrono_literals;
+using std::placeholders::_1;
 
-class BehaviorRunner : public rclcpp_cascade_lifecycle::CascadeLifecycleNode
+class Example : public rclcpp_cascade_lifecycle::CascadeLifecycleNode
 {
 public:
-  BehaviorRunner(
-    BT::Blackboard::Ptr blackboard,
-    const std::string &name,
-    const std::string &xml_path,
-    const std::vector<std::string> &plugins);
+  Example(BT::Blackboard::Ptr blackboard);
 
 private:
   void control_cycle();
+  void status_callback(std_msgs::msg::String::UniquePtr msg);
+  void go_to_state(int state);
+  bool check_behavior_finished();
 
   rclcpp_lifecycle::node_interfaces::LifecycleNodeInterface::CallbackReturn
   on_activate(const rclcpp_lifecycle::State & previous_state);
   rclcpp_lifecycle::node_interfaces::LifecycleNodeInterface::CallbackReturn
   on_deactivate(const rclcpp_lifecycle::State & previous_state);
 
+  int state_;
+  static const int HRI = 0;
+  static const int NAV = 1;
+  static const int STOP = 2;
+  
   rclcpp::TimerBase::SharedPtr timer_;
-  std::shared_ptr<rclcpp_cascade_lifecycle::CascadeLifecycleNode> node_;
-  BT::Tree tree_;
+  rclcpp::Subscription<std_msgs::msg::String>::SharedPtr status_sub_;
+  std::string status_received_, last_status_;
   BT::Blackboard::Ptr blackboard_;
-  std::string xml_path_;
-  std::vector<std::string> plugins_;
 
-  rclcpp_lifecycle::LifecyclePublisher<std_msgs::msg::String>::SharedPtr status_pub_;
+  bool started_ = false;
+  
+  rclcpp_lifecycle::LifecyclePublisher<std_msgs::msg::Float64>::SharedPtr result_pub_;
 
 };
 
-} // namespace gait_speed
+} // namespace example
 
-#endif  // BEHAVIOR_RUNNER__HPP_
+#endif  // EXAMPLE_HPP_

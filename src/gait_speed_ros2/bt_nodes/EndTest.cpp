@@ -30,8 +30,8 @@ EndTest::tick()
     if (mode_ == "distance") {
         float time_elapsed;
         config().blackboard->get("time_elapsed", time_elapsed);
-
-        if (time_elapsed > 0) {
+        
+        if (time_elapsed > 0.0) {
             RCLCPP_INFO(node_->get_logger(), "Test finished. Time: %f seconds", time_elapsed);
             config().blackboard->set("gait_speed_result", time_elapsed);
             return BT::NodeStatus::SUCCESS;
@@ -46,7 +46,7 @@ EndTest::tick()
             return BT::NodeStatus::SUCCESS;
         }
     }
-    RCLCPP_WARN(node_->get_logger(), "Test finished with error");
+    RCLCPP_WARN(node_->get_logger(), "Gait speed test finished with error");
     return BT::NodeStatus::FAILURE;
 }
 
