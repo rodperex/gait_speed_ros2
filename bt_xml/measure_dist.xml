@@ -12,8 +12,8 @@
     <!-- ////////// -->
     <BehaviorTree ID="find_patient_rotating">
         <ReactiveFallback>
-            <Action ID="IdentifyPerson" get_features="false" person_to_identify="patient"/>
-            <Action ID="Rotate" angle="360" speed="0.1"/>
+            <Condition ID="IsInFront" confidence="0.6" direction="{dir}" target="{patient}" what="person"/>
+            <Action ID="Spin" angle="{dir}" forever="true" speed="0.5"/>
         </ReactiveFallback>
     </BehaviorTree>
     <!-- ////////// -->
@@ -27,7 +27,7 @@
             </Timeout>
             <ReactiveFallback>
                 <Action ID="IsWaving" cam_frame="head_front_camera_link_color_optical_frame" person_frame="{tf_person}"/>
-                <Action ID="Spin"/>
+                <Action ID="Spin" angle="" forever="" speed=""/>
             </ReactiveFallback>
         </Fallback>
     </BehaviorTree>
@@ -60,7 +60,9 @@
     <!-- ////////// -->
     <TreeNodesModel>
         <Action ID="CheckEndTest"/>
-        <Action ID="DialogConfirmation"/>
+        <Action ID="DialogConfirmation">
+            <input_port default="en" name="language"/>
+        </Action>
         <Condition ID="DistanceReached">
             <input_port name="distance"/>
         </Condition>
@@ -83,6 +85,12 @@
             <input_port default="2" name="max_depth"/>
             <input_port default="1" name="max_entities"/>
             <input_port default="depth_nearest" name="order"/>
+        </Condition>
+        <Condition ID="IsInFront">
+            <input_port name="confidence"/>
+            <output_port name="direction"/>
+            <input_port name="target"/>
+            <input_port name="what"/>
         </Condition>
         <Action ID="IsPointing">
             <input_port name="camera_frame"/>
@@ -117,15 +125,18 @@
             <inout_port name="pitch_angle"/>
             <inout_port name="range"/>
         </Action>
-        <Action ID="Rotate">
-            <input_port name="angle"/>
-            <input_port name="speed"/>
+        <Action ID="PublishCurrentInterestPose">
+            <input_port name="interest">Current interest of the robot. A static transform in relation to odom will be published</input_port>
         </Action>
         <Action ID="Speak">
             <input_port name="param"/>
             <input_port name="say_text"/>
         </Action>
-        <Action ID="Spin"/>
+        <Action ID="Spin">
+            <input_port name="angle"/>
+            <input_port name="forever"/>
+            <input_port name="speed"/>
+        </Action>
         <Action ID="StartTest"/>
         <Condition ID="TargetReached"/>
         <Condition ID="TargetReachedStatic"/>

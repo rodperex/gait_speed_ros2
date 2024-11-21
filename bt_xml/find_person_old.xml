@@ -11,7 +11,7 @@
     <BehaviorTree ID="find_person_rotating">
         <ReactiveFallback>
             <Condition ID="IsDetected" confidence="0.6" frames="" interest="person" max_depth="2" max_entities="1" order="depth_nearest"/>
-            <Action ID="Rotate" angle="360" speed="0.1"/>
+            <Action ID="Spin" angle="360" speed="0.1"/>
         </ReactiveFallback>
     </BehaviorTree>
     <!-- ////////// -->
@@ -34,7 +34,7 @@
         <Timeout msec="15000">
             <ReactiveFallback>
                 <Action ID="IsWaving" cam_frame="head_front_camera_link_color_optical_frame" person_frame="{tf_patient}"/>
-                <Action ID="Rotate" angle="-1" speed="0.1"/>
+                <Action ID="Spin" angle="-1" speed="0.1"/>
             </ReactiveFallback>
         </Timeout>
     </BehaviorTree>
@@ -85,7 +85,7 @@
             <inout_port name="pitch_angle"/>
             <inout_port name="range"/>
         </Action>
-        <Action ID="Rotate">
+        <Action ID="Spin">
             <input_port name="angle"/>
             <input_port name="speed"/>
         </Action>

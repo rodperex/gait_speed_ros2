@@ -4,7 +4,7 @@
     <BehaviorTree ID="BehaviorTree">
         <Sequence>
             <SubTree ID="find_waving_person_rotating"/>
-            <Action ID="IdentifyPerson" get_features="true" person_to_identify="patient"/>
+            <Action ID="IdentifyPerson" confidence="0.7" detection="{patient}" get_features="true" person_to_identify="patient"/>
             <Action ID="NavigateTo" distance_tolerance="0.5" tf_frame="patient" will_finish="true" x="" y=""/>
         </Sequence>
     </BehaviorTree>
@@ -12,7 +12,7 @@
     <BehaviorTree ID="find_person_rotating">
         <ReactiveFallback>
             <Condition ID="IsDetected" confidence="0.6" frames="" interest="person" max_depth="2" max_entities="1" order="depth_nearest"/>
-            <Action ID="Rotate" angle="360" speed="0.1"/>
+            <Action ID="Spin" angle="360" forever="" speed="0.1"/>
         </ReactiveFallback>
     </BehaviorTree>
     <!-- ////////// -->
@@ -20,13 +20,13 @@
         <Fallback>
             <Timeout msec="15000">
                 <ReactiveFallback>
-                    <Action ID="IsPointing" camera_frame="" high_pointing_limit="" low_pointing_limit="" output_frame="" pointing_direction=""/>
+                    <Action ID="IsPointing" camera_frame="" detection="" high_pointing_limit="" low_pointing_limit="" output_frame="" pointing_direction=""/>
                     <Action ID="Pan" period="10" pitch_angle="0" range="45"/>
                 </ReactiveFallback>
             </Timeout>
             <ReactiveFallback>
-                <Action ID="IsPointing" camera_frame="" high_pointing_limit="" low_pointing_limit="" output_frame="" pointing_direction=""/>
-                <Action ID="Spin"/>
+                <Action ID="IsPointing" camera_frame="" detection="" high_pointing_limit="" low_pointing_limit="" output_frame="" pointing_direction=""/>
+                <Action ID="Spin" angle="" forever="" speed=""/>
             </ReactiveFallback>
         </Fallback>
     </BehaviorTree>
@@ -34,8 +34,8 @@
     <BehaviorTree ID="find_waving_person_rotating">
         <Timeout msec="15000">
             <ReactiveFallback>
-                <Action ID="IsPointing" camera_frame="camera_link" high_pointing_limit="7" low_pointing_limit="5" output_frame="patient" pointing_direction=""/>
-                <Action ID="Rotate" angle="-1" speed="0.1"/>
+                <Action ID="IsPointing" camera_frame="camera_link" detection="{patient}" high_pointing_limit="7" low_pointing_limit="5" output_frame="patient" pointing_direction=""/>
+                <Action ID="Spin" angle="-1" forever="true" speed="0.5"/>
             </ReactiveFallback>
         </Timeout>
     </BehaviorTree>
@@ -54,7 +54,9 @@
     <!-- ////////// -->
     <TreeNodesModel>
         <Action ID="CheckEndTest"/>
-        <Action ID="DialogConfirmation"/>
+        <Action ID="DialogConfirmation">
+            <input_port default="en" name="language"/>
+        </Action>
         <Condition ID="DistanceReached">
             <input_port name="distance"/>
         </Condition>
@@ -102,25 +104,24 @@
         </Action>
         <Action ID="NavigateTo">
             <input_port name="distance_tolerance">How far from the target</input_port>
+            <input_port name="is_truncated">True in case we do not want to reach the destination but to stay close</input_port>
             <input_port name="tf_frame">Where to navigate</input_port>
             <input_port name="will_finish">False in case it is navigating to follow something</input_port>
-            <input_port name="x"/>
-            <input_port name="y"/>
         </Action>
         <Action ID="Pan">
             <inout_port name="period"/>
             <inout_port name="pitch_angle"/>
             <inout_port name="range"/>
         </Action>
-        <Action ID="Rotate">
-            <input_port name="angle"/>
-            <input_port name="speed"/>
-        </Action>
         <Action ID="Speak">
             <input_port name="param"/>
             <input_port name="say_text"/>
         </Action>
-        <Action ID="Spin"/>
+        <Action ID="Spin">
+            <input_port name="angle"/>
+            <input_port name="forever"/>
+            <input_port name="speed"/>
+        </Action>
         <Action ID="StartTest"/>
         <Condition ID="TargetReached"/>
         <Condition ID="TargetReachedStatic"/>

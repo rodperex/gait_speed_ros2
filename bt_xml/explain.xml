@@ -4,19 +4,21 @@
     <BehaviorTree ID="BehaviorTree">
         <Sequence>
             <Action ID="Speak" param="" say_text="We are going to measure your gait speed. When I say GO, please start walking at your normal speed. I will tell you when to stop"/>
-            <SubTree ID="confirm"/>
+            <RetryUntilSuccessful num_attempts="5">
+                <SubTree ID="confirm"/>
+            </RetryUntilSuccessful>
         </Sequence>
     </BehaviorTree>
     <!-- ////////// -->
     <BehaviorTree ID="confirm">
         <ReactiveSequence>
             <Action ID="Speak" param="" say_text="Did you understand? Please say yes or no"/>
-            <ForceFailure>
-                <Fallback>
-                    <Action ID="DialogConfirmation"/>
+            <Fallback>
+                <Action ID="DialogConfirmation" language="en"/>
+                <ForceFailure>
                     <Action ID="Speak" param="You just need to walk when I say so" say_text=""/>
-                </Fallback>
-            </ForceFailure>
+                </ForceFailure>
+            </Fallback>
         </ReactiveSequence>
     </BehaviorTree>
     <!-- ////////// -->
@@ -26,7 +28,7 @@
                 <Condition ID="IsDetected" confidence="0.6" frames="" interest="person" max_depth="2" max_entities="1" order="depth_nearest"/>
             </RetryUntilSuccessful>
             <Action ID="FilterEntity" frame="person_0" lambda="0.1"/>
-            <Action ID="DialogConfirmation"/>
+            <Action ID="DialogConfirmation" language="en"/>
         </ReactiveSequence>
     </BehaviorTree>
     <!-- ////////// -->
@@ -51,20 +53,20 @@
             </Timeout>
             <ReactiveFallback>
                 <Action ID="IsWaving" cam_frame="head_front_camera_link_color_optical_frame" person_frame="{tf_person}"/>
-                <Action ID="Spin"/>
+                <Action ID="Spin" angle="" speed=""/>
             </ReactiveFallback>
         </Fallback>
     </BehaviorTree>
     <!-- ////////// -->
     <BehaviorTree ID="gait_speed_dist">
         <Sequence>
-            <Action ID="StartTest" distance="{d}"/>
+            <Action ID="StartTest"/>
             <SetBlackboard output_key="gait_speed_distance" value="{d}"/>
             <ReactiveSequence>
                 <Inverter>
                     <Condition ID="DistanceReached" distance="{d}"/>
                 </Inverter>
-                <Condition ID="isMyPerson" person_id=""/>
+                <Condition ID="isMyPerson" person_frame=""/>
                 <Action ID="FollowPerson"/>
             </ReactiveSequence>
             <Action ID="EndTest" time="{t}"/>
@@ -84,7 +86,9 @@
     <!-- ////////// -->
     <TreeNodesModel>
         <Action ID="CheckEndTest"/>
-        <Action ID="DialogConfirmation"/>
+        <Action ID="DialogConfirmation">
+            <input_port default="en" name="language"/>
+        </Action>
         <Condition ID="DistanceReached">
             <input_port name="distance"/>
         </Condition>
@@ -141,15 +145,14 @@
             <inout_port name="pitch_angle"/>
             <inout_port name="range"/>
         </Action>
-        <Action ID="Rotate">
-            <input_port name="angle"/>
-            <input_port name="speed"/>
-        </Action>
         <Action ID="Speak">
             <input_port name="param"/>
             <input_port name="say_text"/>
         </Action>
-        <Action ID="Spin"/>
+        <Action ID="Spin">
+            <input_port name="angle"/>
+            <input_port name="speed"/>
+        </Action>
         <Action ID="StartTest"/>
         <Condition ID="TargetReached"/>
         <Condition ID="TargetReachedStatic"/>
