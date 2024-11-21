@@ -90,19 +90,20 @@ GaitSpeed::control_cycle()
     case EXPLAIN:
       if (last_status_ == "SUCCESS") {
         started_ = false;
-        go_to_state(PREPARE);
+        // go_to_state(PREPARE);
+        go_to_state(MAEASURE);
       } else {
         go_to_state(STOP);
       }
       break;
-    case PREPARE:
-      if (last_status_ == "SUCCESS") {
-        started_ = false;
-        go_to_state(MEASURE);
-      } else {
-        go_to_state(STOP);
-      }
-      break;
+    // case PREPARE:
+    //   if (last_status_ == "SUCCESS") {
+    //     started_ = false;
+    //     go_to_state(MEASURE);
+    //   } else {
+    //     go_to_state(STOP);
+    //   }
+    //   break;
     case MEASURE:
       if (check_behavior_finished()) {
         go_to_state(STOP);
@@ -141,11 +142,11 @@ GaitSpeed::go_to_state(int state)
       add_activation("explain_gait_speed");
       on_activate(get_current_state());
       break;
-    case PREPARE:
-      RCLCPP_INFO(get_logger(), "State: PREPARE");
-      add_activation("prepare_gait_speed");
-      on_activate(get_current_state());
-      break;
+    // case PREPARE:
+    //   RCLCPP_INFO(get_logger(), "State: PREPARE");
+    //   add_activation("prepare_gait_speed");
+    //   on_activate(get_current_state());
+    //   break;
     case MEASURE:
       RCLCPP_INFO(get_logger(), "State: MEASURE");
       if (robot_moves_) {

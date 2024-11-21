@@ -39,7 +39,7 @@ int main(int argc, char * argv[])
   
   plugins = {
     "is_pointing_bt_node",
-    "rotate_bt_node",
+    "spin_bt_node",
     "identify_person_bt_node",
     "navigate_to_bt_node"
   };
@@ -66,7 +66,7 @@ int main(int argc, char * argv[])
   
   plugins = {
     "start_test_bt_node",
-    "rotate_bt_node",
+    "spin_bt_node",
     "identify_person_bt_node",
     "speak_bt_node",
     "check_end_test_bt_node",
@@ -93,8 +93,17 @@ int main(int argc, char * argv[])
   explain_gait_speed_node->trigger_transition(lifecycle_msgs::msg::Transition::TRANSITION_CONFIGURE);
   measure_node->trigger_transition(lifecycle_msgs::msg::Transition::TRANSITION_CONFIGURE);
   
-  exec.spin();
+  while (rclcpp::ok()) {
+    exec.spin_some();
+    
+    if (gait_speed_node->get_state() == gait_speed::GaitSpeed::STOP) {
+      RCLCPP_INFO(node->get_logger(), "Orchestrator stopped. Exiting...");
+      
+      gait_speed_node->trigger_transition(lifecycle_msgs::msg::Transition::TRANSITION_DEACTIVATE);
 
+      break;
+    }
+  }
   rclcpp::shutdown();
 
   return 0;

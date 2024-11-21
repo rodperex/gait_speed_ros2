@@ -33,6 +33,14 @@ class GaitSpeed : public rclcpp_cascade_lifecycle::CascadeLifecycleNode
 {
 public:
   GaitSpeed(BT::Blackboard::Ptr blackboard);
+  int get_state() { return state_; }
+
+  static const int INIT = 0;
+  static const int FIND = 1;
+  static const int EXPLAIN = 2;
+  static const int PREPARE = 3;
+  static const int MEASURE = 4;
+  static const int STOP = 5;
 
 private:
   void control_cycle();
@@ -46,12 +54,6 @@ private:
   on_deactivate(const rclcpp_lifecycle::State & previous_state);
 
   int state_;
-  static const int INIT = 0;
-  static const int FIND = 1;
-  static const int EXPLAIN = 2;
-  static const int PREPARE = 3;
-  static const int MEASURE = 4;
-  static const int STOP = 5;
 
   rclcpp::TimerBase::SharedPtr timer_;
   rclcpp::Subscription<std_msgs::msg::String>::SharedPtr status_sub_;
