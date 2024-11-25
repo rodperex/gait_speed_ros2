@@ -91,7 +91,7 @@ GaitSpeed::control_cycle()
       if (last_status_ == "SUCCESS") {
         started_ = false;
         // go_to_state(PREPARE);
-        go_to_state(MAEASURE);
+        go_to_state(MEASURE);
       } else {
         go_to_state(STOP);
       }

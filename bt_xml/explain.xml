@@ -112,6 +112,13 @@
             <input_port default="1" name="max_entities"/>
             <input_port default="depth_nearest" name="order"/>
         </Condition>
+        <Condition ID="IsInFront">
+            <input_port name="confidence"/>
+            <output_port name="direction"/>
+            <input_port name="entity_to_identify"/>
+            <input_port name="target"/>
+            <input_port name="what"/>
+        </Condition>
         <Action ID="IsPointing">
             <input_port name="camera_frame"/>
             <input_port name="high_pointing_limit"/>
@@ -136,14 +143,18 @@
         </Action>
         <Action ID="NavigateTo">
             <input_port name="distance_tolerance">How far from the target</input_port>
-            <input_port name="is_truncated">True in case we do not want to reach the destination but to stay close</input_port>
             <input_port name="tf_frame">Where to navigate</input_port>
             <input_port name="will_finish">False in case it is navigating to follow something</input_port>
+            <input_port name="x"/>
+            <input_port name="y"/>
         </Action>
         <Action ID="Pan">
             <inout_port name="period"/>
             <inout_port name="pitch_angle"/>
             <inout_port name="range"/>
+        </Action>
+        <Action ID="PublishCurrentInterestPose">
+            <input_port name="interest">Current interest of the robot. A static transform in relation to odom will be published</input_port>
         </Action>
         <Action ID="Speak">
             <input_port name="param"/>
@@ -151,6 +162,7 @@
         </Action>
         <Action ID="Spin">
             <input_port name="angle"/>
+            <input_port name="forever"/>
             <input_port name="speed"/>
         </Action>
         <Action ID="StartTest"/>
@@ -159,6 +171,9 @@
         <SubTree ID="confirm"/>
         <SubTree ID="confirm_old">
             <input_port default="false" name="__shared_blackboard">If false (default), the Subtree has an isolated blackboard and needs port remapping</input_port>
+        </SubTree>
+        <SubTree ID="find_patient_rotating">
+            <input_port default="true" name="__shared_blackboard">If false  , the Subtree has an isolated blackboard and needs port remapping</input_port>
         </SubTree>
         <SubTree ID="find_person"/>
         <SubTree ID="find_person_rotating">

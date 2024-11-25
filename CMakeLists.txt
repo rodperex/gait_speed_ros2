@@ -63,13 +63,13 @@ add_library(${PROJECT_NAME} SHARED
 )
 ament_target_dependencies(${PROJECT_NAME} ${dependencies})
 
-add_executable(example src/main_example.cpp)
-ament_target_dependencies(example ${dependencies})
-target_link_libraries(example ${PROJECT_NAME})
+add_executable(example_nav src/main_example_nav.cpp)
+ament_target_dependencies(example_nav ${dependencies})
+target_link_libraries(example_nav ${PROJECT_NAME})
 
-add_executable(example2 src/main_example2.cpp)
-ament_target_dependencies(example2 ${dependencies})
-target_link_libraries(example2 ${PROJECT_NAME})
+add_executable(example_repeat src/main_example_repeat.cpp)
+ament_target_dependencies(example_repeat ${dependencies})
+target_link_libraries(example_repeat ${PROJECT_NAME})
 
 add_executable(gait_speed_dist src/main_gait_speed_dist.cpp)
 ament_target_dependencies(gait_speed_dist ${dependencies})
@@ -78,8 +78,8 @@ target_link_libraries(gait_speed_dist ${PROJECT_NAME})
 install(TARGETS
   ${plugin_libs}
   ${PROJECT_NAME}
-  example
-  example2
+  example_nav
+  example_repeat
   gait_speed_dist
   ARCHIVE DESTINATION lib
   LIBRARY DESTINATION lib
