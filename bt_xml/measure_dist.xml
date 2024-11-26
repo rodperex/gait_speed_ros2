@@ -43,7 +43,7 @@
                     <Action ID="NavigateTo" distance_tolerance="0.5" tf_frame="patient" will_finish="yes" x="" y=""/>
                 </ReactiveFallback>
                 <Action ID="CheckEndTest"/>
-                <Action ID="Speak" param="{result}" say_text="You have taken [] seconds to complete the test"/>
+                <Action ID="Speak" param="{result}" say_text="Has tardado [] segundos en completar la prueba"/>
                 <Action ID="EndTest" time="{result}"/>
             </ReactiveSequence>
         </Sequence>
@@ -66,9 +66,6 @@
         <Action ID="DialogConfirmation">
             <input_port default="en" name="language"/>
         </Action>
-        <Condition ID="DistanceReached">
-            <input_port name="distance"/>
-        </Condition>
         <Action ID="EndTest">
             <output_port name="time">Time needed to complete the gait speed test</output_port>
         </Action>
@@ -95,19 +92,18 @@
         </Condition>
         <Condition ID="IsInFront">
             <input_port name="confidence"/>
-            <input_port name="detection"/>
             <output_port name="direction"/>
             <input_port name="entity_to_identify"/>
-            <input_port name="model"/>
+            <input_port name="target"/>
+            <input_port name="what"/>
         </Condition>
-        <Condition ID="IsPointing">
+        <Action ID="IsPointing">
             <input_port name="camera_frame"/>
-            <output_port name="detection"/>
             <input_port name="high_pointing_limit"/>
             <input_port name="low_pointing_limit"/>
-            <inout_port name="output_frame"/>
+            <input_port name="output_frame"/>
             <output_port name="pointing_direction"/>
-        </Condition>
+        </Action>
         <Action ID="IsWaving">
             <input_port name="cam_frame"/>
             <output_port name="person_frame"/>
@@ -149,7 +145,6 @@
         </Action>
         <Action ID="StartTest"/>
         <Condition ID="TargetReached"/>
-        <Condition ID="TargetReachedStatic"/>
         <SubTree ID="confirm"/>
         <SubTree ID="confirm_old">
             <input_port default="false" name="__shared_blackboard">If false (default), the Subtree has an isolated blackboard and needs port remapping</input_port>
@@ -167,9 +162,6 @@
         <SubTree ID="gait_speed_dist_following">
             <input_port default="false" name="__shared_blackboard">If false (default), the Subtree has an isolated blackboard and needs port remapping</input_port>
         </SubTree>
-        <Condition ID="isMyPerson">
-            <input_port name="person_frame"/>
-        </Condition>
         <SubTree ID="listen"/>
     </TreeNodesModel>
     <!-- ////////// -->

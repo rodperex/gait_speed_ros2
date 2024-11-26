@@ -3,7 +3,7 @@
     <!-- ////////// -->
     <BehaviorTree ID="BehaviorTree">
         <Sequence>
-            <Action ID="Speak" param="" say_text="We are going to measure your gait speed. When I say GO, please start walking at your normal speed. I will tell you when to stop"/>
+            <Action ID="Speak" param="" say_text="Vamos a medir tu velocidad de la marcha. Cuando diga ¡YA!, por favor empieza a caminar a la velocidad a la que sueles ir. Yo te indiaré después cuándo tienes que parar"/>
             <RetryUntilSuccessful num_attempts="5">
                 <SubTree ID="confirm"/>
             </RetryUntilSuccessful>
@@ -12,11 +12,11 @@
     <!-- ////////// -->
     <BehaviorTree ID="confirm">
         <ReactiveSequence>
-            <Action ID="Speak" param="" say_text="Did you understand? Please say yes or no"/>
+            <Action ID="Speak" param="" say_text="¿Has entendido lo que hay que hacer? Por favor, di sí o no"/>
             <Fallback>
-                <Action ID="DialogConfirmation" language="en"/>
+                <Action ID="DialogConfirmation" language="es"/>
                 <ForceFailure>
-                    <Action ID="Speak" param="You just need to walk when I say so" say_text=""/>
+                    <Action ID="Speak" param="Simplemente tienes que comenzar a caminar cuando diga ¡YA!" say_text=""/>
                 </ForceFailure>
             </Fallback>
         </ReactiveSequence>
@@ -53,7 +53,7 @@
             </Timeout>
             <ReactiveFallback>
                 <Action ID="IsWaving" cam_frame="head_front_camera_link_color_optical_frame" person_frame="{tf_person}"/>
-                <Action ID="Spin" angle="" speed=""/>
+                <Action ID="Spin" angle="" forever="" speed=""/>
             </ReactiveFallback>
         </Fallback>
     </BehaviorTree>
