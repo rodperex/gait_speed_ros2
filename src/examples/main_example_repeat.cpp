@@ -12,7 +12,7 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-#include "gait_speed_ros2/orchestrators/example.hpp"
+#include "gait_speed_ros2/orchestrators/examples/example_repeat.hpp"
 
 #include "gait_speed_ros2/behaviors/behavior_runner.hpp"
 
@@ -34,7 +34,7 @@ int main(int argc, char * argv[])
   blackboard->set("node", node);
 
   // orchestrator
-  auto orch = std::make_shared<example::Example>(blackboard);
+  auto orch = std::make_shared<example::ExampleRepeat>(blackboard);
 
   // behaviors
   std::vector<std::string> plugins;
@@ -44,27 +44,23 @@ int main(int argc, char * argv[])
     "listen_bt_node"
   };
 
-  auto listen_and_repeat_node = std::make_shared<gait_speed::BehaviorRunner>(
+  auto listen = std::make_shared<gait_speed::BehaviorRunner>(
     blackboard,
-    "listen_and_repeat",
-    "/bt_xml/examples/listen_and_repeat.xml",
+    "listen",
+    "/bt_xml/examples/listen.xml",
     plugins
   );
 
-  plugins = {
-    "navigate_through_bt_node",
-    "navigate_to_bt_node"
-  };
-
-  auto navigation_node = std::make_shared<gait_speed::BehaviorRunner>(
+  auto repeat = std::make_shared<gait_speed::BehaviorRunner>(
     blackboard,
-    "navigation",
-    "/bt_xml/examples/nav_through.xml",
+    "repeat",
+    "/bt_xml/examples/repeat.xml",
     plugins
   );
 
-  exec.add_node(listen_and_repeat_node->get_node_base_interface());
-  exec.add_node(navigation_node->get_node_base_interface());
+ 
+  exec.add_node(listen->get_node_base_interface());
+  exec.add_node(repeat->get_node_base_interface());
   exec.add_node(orch->get_node_base_interface());
 
   RCLCPP_INFO(node->get_logger(), "Behaviors added to executor");
@@ -72,12 +68,12 @@ int main(int argc, char * argv[])
   orch->trigger_transition(lifecycle_msgs::msg::Transition::TRANSITION_CONFIGURE);
   orch->trigger_transition(lifecycle_msgs::msg::Transition::TRANSITION_ACTIVATE);
 
-  listen_and_repeat_node->trigger_transition(lifecycle_msgs::msg::Transition::TRANSITION_CONFIGURE);
-  navigation_node->trigger_transition(lifecycle_msgs::msg::Transition::TRANSITION_CONFIGURE);
-  
+  listen->trigger_transition(lifecycle_msgs::msg::Transition::TRANSITION_CONFIGURE);
+  repeat->trigger_transition(lifecycle_msgs::msg::Transition::TRANSITION_CONFIGURE);
+
   RCLCPP_INFO(node->get_logger(), "Orchestrator state: %s", orch->get_current_state().label().c_str());
-  RCLCPP_INFO(node->get_logger(), "Listen and repeat state: %s", listen_and_repeat_node->get_current_state().label().c_str());
-  RCLCPP_INFO(node->get_logger(), "Navigation state: %s", navigation_node->get_current_state().label().c_str());
+  RCLCPP_INFO(node->get_logger(), "Listen state: %s", listen->get_current_state().label().c_str());
+  RCLCPP_INFO(node->get_logger(), "Repeat state: %s", repeat->get_current_state().label().c_str());
   
   
   RCLCPP_INFO(node->get_logger(), "Behaviors configured");
@@ -85,16 +81,25 @@ int main(int argc, char * argv[])
   while (rclcpp::ok()) {
     exec.spin_some();
     
-    if (orch->get_current_state().id() == lifecycle_msgs::msg::State::PRIMARY_STATE_INACTIVE) {
-      RCLCPP_INFO(node->get_logger(), "Orchestrator inactive. Exiting...");
+    if (orch->get_state() == example::ExampleRepeat::STOP) {
+      RCLCPP_INFO(node->get_logger(), "Orchestrator stopped. Exiting...");
+      
+      orch->trigger_transition(lifecycle_msgs::msg::Transition::TRANSITION_DEACTIVATE);
+
+      if (listen->get_current_state().id() != lifecycle_msgs::msg::State::PRIMARY_STATE_INACTIVE) {
+        listen->trigger_transition(lifecycle_msgs::msg::Transition::TRANSITION_DEACTIVATE);
+      }
+
+      if (repeat->get_current_state().id() != lifecycle_msgs::msg::State::PRIMARY_STATE_INACTIVE) {
+        repeat->trigger_transition(lifecycle_msgs::msg::Transition::TRANSITION_DEACTIVATE);
+      }
       break;
     }
-
   }
 
   RCLCPP_INFO(node->get_logger(), "Orchestrator state: %s", orch->get_current_state().label().c_str());
-  RCLCPP_INFO(node->get_logger(), "Listen and repeat state: %s", listen_and_repeat_node->get_current_state().label().c_str());
-  RCLCPP_INFO(node->get_logger(), "Navigation state: %s", navigation_node->get_current_state().label().c_str());
+  RCLCPP_INFO(node->get_logger(), "Listen state: %s", listen->get_current_state().label().c_str());
+  RCLCPP_INFO(node->get_logger(), "Repeat state: %s", repeat->get_current_state().label().c_str());
   
   rclcpp::shutdown();
 

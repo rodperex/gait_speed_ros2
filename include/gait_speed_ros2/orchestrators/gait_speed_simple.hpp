@@ -13,44 +13,57 @@
 // limitations under the License.
 
 
-#ifndef EXPLAIN__HPP_
-#define EXPLAIN__HPP_
+#ifndef GaitSpeedSimple__SIMPLE_HPP_
+#define GaitSpeedSimple__SIMPLE_HPP_
 
 #include "rclcpp/rclcpp.hpp"
 #include "rclcpp_cascade_lifecycle/rclcpp_cascade_lifecycle.hpp"
-#include "behaviortree_cpp_v3/behavior_tree.h"
-#include "behaviortree_cpp_v3/bt_factory.h"
-#include "behaviortree_cpp_v3/utils/shared_library.h"
-#include "ament_index_cpp/get_package_share_directory.hpp"
 #include "std_msgs/msg/string.hpp"
+#include "std_msgs/msg/float64.hpp"
+
+#include "behaviortree_cpp_v3/behavior_tree.h"
 
 namespace gait_speed
 {
 
 using namespace std::chrono_literals;
+using std::placeholders::_1;
 
-class Explain : public rclcpp_cascade_lifecycle::CascadeLifecycleNode
+class GaitSpeedSimple : public rclcpp_cascade_lifecycle::CascadeLifecycleNode
 {
 public:
-  Explain(BT::Blackboard::Ptr blackboard);
+  GaitSpeedSimple(BT::Blackboard::Ptr blackboard);
+  int get_state() { return state_; }
+
+  static const int INIT = 0;
+  static const int FIND = 1;
+  static const int MEASURE = 4;
+  static const int STOP = 5;
 
 private:
   void control_cycle();
+  void status_callback(std_msgs::msg::String::UniquePtr msg);
+  void go_to_state(int state);
+  bool check_behavior_finished();
 
   rclcpp_lifecycle::node_interfaces::LifecycleNodeInterface::CallbackReturn
   on_activate(const rclcpp_lifecycle::State & previous_state);
   rclcpp_lifecycle::node_interfaces::LifecycleNodeInterface::CallbackReturn
   on_deactivate(const rclcpp_lifecycle::State & previous_state);
 
+  int state_;
+
   rclcpp::TimerBase::SharedPtr timer_;
-  rclcpp::Node::SharedPtr node_;
-  BT::Tree tree_;
+  rclcpp::Subscription<std_msgs::msg::String>::SharedPtr status_sub_;
+  std::string status_received_, last_status_;
   BT::Blackboard::Ptr blackboard_;
 
-  rclcpp_lifecycle::LifecyclePublisher<std_msgs::msg::String>::SharedPtr status_pub_;
+  bool started_ = false;
+
+  rclcpp_lifecycle::LifecyclePublisher<std_msgs::msg::Float64>::SharedPtr result_pub_;
 
 };
 
 } // namespace gait_speed
 
-#endif  // EXPLAIN__HPP_
+#endif  // GaitSpeedSimple__SIMPLE_HPP_

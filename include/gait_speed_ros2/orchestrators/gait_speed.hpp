@@ -13,8 +13,8 @@
 // limitations under the License.
 
 
-#ifndef GAITSPEED__DIST_HPP_
-#define GAITSPEED__DIST_HPP_
+#ifndef GAITSPEED_HPP_
+#define GAITSPEED_HPP_
 
 #include "rclcpp/rclcpp.hpp"
 #include "rclcpp_cascade_lifecycle/rclcpp_cascade_lifecycle.hpp"
@@ -71,4 +71,4 @@ private:
 
 } // namespace gait_speed
 
-#endif  // GAITSPEED__DIST_HPP_
+#endif  // GAITSPEED_HPP_

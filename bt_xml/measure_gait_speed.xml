@@ -6,13 +6,13 @@
             <Timeout msec="15000">
                 <SubTree ID="find_patient_rotating" __shared_blackboard="true"/>
             </Timeout>
-            <SubTree ID="gait_speed_dist"/>
+            <SubTree ID="gait_speed_dist" __shared_blackboard="true"/>
         </Sequence>
     </BehaviorTree>
     <!-- ////////// -->
     <BehaviorTree ID="find_patient_rotating">
         <ReactiveFallback>
-            <Condition ID="IsInFront" confidence="0.6" detection="" direction="{dir}" entity_to_identify="patient" model="object"/>
+            <Condition ID="IsInFront" confidence="0.6" direction="{dir}" entity_to_identify="patient" target="" what=""/>
             <Action ID="Spin" angle="{dir}" forever="true" speed="0.5"/>
         </ReactiveFallback>
     </BehaviorTree>
@@ -120,9 +120,9 @@
             <input_port name="tf_frame"/>
         </Action>
         <Action ID="NavigateTo">
-            <input_port name="distance_tolerance">How far from the target</input_port>
-            <input_port name="tf_frame">Where to navigate</input_port>
-            <input_port name="will_finish">False in case it is navigating to follow something</input_port>
+            <input_port name="distance_tolerance"/>
+            <input_port name="tf_frame"/>
+            <input_port name="will_finish"/>
             <input_port name="x"/>
             <input_port name="y"/>
         </Action>
@@ -158,7 +158,9 @@
         </SubTree>
         <SubTree ID="find_waving_person"/>
         <SubTree ID="find_waving_person_rotating"/>
-        <SubTree ID="gait_speed_dist"/>
+        <SubTree ID="gait_speed_dist">
+            <input_port default="true" name="__shared_blackboard">If false (default), the Subtree has an isolated blackboard and needs port remapping</input_port>
+        </SubTree>
         <SubTree ID="gait_speed_dist_following">
             <input_port default="false" name="__shared_blackboard">If false (default), the Subtree has an isolated blackboard and needs port remapping</input_port>
         </SubTree>

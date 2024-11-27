@@ -3,33 +3,26 @@
     <!-- ////////// -->
     <BehaviorTree ID="BehaviorTree">
         <Sequence>
-            <Action ID="Speak" param="" say_text="Vamos a medir tu velocidad de la marcha. Cuando diga ¡YA!, por favor empieza a caminar a la velocidad a la que sueles ir. Yo te indiaré después cuándo tienes que parar"/>
-            <RetryUntilSuccessful num_attempts="5">
-                <SubTree ID="confirm"/>
-            </RetryUntilSuccessful>
+            <Action ID="Speak" params="" speech_text="Hola, vamos a medir tu velocidad de la marcha. Cuando diga ¡YA!, por favor empieza a caminar a la velocidad a la que sueles ir. Yo te indicaré después cuándo tienes que parar"/>
+            <Action ID="Speak" params="" speech_text="¿Has entendido lo que hay que hacer?"/>
+            <Fallback>
+                <RetryUntilSuccessful num_attempts="5">
+                    <SubTree ID="confirm" __shared_blackboard="true"/>
+                </RetryUntilSuccessful>
+                <ForceFailure>
+                    <Action ID="Speak" params="" speech_text="Lo siento, no vamos a poder hacer la prueba"/>
+                </ForceFailure>
+            </Fallback>
         </Sequence>
     </BehaviorTree>
     <!-- ////////// -->
     <BehaviorTree ID="confirm">
-        <ReactiveSequence>
-            <Action ID="Speak" param="" say_text="¿Has entendido lo que hay que hacer? Por favor, di sí o no"/>
-            <Fallback>
-                <Action ID="DialogConfirmation" language="es"/>
-                <ForceFailure>
-                    <Action ID="Speak" param="Simplemente tienes que comenzar a caminar cuando diga ¡YA!" say_text=""/>
-                </ForceFailure>
-            </Fallback>
-        </ReactiveSequence>
-    </BehaviorTree>
-    <!-- ////////// -->
-    <BehaviorTree ID="confirm_old">
-        <ReactiveSequence>
-            <RetryUntilSuccessful num_attempts="-1">
-                <Condition ID="IsDetected" confidence="0.6" frames="" interest="person" max_depth="2" max_entities="1" order="depth_nearest"/>
-            </RetryUntilSuccessful>
-            <Action ID="FilterEntity" frame="person_0" lambda="0.1"/>
-            <Action ID="DialogConfirmation" language="en"/>
-        </ReactiveSequence>
+        <Fallback>
+            <Action ID="DialogConfirmation" language="es"/>
+            <ForceFailure>
+                <Action ID="Speak" params="" speech_text="Simplemente tienes que comenzar a caminar cuando diga ¡YA! ¿entendiste ahora?"/>
+            </ForceFailure>
+        </Fallback>
     </BehaviorTree>
     <!-- ////////// -->
     <BehaviorTree ID="find_person">
@@ -157,8 +150,8 @@
             <input_port name="interest">Current interest of the robot. A static transform in relation to odom will be published</input_port>
         </Action>
         <Action ID="Speak">
-            <input_port name="param"/>
-            <input_port name="say_text"/>
+            <input_port name="params"/>
+            <input_port name="speech_text"/>
         </Action>
         <Action ID="Spin">
             <input_port name="angle"/>

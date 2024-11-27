@@ -38,6 +38,8 @@ public:
     const std::string &name,
     const std::string &xml_path,
     const std::vector<std::string> &plugins);
+  
+  BT::NodeStatus get_bt_status(); 
 
 private:
   void control_cycle();
@@ -50,6 +52,7 @@ private:
   rclcpp::TimerBase::SharedPtr timer_;
   std::shared_ptr<rclcpp_cascade_lifecycle::CascadeLifecycleNode> node_;
   BT::Tree tree_;
+  BT::NodeStatus status_;
   BT::Blackboard::Ptr blackboard_;
   std::string xml_path_;
   std::vector<std::string> plugins_;

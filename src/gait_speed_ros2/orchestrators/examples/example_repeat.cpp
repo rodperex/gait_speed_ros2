@@ -13,31 +13,31 @@
 // limitations under the License.
 
 
-#include "gait_speed_ros2/orchestrators/example.hpp"
+#include "gait_speed_ros2/orchestrators/examples/example_repeat.hpp"
 
 namespace example
 {
 
-Example::Example(BT::Blackboard::Ptr blackboard)
-: CascadeLifecycleNode("example_node"),
-  state_(HRI),
+ExampleRepeat::ExampleRepeat(BT::Blackboard::Ptr blackboard)
+: CascadeLifecycleNode("example_repeat_node"),
+  state_(LISTEN),
   last_status_(""),
   blackboard_(blackboard)
 {
 
   status_sub_ = create_subscription<std_msgs::msg::String>(
-    "behavior_status", 10, std::bind(&Example::status_callback, this, _1));
+    "behavior_status", 10, std::bind(&ExampleRepeat::status_callback, this, _1));
 
   result_pub_ = create_publisher<std_msgs::msg::Float64>("result", 10);
   
-  go_to_state(state_);
+  go_to_state(state_); // First activation declared while creating the node
 
-  RCLCPP_INFO(get_logger(), "Example created. State: %d", state_);
+  RCLCPP_INFO(get_logger(), "ExampleRepeat created. State: %d", state_);
 
 }
 
 void
-Example::status_callback(std_msgs::msg::String::UniquePtr msg)
+ExampleRepeat::status_callback(std_msgs::msg::String::UniquePtr msg)
 {
   RCLCPP_DEBUG(get_logger(), "Status received: %s", msg.get()->data.c_str());
 
@@ -51,12 +51,12 @@ Example::status_callback(std_msgs::msg::String::UniquePtr msg)
 }
 
 void
-Example::control_cycle()
+ExampleRepeat::control_cycle()
 {
   std_msgs::msg::Float64 result_msg;
 
 
-  RCLCPP_DEBUG(get_logger(), "Example control cycle. State: %d. Last status: %s", state_, last_status_.c_str());
+  RCLCPP_DEBUG(get_logger(), "ExampleRepeat control cycle. State: %d. Last status: %s", state_, last_status_.c_str());
 
   if (!started_) {
     RCLCPP_INFO(get_logger(), "Not started yet");
@@ -64,39 +64,39 @@ Example::control_cycle()
   }
 
   switch (state_) {
-    case HRI:
-    RCLCPP_DEBUG(get_logger(), "HRI");
+    case LISTEN:
+    RCLCPP_DEBUG(get_logger(), "LISTEN");
       if (check_behavior_finished()) {
         if (last_status_ == "SUCCESS") {
           started_ = false;
-          RCLCPP_INFO(get_logger(), "HRI finished successfully");
-          go_to_state(NAV);
+          RCLCPP_INFO(get_logger(), "LISTEN finished successfully");
+          go_to_state(REPEAT);
         } else {
-          RCLCPP_ERROR(get_logger(), "HRI failed");
+          RCLCPP_ERROR(get_logger(), "LISTEN failed");
           go_to_state(STOP);
         }
       }
       break;
-    case NAV:
-    RCLCPP_DEBUG(get_logger(), "NAV");
+    case REPEAT:
+    RCLCPP_DEBUG(get_logger(), "REPEAT");
       if (check_behavior_finished()) {
         if (last_status_ == "SUCCESS") {
           started_ = false;
-          RCLCPP_INFO(get_logger(), "NAV finished successfully");
+          RCLCPP_INFO(get_logger(), "REPEAT finished successfully");
           go_to_state(STOP);
         } else {
-          RCLCPP_ERROR(get_logger(), "NAV failed");
+          RCLCPP_ERROR(get_logger(), "REPEAT failed");
           go_to_state(STOP);
         }
       }
       break;
     case STOP:
       if (last_status_ == "SUCCESS") {
-        RCLCPP_INFO(get_logger(), "Example finished successfully.");
+        RCLCPP_INFO(get_logger(), "ExampleRepeat finished successfully.");
         result_msg.data = 0;
       } else {
         result_msg.data = -1;
-        RCLCPP_ERROR(get_logger(), "Example test failed");
+        RCLCPP_ERROR(get_logger(), "ExampleRepeat test failed");
       }
       result_pub_->publish(result_msg);
       break;
@@ -106,7 +106,7 @@ Example::control_cycle()
 }
 
 void
-Example::go_to_state(int state)
+ExampleRepeat::go_to_state(int state)
 {
   clear_activation();
 
@@ -117,46 +117,42 @@ Example::go_to_state(int state)
   RCLCPP_INFO(get_logger(), "Going to state %d", state_);
 
   switch (state_) {
-    case NAV:
-      add_activation("navigation");
+    case REPEAT:
       add_activation("repeat");
-      on_activate(get_current_state());
-      RCLCPP_INFO(get_logger(), "NAV activated");
-      state_ = NAV;
+      // on_activate(get_current_state());
+      RCLCPP_INFO(get_logger(), "REPEAT activated");
+      state_ = REPEAT;
       break;
-    case HRI:
-      add_activation("listen_and_repeat");
-      on_activate(get_current_state());
-      RCLCPP_INFO(get_logger(), "HRI activated");
-      state_ = HRI;
+    case LISTEN:
+      add_activation("listen");
+      // on_activate(get_current_state());
+      RCLCPP_INFO(get_logger(), "LISTEN activated");
+      state_ = LISTEN;
       break;
     default:
       state_ = STOP;
       RCLCPP_INFO(get_logger(), "Deactivating");
-      // deactivate();
-      // trigger_transition(lifecycle_msgs::msg::Transition::TRANSITION_DEACTIVATE);
-      on_deactivate(get_current_state());
       break;
   }
 }
 
 bool
-Example::check_behavior_finished()
+ExampleRepeat::check_behavior_finished()
 {
   return last_status_ != "RUNNING";
 }
 
 
 rclcpp_lifecycle::node_interfaces::LifecycleNodeInterface::CallbackReturn
-Example::on_activate(const rclcpp_lifecycle::State & previous_state)
+ExampleRepeat::on_activate(const rclcpp_lifecycle::State & previous_state)
 {
   (void)previous_state;
-  RCLCPP_INFO(get_logger(), "Example on_activate");
+  RCLCPP_INFO(get_logger(), "ExampleRepeat on_activate");
 
   RCLCPP_INFO(get_logger(), "Initial state: %d", state_);
 
   timer_ =
-    create_wall_timer(50ms, std::bind(&Example::control_cycle, this));
+    create_wall_timer(50ms, std::bind(&ExampleRepeat::control_cycle, this));
   
   RCLCPP_INFO(get_logger(), "Timer created");
 
@@ -168,17 +164,14 @@ Example::on_activate(const rclcpp_lifecycle::State & previous_state)
 }
 
 rclcpp_lifecycle::node_interfaces::LifecycleNodeInterface::CallbackReturn
-Example::on_deactivate(const rclcpp_lifecycle::State & previous_state)
+ExampleRepeat::on_deactivate(const rclcpp_lifecycle::State & previous_state)
 {
   (void)previous_state;
-  RCLCPP_INFO(get_logger(), "Example on_deactivate");
+  RCLCPP_INFO(get_logger(), "ExampleRepeat on_deactivate");
 
   timer_ = nullptr;
 
   result_pub_->on_deactivate();
-
-  // trigger_transition(lifecycle_msgs::msg::Transition::TRANSITION_DEACTIVATE);
-
 
   return rclcpp_lifecycle::node_interfaces::LifecycleNodeInterface::CallbackReturn::SUCCESS;
 }

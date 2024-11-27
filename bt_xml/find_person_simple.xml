@@ -1,0 +1,38 @@
+<?xml version="1.0"?>
+<root main_tree_to_execute="BehaviorTree">
+    <!-- ////////// -->
+    <BehaviorTree ID="BehaviorTree">
+        <Sequence>
+            <Timeout msec="3000">
+                <RetryUntilSuccessful num_attempts="-1">
+                    <Condition ID="IsDetected" best_detection="{roi}" cam_frame="oak-d-base-frame" confidence="0.6" frame="" interest="person" max_depth="5" max_entities="1" model="people" n_detections="" order="depth"/>
+                </RetryUntilSuccessful>
+            </Timeout>
+            <Action ID="Identify" detection="{roi}" entity_to_identify="patient"/>
+            <Action ID="NavigateTo" distance_tolerance="0.5" tf_frame="patient" will_finish="true" x="" y=""/>
+        </Sequence>
+    </BehaviorTree>
+    <!-- ////////// -->
+    <TreeNodesModel>
+        <Action ID="Identify">
+            <input_port name="detection"/>
+            <input_port name="entity_to_identify"/>
+        </Action>
+        <Condition ID="IsDetected">
+            <input_port default="0.6" name="confidence"/>
+            <output_port name="frames"/>
+            <input_port default="person" name="interest"/>
+            <input_port default="2" name="max_depth"/>
+            <input_port default="1" name="max_entities"/>
+            <input_port default="depth_nearest" name="order"/>
+        </Condition>
+        <Action ID="NavigateTo">
+            <input_port name="distance_tolerance"/>
+            <input_port name="tf_frame"/>
+            <input_port name="will_finish"/>
+            <input_port name="x"/>
+            <input_port name="y"/>
+        </Action>
+    </TreeNodesModel>
+    <!-- ////////// -->
+</root>

@@ -56,31 +56,52 @@ endforeach()
 
 
 add_library(${PROJECT_NAME} SHARED
-  src/gait_speed_ros2/orchestrators/example.cpp
-  src/gait_speed_ros2/orchestrators/example2.cpp
+  src/gait_speed_ros2/orchestrators/examples/example_nav.cpp
+  src/gait_speed_ros2/orchestrators/examples/example_repeat.cpp
   src/gait_speed_ros2/orchestrators/gait_speed.cpp
+  src/gait_speed_ros2/orchestrators/gait_speed_simple.cpp
   src/gait_speed_ros2/behaviors/behavior_runner.cpp
 )
 ament_target_dependencies(${PROJECT_NAME} ${dependencies})
 
-add_executable(example_nav src/main_example_nav.cpp)
+add_executable(example_nav src/examples/main_example_nav.cpp)
 ament_target_dependencies(example_nav ${dependencies})
 target_link_libraries(example_nav ${PROJECT_NAME})
 
-add_executable(example_repeat src/main_example_repeat.cpp)
+add_executable(example_repeat src/examples/main_example_repeat.cpp)
 ament_target_dependencies(example_repeat ${dependencies})
 target_link_libraries(example_repeat ${PROJECT_NAME})
 
-add_executable(gait_speed_dist src/main_gait_speed_dist.cpp)
-ament_target_dependencies(gait_speed_dist ${dependencies})
-target_link_libraries(gait_speed_dist ${PROJECT_NAME})
+add_executable(just_explain src/examples/main_just_explain.cpp)
+ament_target_dependencies(just_explain ${dependencies})
+target_link_libraries(just_explain ${PROJECT_NAME})
+
+add_executable(just_find src/examples/main_just_find.cpp)
+ament_target_dependencies(just_find ${dependencies})
+target_link_libraries(just_find ${PROJECT_NAME})
+
+add_executable(just_measure src/examples/main_just_measure.cpp)
+ament_target_dependencies(just_measure ${dependencies})
+target_link_libraries(just_measure ${PROJECT_NAME})
+
+add_executable(gait_speed src/main_gait_speed.cpp)
+ament_target_dependencies(gait_speed ${dependencies})
+target_link_libraries(gait_speed ${PROJECT_NAME})
+
+add_executable(gait_speed_simple src/main_gait_speed_simple.cpp)
+ament_target_dependencies(gait_speed_simple ${dependencies})
+target_link_libraries(gait_speed_simple ${PROJECT_NAME})
 
 install(TARGETS
   ${plugin_libs}
   ${PROJECT_NAME}
   example_nav
   example_repeat
-  gait_speed_dist
+  just_explain
+  just_find
+  just_measure
+  gait_speed
+  gait_speed_simple
   ARCHIVE DESTINATION lib
   LIBRARY DESTINATION lib
   RUNTIME DESTINATION lib/${PROJECT_NAME}

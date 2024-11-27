@@ -24,11 +24,13 @@ BehaviorRunner::BehaviorRunner(
   const std::string &xml_path,
   const std::vector<std::string> &plugins)
   : CascadeLifecycleNode(name),
-  blackboard_(blackboard)
+  blackboard_(blackboard),
+  status_(BT::NodeStatus::IDLE)
 {
   RCLCPP_INFO(get_logger(), "BehaviorRunner constructor (%s)", name.c_str());
   
   blackboard_->get("node", node_);
+  RCLCPP_INFO(node_->get_logger(), "Node status: %s", node_->get_current_state().label().c_str());
 
   xml_path_ = xml_path;
   plugins_ = plugins;
@@ -43,9 +45,9 @@ void
 BehaviorRunner::control_cycle()
 {
   std_msgs::msg::String msg;
-  BT::NodeStatus status = tree_.rootNode()->executeTick();
+  status_ = tree_.rootNode()->executeTick();
 
-  switch (status) {
+  switch (status_) {
     case BT::NodeStatus::SUCCESS:
       RCLCPP_INFO(get_logger(), "Behavior tree executed successfully");
       msg.data = "SUCCESS";
@@ -65,6 +67,11 @@ BehaviorRunner::control_cycle()
 
 }
 
+BT::NodeStatus
+BehaviorRunner::get_bt_status() {
+  return status_;
+}
+
 rclcpp_lifecycle::node_interfaces::LifecycleNodeInterface::CallbackReturn
 BehaviorRunner::on_activate(const rclcpp_lifecycle::State & previous_state)
 {
@@ -74,16 +81,20 @@ BehaviorRunner::on_activate(const rclcpp_lifecycle::State & previous_state)
   std::string pkg_path = ament_index_cpp::get_package_share_directory("gait_speed_ros2");
   std::string xml_file = pkg_path + xml_path_;
 
-  RCLCPP_DEBUG(get_logger(), "XML file: %s", xml_file.c_str());
+  RCLCPP_INFO(get_logger(), "XML file: %s", xml_file.c_str());
 
   BT::BehaviorTreeFactory factory;
   BT::SharedLibrary loader;
 
   for (const auto & plugin : plugins_) {
     factory.registerFromPlugin(loader.getOSName(plugin));
+    RCLCPP_INFO(get_logger(), "Plugin loaded: %s", plugin.c_str());
   }
 
+  RCLCPP_INFO(get_logger(), "Creating BT from XML");
+  blackboard_->get("node", node_);
   tree_ = factory.createTreeFromFile(xml_file, blackboard_);
+  RCLCPP_INFO(get_logger(), "BT created from XML");
 
   status_pub_->on_activate();
 

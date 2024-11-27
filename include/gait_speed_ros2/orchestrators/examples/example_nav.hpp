@@ -13,8 +13,8 @@
 // limitations under the License.
 
 
-#ifndef EXAMPLE22_HPP_
-#define EXAMPLE2_HPP_
+#ifndef EXAMPLE_NAV_HPP_
+#define EXAMPLE_NAV_HPP_
 
 #include "rclcpp/rclcpp.hpp"
 #include "rclcpp_cascade_lifecycle/rclcpp_cascade_lifecycle.hpp"
@@ -29,15 +29,10 @@ namespace example
 using namespace std::chrono_literals;
 using std::placeholders::_1;
 
-class Example2 : public rclcpp_cascade_lifecycle::CascadeLifecycleNode
+class ExampleNav : public rclcpp_cascade_lifecycle::CascadeLifecycleNode
 {
 public:
-  Example2(BT::Blackboard::Ptr blackboard);
-  int get_state() {return state_;}
-
-  static const int LISTEN = 0;
-  static const int REPEAT = 1;
-  static const int STOP = 2;
+  ExampleNav(BT::Blackboard::Ptr blackboard);
 
 private:
   void control_cycle();
@@ -51,6 +46,9 @@ private:
   on_deactivate(const rclcpp_lifecycle::State & previous_state);
 
   int state_;
+  static const int HRI = 0;
+  static const int NAV = 1;
+  static const int STOP = 2;
   
   rclcpp::TimerBase::SharedPtr timer_;
   rclcpp::Subscription<std_msgs::msg::String>::SharedPtr status_sub_;
@@ -63,6 +61,6 @@ private:
 
 };
 
-} // namespace example
+} // namespace ExampleNav
 
-#endif  // EXAMPLE2_HPP_
+#endif  // EXAMPLE_NAV_HPP_

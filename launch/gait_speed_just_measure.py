@@ -30,6 +30,7 @@ def generate_launch_description():
     whisper_dir = get_package_share_directory('whisper_bringup')
 
     # HRI
+    launch_hri = False
     whisper_cmd = IncludeLaunchDescription(
         PythonLaunchDescriptionSource(
             os.path.join(whisper_dir, 'launch', 'whisper.launch.py')
@@ -66,17 +67,16 @@ def generate_launch_description():
 
     robot_cmd = Node(
         package='gait_speed_ros2',
-        executable='gait_speed_dist',
+        executable='just_measure',
         output='screen',
         remappings=[
         ],
-        parameters=[{
-            'use_sim_time': True,
-        }, params]
+        parameters=params
     )
-    ld.add_action(whisper_cmd)
-    ld.add_action(audio_common_player_cmd)
-    ld.add_action(audio_common_tts_cmd)
+    if (launch_hri):
+        ld.add_action(whisper_cmd)
+        ld.add_action(audio_common_player_cmd)
+        ld.add_action(audio_common_tts_cmd)
     ld.add_action(robot_cmd)
 
     return ld

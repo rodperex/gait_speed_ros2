@@ -13,35 +13,26 @@
 // limitations under the License.
 
 
-#include "gait_speed_ros2/orchestrators/gait_speed.hpp"
+#include "gait_speed_ros2/orchestrators/gait_speed_simple.hpp"
 
 namespace gait_speed
 {
 
-GaitSpeed::GaitSpeed(BT::Blackboard::Ptr blackboard)
+GaitSpeedSimple::GaitSpeedSimple(BT::Blackboard::Ptr blackboard)
 : CascadeLifecycleNode("gait_speed_node"),
   state_(INIT),
   last_status_(""),
   blackboard_(blackboard)
 {
   this->declare_parameter<float>("value", 4.0);
-  this->declare_parameter<std::string>("mode", "distance");
-  this->declare_parameter<bool>("robot_moves", false); // at the moment, robot does not move
-
-  mode_ = this->get_parameter("mode").as_string();
   double value = this->get_parameter("value").as_double();
-  robot_moves_ = this->get_parameter("robot_moves").as_bool();
 
-  if (mode_ == "distance") {
-    RCLCPP_INFO(get_logger(), "GaitSpeed constructor: %f meters", value);
-  } else if (mode_ == "time") {
-    RCLCPP_INFO(get_logger(), "GaitSpeed constructor: %f seconds", value);
-  }
+  RCLCPP_INFO(get_logger(), "GaitSpeedSimple constructor: %f meters", value);
+  
   blackboard_->set("target", value);
-  blackboard_->set("mode", mode_); // to create a generic TargetReached BT node
 
   status_sub_ = create_subscription<std_msgs::msg::String>(
-    "behavior_status", 10, std::bind(&GaitSpeed::status_callback, this, _1));
+    "behavior_status", 10, std::bind(&GaitSpeedSimple::status_callback, this, _1));
 
   result_pub_ = create_publisher<std_msgs::msg::Float64>("gait_speed_result", 10);
 
@@ -49,7 +40,7 @@ GaitSpeed::GaitSpeed(BT::Blackboard::Ptr blackboard)
 }
 
 void
-GaitSpeed::status_callback(std_msgs::msg::String::UniquePtr msg)
+GaitSpeedSimple::status_callback(std_msgs::msg::String::UniquePtr msg)
 {
   last_status_ = msg.get()->data;
   
@@ -59,7 +50,7 @@ GaitSpeed::status_callback(std_msgs::msg::String::UniquePtr msg)
 }
 
 void
-GaitSpeed::control_cycle()
+GaitSpeedSimple::control_cycle()
 {
   std_msgs::msg::Float64 result_msg;
 
@@ -71,37 +62,18 @@ GaitSpeed::control_cycle()
   switch (state_) {
     case INIT:
       if (check_behavior_finished()) {
-          started_ = true;
           go_to_state(FIND);
       } else {
-        go_to_state(STOP);
+          go_to_state(STOP);
       }
       break;
     case FIND:
       if (last_status_ == "SUCCESS") {
-        // started_ = false;
-        go_to_state(EXPLAIN);
-      } else {
-        go_to_state(STOP);
-      }
-      break;
-    case EXPLAIN:
-      if (last_status_ == "SUCCESS") {
-        // started_ = false;
-        // go_to_state(PREPARE);
         go_to_state(MEASURE);
       } else {
         go_to_state(STOP);
       }
       break;
-    // case PREPARE:
-    //   if (last_status_ == "SUCCESS") {
-    //     started_ = false;
-    //     go_to_state(MEASURE);
-    //   } else {
-    //     go_to_state(STOP);
-    //   }
-    //   break;
     case MEASURE:
       if (check_behavior_finished()) {
         go_to_state(STOP);
@@ -124,7 +96,7 @@ GaitSpeed::control_cycle()
 }
 
 void
-GaitSpeed::go_to_state(int state)
+GaitSpeedSimple::go_to_state(int state)
 {
   clear_activation();
   state_ = state;
@@ -135,17 +107,7 @@ GaitSpeed::go_to_state(int state)
       add_activation("find_person");
       // on_activate(get_current_state());
       break;
-    case EXPLAIN:
-      RCLCPP_INFO(get_logger(), "State: EXPLAIN");
-      add_activation("explain_gait_speed");
-      // on_activate(get_current_state());
-      break;
-    // case PREPARE:
-    //   RCLCPP_INFO(get_logger(), "State: PREPARE");
-    //   add_activation("prepare_gait_speed");
-    //   on_activate(get_current_state());
-    //   break;
-    case MEASURE: // TODO: add a check to see if the robot is moving to activate a different behavior
+    case MEASURE:
       RCLCPP_INFO(get_logger(), "State: MEASURE");
       add_activation("measure_gait_speed_dist");
       // on_activate(get_current_state());
@@ -160,20 +122,20 @@ GaitSpeed::go_to_state(int state)
 }
 
 bool
-GaitSpeed::check_behavior_finished()
+GaitSpeedSimple::check_behavior_finished()
 {
   return last_status_ != "RUNNING";
 }
 
 
 rclcpp_lifecycle::node_interfaces::LifecycleNodeInterface::CallbackReturn
-GaitSpeed::on_activate(const rclcpp_lifecycle::State & previous_state)
+GaitSpeedSimple::on_activate(const rclcpp_lifecycle::State & previous_state)
 {
   (void)previous_state;
-  RCLCPP_INFO(get_logger(), "GaitSpeed on_activate");
+  RCLCPP_INFO(get_logger(), "GaitSpeedSimple on_activate");
 
   timer_ =
-    create_wall_timer(50ms, std::bind(&GaitSpeed::control_cycle, this));
+    create_wall_timer(50ms, std::bind(&GaitSpeedSimple::control_cycle, this));
 
   result_pub_->on_activate();
 
@@ -181,10 +143,10 @@ GaitSpeed::on_activate(const rclcpp_lifecycle::State & previous_state)
 }
 
 rclcpp_lifecycle::node_interfaces::LifecycleNodeInterface::CallbackReturn
-GaitSpeed::on_deactivate(const rclcpp_lifecycle::State & previous_state)
+GaitSpeedSimple::on_deactivate(const rclcpp_lifecycle::State & previous_state)
 {
   (void)previous_state;
-  RCLCPP_INFO(get_logger(), "GaitSpeed on_deactivate");
+  RCLCPP_INFO(get_logger(), "GaitSpeedSimple on_deactivate");
 
   timer_ = nullptr;
 

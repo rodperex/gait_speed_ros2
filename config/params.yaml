@@ -1,5 +1,6 @@
 gait_speed_node:
   ros__parameters:
+    use_sim_time: true
     robot_moves: false # true or false
     mode: "distance" # "time" or "distance"
     value: 6.0 # seconds or meters

@@ -53,6 +53,7 @@ int main(int argc, char * argv[])
 
   plugins = {
     "speak_bt_node",
+    "listen_bt_node",
     "dialog_confirmation_bt_node"
   };
 
@@ -75,7 +76,7 @@ int main(int argc, char * argv[])
   auto measure_node = std::make_shared<gait_speed::BehaviorRunner>(
     blackboard,
     "measure_gait_speed",
-    "/bt_xml/measure_dist.xml",
+    "/bt_xml/measure_gait_speed.xml",
     plugins
   );
 
