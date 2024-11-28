@@ -14,13 +14,15 @@
 
 
 #include "gait_speed_ros2/orchestrators/gait_speed.hpp"
+#include "gait_speed_ros2/orchestrators/gait_speed_states.hpp"
 
 namespace gait_speed
 {
 
 GaitSpeed::GaitSpeed(BT::Blackboard::Ptr blackboard)
 : CascadeLifecycleNode("gait_speed_node"),
-  state_(INIT),
+  state_(State::INIT),
+  n_tries_(0),
   last_status_(""),
   blackboard_(blackboard)
 {
@@ -69,29 +71,30 @@ GaitSpeed::control_cycle()
   }
 
   switch (state_) {
-    case INIT:
+    case State::INIT:
       if (check_behavior_finished()) {
           started_ = true;
-          go_to_state(FIND);
+          go_to_state(State::FIND);
+          n_tries_++;
       } else {
-        go_to_state(STOP);
+        go_to_state(State::STOP);
       }
       break;
-    case FIND:
+    case State::FIND:
       if (last_status_ == "SUCCESS") {
         // started_ = false;
-        go_to_state(EXPLAIN);
+        go_to_state(State::EXPLAIN);
       } else {
-        go_to_state(STOP);
+        go_to_state(State::STOP);
       }
       break;
-    case EXPLAIN:
+    case State::EXPLAIN:
       if (last_status_ == "SUCCESS") {
         // started_ = false;
         // go_to_state(PREPARE);
-        go_to_state(MEASURE);
+        go_to_state(State::MEASURE);
       } else {
-        go_to_state(STOP);
+        go_to_state(State::STOP);
       }
       break;
     // case PREPARE:
@@ -102,17 +105,18 @@ GaitSpeed::control_cycle()
     //     go_to_state(STOP);
     //   }
     //   break;
-    case MEASURE:
+    case State::MEASURE:
       if (check_behavior_finished()) {
-        go_to_state(STOP);
+        go_to_state(State::STOP);
       }
       break;
-    case STOP:
+    case State::STOP:
       clear_activation();
       if (last_status_ == "SUCCESS") {
         blackboard_->get("gait_speed_time", result_msg.data);
         RCLCPP_INFO(get_logger(), "Gait speed test finished successfully");
-      } else {
+      } else { // The was an error in the process
+        go_to_state(State::ERROR);
         result_msg.data = -1;
         RCLCPP_ERROR(get_logger(), "Gait speed test failed");
       }
@@ -124,18 +128,18 @@ GaitSpeed::control_cycle()
 }
 
 void
-GaitSpeed::go_to_state(int state)
+GaitSpeed::go_to_state(State state)
 {
   clear_activation();
   state_ = state;
 
   switch (state_) {
-    case FIND:
+    case State::FIND:
       RCLCPP_INFO(get_logger(), "State: FIND");
       add_activation("find_person");
       // on_activate(get_current_state());
       break;
-    case EXPLAIN:
+    case State::EXPLAIN:
       RCLCPP_INFO(get_logger(), "State: EXPLAIN");
       add_activation("explain_gait_speed");
       // on_activate(get_current_state());
@@ -145,13 +149,18 @@ GaitSpeed::go_to_state(int state)
     //   add_activation("prepare_gait_speed");
     //   on_activate(get_current_state());
     //   break;
-    case MEASURE: // TODO: add a check to see if the robot is moving to activate a different behavior
+    case State::MEASURE: // TODO: add a check to see if the robot is moving to activate a different behavior
       RCLCPP_INFO(get_logger(), "State: MEASURE");
       add_activation("measure_gait_speed_dist");
       // on_activate(get_current_state());
       break;
+    case State::ERROR:
+      RCLCPP_INFO(get_logger(), "State: ERROR");
+      add_activation("error");
+      // on_activate(get_current_state());
+      break;
     default:
-      state_ = STOP;
+      state_ = State::STOP;
       RCLCPP_INFO(get_logger(), "Deactivating");
       cleanup();
       deactivate();

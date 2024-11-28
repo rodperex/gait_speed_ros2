@@ -13,7 +13,7 @@
 // limitations under the License.
 
 #include "gait_speed_ros2/orchestrators/gait_speed_simple.hpp"
-
+#include "gait_speed_ros2/orchestrators/gait_speed_states.hpp"
 #include "gait_speed_ros2/behaviors/behavior_runner.hpp"
 
 #include "rclcpp/rclcpp.hpp"
@@ -79,7 +79,7 @@ int main(int argc, char * argv[])
   while (rclcpp::ok()) {
     exec.spin_some();
     
-    if (gait_speed_node->get_state() == gait_speed::GaitSpeedSimple::STOP) {
+    if (gait_speed_node->get_state() == gait_speed::State::STOP) {
       RCLCPP_INFO(node->get_logger(), "Orchestrator stopped. Exiting...");
       
       gait_speed_node->trigger_transition(lifecycle_msgs::msg::Transition::TRANSITION_DEACTIVATE);

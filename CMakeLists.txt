@@ -40,11 +40,13 @@ include_directories(include)
 
 add_library(check_end_test_bt_node SHARED src/gait_speed_ros2/bt_nodes/CheckEndTest.cpp)
 add_library(start_test_bt_node SHARED src/gait_speed_ros2/bt_nodes/StartTest.cpp)
+add_library(has_person_started_bt_node SHARED src/gait_speed_ros2/bt_nodes/HasPersonStarted.cpp)
 add_library(end_test_bt_node SHARED src/gait_speed_ros2/bt_nodes/EndTest.cpp)
 
 
 list(APPEND plugin_libs
   start_test_bt_node
+  has_person_started_bt_node
   check_end_test_bt_node
   end_test_bt_node
 )

@@ -13,8 +13,8 @@
 // limitations under the License.
 
 
-#ifndef GaitSpeedSimple__SIMPLE_HPP_
-#define GaitSpeedSimple__SIMPLE_HPP_
+#ifndef GAITSPEED_SIMPLE__SIMPLE_HPP_
+#define GAITSPEED_SIMPLE__SIMPLE_HPP_
 
 #include "rclcpp/rclcpp.hpp"
 #include "rclcpp_cascade_lifecycle/rclcpp_cascade_lifecycle.hpp"
@@ -22,6 +22,8 @@
 #include "std_msgs/msg/float64.hpp"
 
 #include "behaviortree_cpp_v3/behavior_tree.h"
+
+#include "gait_speed_ros2/orchestrators/gait_speed_states.hpp"
 
 namespace gait_speed
 {
@@ -33,17 +35,13 @@ class GaitSpeedSimple : public rclcpp_cascade_lifecycle::CascadeLifecycleNode
 {
 public:
   GaitSpeedSimple(BT::Blackboard::Ptr blackboard);
-  int get_state() { return state_; }
+  State get_state() { return state_; }
 
-  static const int INIT = 0;
-  static const int FIND = 1;
-  static const int MEASURE = 4;
-  static const int STOP = 5;
 
 private:
   void control_cycle();
   void status_callback(std_msgs::msg::String::UniquePtr msg);
-  void go_to_state(int state);
+  void go_to_state(State state);
   bool check_behavior_finished();
 
   rclcpp_lifecycle::node_interfaces::LifecycleNodeInterface::CallbackReturn
@@ -51,7 +49,7 @@ private:
   rclcpp_lifecycle::node_interfaces::LifecycleNodeInterface::CallbackReturn
   on_deactivate(const rclcpp_lifecycle::State & previous_state);
 
-  int state_;
+State state_;
 
   rclcpp::TimerBase::SharedPtr timer_;
   rclcpp::Subscription<std_msgs::msg::String>::SharedPtr status_sub_;
@@ -66,4 +64,4 @@ private:
 
 } // namespace gait_speed
 
-#endif  // GaitSpeedSimple__SIMPLE_HPP_
+#endif  // GAITSPEED_SIMPLE__SIMPLE_HPP_

@@ -13,6 +13,7 @@
 // limitations under the License.
 
 #include "gait_speed_ros2/orchestrators/gait_speed.hpp"
+#include "gait_speed_ros2/orchestrators/gait_speed_states.hpp"
 
 #include "gait_speed_ros2/behaviors/behavior_runner.hpp"
 
@@ -80,6 +81,17 @@ int main(int argc, char * argv[])
     plugins
   );
 
+  plugins = {
+    "speak_bt_node",
+  };
+
+  auto error_node = std::make_shared<gait_speed::BehaviorRunner>(
+    blackboard,
+    "error",
+    "/bt_xml/error.xml",
+    plugins
+  );
+
   exec.add_node(gait_speed_node->get_node_base_interface());
   
   exec.add_node(node->get_node_base_interface());
@@ -88,16 +100,18 @@ int main(int argc, char * argv[])
   exec.add_node(find_person_node->get_node_base_interface());
   exec.add_node(explain_gait_speed_node->get_node_base_interface());
   exec.add_node(measure_node->get_node_base_interface());
+  exec.add_node(error_node->get_node_base_interface());
 
   gait_speed_node->trigger_transition(lifecycle_msgs::msg::Transition::TRANSITION_CONFIGURE);
   find_person_node->trigger_transition(lifecycle_msgs::msg::Transition::TRANSITION_CONFIGURE);
   explain_gait_speed_node->trigger_transition(lifecycle_msgs::msg::Transition::TRANSITION_CONFIGURE);
   measure_node->trigger_transition(lifecycle_msgs::msg::Transition::TRANSITION_CONFIGURE);
+  error_node->trigger_transition(lifecycle_msgs::msg::Transition::TRANSITION_CONFIGURE);
   
   while (rclcpp::ok()) {
     exec.spin_some();
     
-    if (gait_speed_node->get_state() == gait_speed::GaitSpeed::STOP) {
+    if (gait_speed_node->get_state() == gait_speed::State::STOP) {
       RCLCPP_INFO(node->get_logger(), "Orchestrator stopped. Exiting...");
       
       gait_speed_node->trigger_transition(lifecycle_msgs::msg::Transition::TRANSITION_DEACTIVATE);

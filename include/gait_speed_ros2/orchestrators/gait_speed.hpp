@@ -23,29 +23,42 @@
 
 #include "behaviortree_cpp_v3/behavior_tree.h"
 
+#include "gait_speed_ros2/orchestrators/gait_speed_states.hpp"
+
 namespace gait_speed
 {
 
 using namespace std::chrono_literals;
 using std::placeholders::_1;
 
+// enum class State : int {
+//     INIT = 0,
+//     FIND = 1,
+//     EXPLAIN = 2,
+//     PREPARE = 3,
+//     MEASURE = 4,
+//     STOP = 5,
+//     ERROR = 6,
+// };
+
 class GaitSpeed : public rclcpp_cascade_lifecycle::CascadeLifecycleNode
 {
 public:
   GaitSpeed(BT::Blackboard::Ptr blackboard);
-  int get_state() { return state_; }
+  State get_state() { return state_; }
 
-  static const int INIT = 0;
-  static const int FIND = 1;
-  static const int EXPLAIN = 2;
-  static const int PREPARE = 3;
-  static const int MEASURE = 4;
-  static const int STOP = 5;
+  // static const int INIT = 0;
+  // static const int FIND = 1;
+  // static const int EXPLAIN = 2;
+  // static const int PREPARE = 3;
+  // static const int MEASURE = 4;
+  // static const int STOP = 5;
+  // static const int ERROR = 6;
 
 private:
   void control_cycle();
   void status_callback(std_msgs::msg::String::UniquePtr msg);
-  void go_to_state(int state);
+  void go_to_state(State state);
   bool check_behavior_finished();
 
   rclcpp_lifecycle::node_interfaces::LifecycleNodeInterface::CallbackReturn
@@ -53,7 +66,8 @@ private:
   rclcpp_lifecycle::node_interfaces::LifecycleNodeInterface::CallbackReturn
   on_deactivate(const rclcpp_lifecycle::State & previous_state);
 
-  int state_;
+  State state_;
+  int n_tries_;
 
   rclcpp::TimerBase::SharedPtr timer_;
   rclcpp::Subscription<std_msgs::msg::String>::SharedPtr status_sub_;

@@ -20,7 +20,7 @@ namespace gait_speed
 
 GaitSpeedSimple::GaitSpeedSimple(BT::Blackboard::Ptr blackboard)
 : CascadeLifecycleNode("gait_speed_node"),
-  state_(INIT),
+  state_(State::INIT),
   last_status_(""),
   blackboard_(blackboard)
 {
@@ -60,26 +60,26 @@ GaitSpeedSimple::control_cycle()
   }
 
   switch (state_) {
-    case INIT:
+    case State::INIT:
       if (check_behavior_finished()) {
-          go_to_state(FIND);
+          go_to_state(State::FIND);
       } else {
-          go_to_state(STOP);
+          go_to_state(State::STOP);
       }
       break;
-    case FIND:
+    case State::FIND:
       if (last_status_ == "SUCCESS") {
-        go_to_state(MEASURE);
+        go_to_state(State::MEASURE);
       } else {
-        go_to_state(STOP);
+        go_to_state(State::STOP);
       }
       break;
-    case MEASURE:
+    case State::MEASURE:
       if (check_behavior_finished()) {
-        go_to_state(STOP);
+        go_to_state(State::STOP);
       }
       break;
-    case STOP:
+    case State::STOP:
       clear_activation();
       if (last_status_ == "SUCCESS") {
         blackboard_->get("gait_speed_time", result_msg.data);
@@ -96,24 +96,24 @@ GaitSpeedSimple::control_cycle()
 }
 
 void
-GaitSpeedSimple::go_to_state(int state)
+GaitSpeedSimple::go_to_state(State state)
 {
   clear_activation();
   state_ = state;
 
   switch (state_) {
-    case FIND:
-      RCLCPP_INFO(get_logger(), "State: FIND");
-      add_activation("find_person");
+    case State::FIND:
+      RCLCPP_INFO(get_logger(), "State: State::FIND");
+      add_activation("State::FIND_person");
       // on_activate(get_current_state());
       break;
-    case MEASURE:
-      RCLCPP_INFO(get_logger(), "State: MEASURE");
-      add_activation("measure_gait_speed_dist");
+    case State::MEASURE:
+      RCLCPP_INFO(get_logger(), "State: State::MEASURE");
+      add_activation("State::MEASURE_gait_speed_dist");
       // on_activate(get_current_state());
       break;
     default:
-      state_ = STOP;
+      state_ = State::STOP;
       RCLCPP_INFO(get_logger(), "Deactivating");
       cleanup();
       deactivate();
