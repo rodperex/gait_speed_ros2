@@ -3,7 +3,7 @@
     <!-- ////////// -->
     <BehaviorTree ID="BehaviorTree">
         <Sequence>
-            <SubTree ID="find_waving_person_rotating"/>
+            <SubTree ID="find_waving_person_rotating" __shared_blackboard="true"/>
             <Action ID="Identify" detection="{patient}" entity_to_identify="patient"/>
             <Action ID="NavigateTo" distance_tolerance="0.5" tf_frame="patient" will_finish="true" x="" y=""/>
         </Sequence>
@@ -20,21 +20,21 @@
         <Fallback>
             <Timeout msec="15000">
                 <ReactiveFallback>
-                    <Condition ID="IsPointing" camera_frame="" detection="" high_pointing_limit="" low_pointing_limit="" output_frame="" pointing_direction=""/>
+                    <Action ID="IsPointing" camera_frame="" high_pointing_limit="" low_pointing_limit="" output_frame="" pointing_direction=""/>
                     <Action ID="Pan" period="10" pitch_angle="0" range="45"/>
                 </ReactiveFallback>
             </Timeout>
             <ReactiveFallback>
-                <Condition ID="IsPointing" camera_frame="" detection="" high_pointing_limit="" low_pointing_limit="" output_frame="" pointing_direction=""/>
+                <Action ID="IsPointing" camera_frame="" high_pointing_limit="" low_pointing_limit="" output_frame="" pointing_direction=""/>
                 <Action ID="Spin" angle="" forever="" speed=""/>
             </ReactiveFallback>
         </Fallback>
     </BehaviorTree>
     <!-- ////////// -->
     <BehaviorTree ID="find_waving_person_rotating">
-        <Timeout msec="15000">
+        <Timeout msec="30000">
             <ReactiveFallback>
-                <Condition ID="IsPointing" camera_frame="camera_link" detection="{patient}" high_pointing_limit="7" low_pointing_limit="5" output_frame="patient" pointing_direction=""/>
+                <Action ID="IsPointing" camera_frame="oak-d-base-frame" high_pointing_limit="7" low_pointing_limit="5" output_frame="patient" pointing_direction=""/>
                 <Action ID="Spin" angle="-1" forever="true" speed="0.5"/>
             </ReactiveFallback>
         </Timeout>
@@ -92,7 +92,7 @@
             <input_port name="camera_frame"/>
             <input_port name="high_pointing_limit"/>
             <input_port name="low_pointing_limit"/>
-            <input_port name="output_frame"/>
+            <inout_port name="output_frame"/>
             <output_port name="pointing_direction"/>
         </Action>
         <Action ID="IsWaving">
@@ -149,7 +149,9 @@
             <input_port default="true" name="__shared_blackboard">If false  , the Subtree has an isolated blackboard and needs port remapping</input_port>
         </SubTree>
         <SubTree ID="find_waving_person"/>
-        <SubTree ID="find_waving_person_rotating"/>
+        <SubTree ID="find_waving_person_rotating">
+            <input_port default="true" name="__shared_blackboard">If false (default), the Subtree has an isolated blackboard and needs port remapping</input_port>
+        </SubTree>
         <SubTree ID="gait_speed_dist"/>
         <SubTree ID="gait_speed_dist_following">
             <input_port default="false" name="__shared_blackboard">If false (default), the Subtree has an isolated blackboard and needs port remapping</input_port>

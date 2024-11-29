@@ -36,7 +36,7 @@ int main(int argc, char * argv[])
   plugins = {
     "is_pointing_bt_node",
     "spin_bt_node",
-    "identify_person_bt_node",
+    "identify_bt_node",
     "navigate_to_bt_node"
   };
 
@@ -60,7 +60,7 @@ int main(int argc, char * argv[])
   
   while (rclcpp::ok()) {
     exec.spin_some();
-    if (find->get_bt_status() != BT::NodeStatus::RUNNING) {
+    if ((find->get_bt_status() == BT::NodeStatus::SUCCESS) || find->get_bt_status() == BT::NodeStatus::FAILURE) {
       RCLCPP_INFO(node->get_logger(), "Orchestrator stopped. Exiting...");
       find->trigger_transition(lifecycle_msgs::msg::Transition::TRANSITION_DEACTIVATE);
       break;

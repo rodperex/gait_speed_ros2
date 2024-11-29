@@ -20,7 +20,6 @@
 
 namespace gait_speed
 {
-
 enum class State : int {
     INIT = 0,
     FIND = 1,
