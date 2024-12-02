@@ -3,16 +3,38 @@
     <!-- ////////// -->
     <BehaviorTree ID="BehaviorTree">
         <Sequence>
-            <SubTree ID="find_waving_person_rotating" __shared_blackboard="true"/>
-            <Action ID="Identify" detection="{patient}" entity_to_identify="patient"/>
-            <Action ID="NavigateTo" distance_tolerance="0.5" tf_frame="patient" will_finish="true" x="" y=""/>
+            <Timeout msec="3000">
+                <RetryUntilSuccessful num_attempts="-1">
+                    <Condition ID="IsDetected" best_detection="{patient}" confidence="0.6" interest="person" max_depth="20" max_entities="1" order="depth"/>
+                </RetryUntilSuccessful>
+            </Timeout>
+            <Action ID="Identify" confidence="0.6" detection="{patient}" entity_to_identify="patient"/>
+            <Timeout msec="15000">
+                <SubTree ID="find_patient_rotating" __shared_blackboard="true"/>
+            </Timeout>
+            <SubTree ID="gait_speed_dist_no_speak" __shared_blackboard="true"/>
         </Sequence>
     </BehaviorTree>
     <!-- ////////// -->
-    <BehaviorTree ID="find_person_rotating">
+    <BehaviorTree ID="check_test_started">
+        <Timeout msec="20000">
+            <RetryUntilSuccessful num_attempts="-1">
+                <ReactiveFallback>
+                    <Condition ID="HasPersonStarted" min_distance="0.2"/>
+                    <Timeout msec="1000">
+                        <ForceFailure>
+                            <Action ID="Speak" param="" say_text="Comienza a caminar"/>
+                        </ForceFailure>
+                    </Timeout>
+                </ReactiveFallback>
+            </RetryUntilSuccessful>
+        </Timeout>
+    </BehaviorTree>
+    <!-- ////////// -->
+    <BehaviorTree ID="find_patient_rotating">
         <ReactiveFallback>
-            <Condition ID="IsDetected" confidence="0.6" frames="" interest="person" max_depth="2" max_entities="1" order="depth_nearest"/>
-            <Action ID="Spin" angle="360" forever="" speed="0.1"/>
+            <Condition ID="IsInFront" confidence="0.6" detection="" direction="{dir}" entity_to_identify="patient" model="people"/>
+            <Action ID="Spin" angle="{dir}" forever="true" speed="0.5"/>
         </ReactiveFallback>
     </BehaviorTree>
     <!-- ////////// -->
@@ -20,27 +42,18 @@
         <Fallback>
             <Timeout msec="15000">
                 <ReactiveFallback>
-                    <Condition ID="IsPointing" detection="" high_pointing_limit="" low_pointing_limit="" output_frame="" pointing_direction="" threshold="0.7"/>
+                    <Action ID="IsWaving" cam_frame="head_front_camera_link_color_optical_frame" person_frame="{tf_patient}"/>
                     <Action ID="Pan" period="10" pitch_angle="0" range="45"/>
                 </ReactiveFallback>
             </Timeout>
             <ReactiveFallback>
-                <Condition ID="IsPointing" detection="" high_pointing_limit="" low_pointing_limit="" output_frame="" pointing_direction="" threshold="0.7"/>
+                <Action ID="IsWaving" cam_frame="head_front_camera_link_color_optical_frame" person_frame="{tf_person}"/>
                 <Action ID="Spin" angle="" forever="" speed=""/>
             </ReactiveFallback>
         </Fallback>
     </BehaviorTree>
     <!-- ////////// -->
-    <BehaviorTree ID="find_waving_person_rotating">
-        <Timeout msec="30000">
-            <ReactiveFallback>
-                <Condition ID="IsPointing" detection="{patient}" high_pointing_limit="7" low_pointing_limit="5" output_frame="{patient_calling}" pointing_direction="" threshold="0.7"/>
-                <Action ID="Spin" angle="-1" forever="true" speed="0.5"/>
-            </ReactiveFallback>
-        </Timeout>
-    </BehaviorTree>
-    <!-- ////////// -->
-    <BehaviorTree ID="gait_speed_dist">
+    <BehaviorTree ID="gait_speed_dist_following">
         <Sequence>
             <ReactiveSequence>
                 <Inverter>
@@ -48,7 +61,23 @@
                 </Inverter>
                 <Action ID="FollowPerson"/>
             </ReactiveSequence>
-            <Action ID="EndTest" time=""/>
+            <Action ID="EndTest"/>
+        </Sequence>
+    </BehaviorTree>
+    <!-- ////////// -->
+    <BehaviorTree ID="gait_speed_dist_no_speak">
+        <Sequence>
+            <Action ID="StartTest"/>
+            <ReactiveSequence>
+                <ReactiveFallback>
+                    <Timeout msec="3000">
+                        <SubTree ID="find_patient_rotating" __shared_blackboard="true"/>
+                    </Timeout>
+                    <Action ID="NavigateTo" distance_tolerance="0.5" tf_frame="patient" will_finish="yes" x="" y=""/>
+                </ReactiveFallback>
+                <Action ID="CheckEndTest"/>
+                <Action ID="EndTest"/>
+            </ReactiveSequence>
         </Sequence>
     </BehaviorTree>
     <!-- ////////// -->
@@ -57,25 +86,23 @@
         <Action ID="DialogConfirmation">
             <input_port default="en" name="language"/>
         </Action>
-        <Action ID="EndTest">
-            <output_port name="time">Time needed to complete the gait speed test</output_port>
-        </Action>
+        <Action ID="EndTest"/>
         <Action ID="FilterEntity">
             <inout_port name="frame"/>
             <inout_port name="lambda"/>
         </Action>
         <Action ID="FollowPerson"/>
+        <Condition ID="HasPersonStarted">
+            <input_port default="0.2" name="min_distance"/>
+        </Condition>
         <Action ID="Identify">
+            <input_port default="0.6" name="confidence"/>
             <input_port name="detection"/>
             <input_port name="entity_to_identify"/>
         </Action>
-        <Action ID="IdentifyPerson">
-            <input_port name="get_features"/>
-            <input_port name="person_to_identify"/>
-        </Action>
         <Condition ID="IsDetected">
+            <output_port name="best_detection"/>
             <input_port default="0.6" name="confidence"/>
-            <output_port name="frames"/>
             <input_port default="person" name="interest"/>
             <input_port default="2" name="max_depth"/>
             <input_port default="1" name="max_entities"/>
@@ -83,19 +110,18 @@
         </Condition>
         <Condition ID="IsInFront">
             <input_port name="confidence"/>
+            <output_port name="detection"/>
             <output_port name="direction"/>
             <input_port name="entity_to_identify"/>
-            <input_port name="target"/>
-            <input_port name="what"/>
+            <input_port name="model"/>
         </Condition>
-        <Condition ID="IsPointing">
-            <output_port name="detection"/>
+        <Action ID="IsPointing">
+            <input_port name="camera_frame"/>
             <input_port name="high_pointing_limit"/>
             <input_port name="low_pointing_limit"/>
-            <output_port name="output_frame"/>
+            <input_port name="output_frame"/>
             <output_port name="pointing_direction"/>
-            <input_port default="0.7" name="threshold"/>
-        </Condition>
+        </Action>
         <Action ID="IsWaving">
             <input_port name="cam_frame"/>
             <output_port name="person_frame"/>
@@ -137,7 +163,9 @@
         </Action>
         <Action ID="StartTest"/>
         <Condition ID="TargetReached"/>
-        <Condition ID="TargetReachedStatic"/>
+        <SubTree ID="check_test_started">
+            <input_port default="true" name="__shared_blackboard">If false (default), the Subtree has an isolated blackboard and needs port remapping</input_port>
+        </SubTree>
         <SubTree ID="confirm"/>
         <SubTree ID="confirm_old">
             <input_port default="false" name="__shared_blackboard">If false (default), the Subtree has an isolated blackboard and needs port remapping</input_port>
@@ -150,12 +178,12 @@
             <input_port default="true" name="__shared_blackboard">If false  , the Subtree has an isolated blackboard and needs port remapping</input_port>
         </SubTree>
         <SubTree ID="find_waving_person"/>
-        <SubTree ID="find_waving_person_rotating">
-            <input_port default="true" name="__shared_blackboard">If false (default), the Subtree has an isolated blackboard and needs port remapping</input_port>
-        </SubTree>
-        <SubTree ID="gait_speed_dist"/>
+        <SubTree ID="find_waving_person_rotating"/>
         <SubTree ID="gait_speed_dist_following">
             <input_port default="false" name="__shared_blackboard">If false (default), the Subtree has an isolated blackboard and needs port remapping</input_port>
+        </SubTree>
+        <SubTree ID="gait_speed_dist_no_speak">
+            <input_port default="true" name="__shared_blackboard">If false (default), the Subtree has an isolated blackboard and needs port remapping</input_port>
         </SubTree>
         <SubTree ID="listen"/>
     </TreeNodesModel>

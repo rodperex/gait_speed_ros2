@@ -83,6 +83,12 @@ CheckEndTest::get_time_elapsed()
   return duration.nanoseconds() / 1e9;
 
 }
+
+void
+CheckEndTest::halt()
+{
+}
+
 }  // namespace gait_speed
 
 BT_REGISTER_NODES(factory) {
