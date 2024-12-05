@@ -78,6 +78,10 @@ add_executable(just_explain src/examples/main_just_explain.cpp)
 ament_target_dependencies(just_explain ${dependencies})
 target_link_libraries(just_explain ${PROJECT_NAME})
 
+add_executable(explain_and_focus src/examples/main_explain_and_focus.cpp)
+ament_target_dependencies(explain_and_focus ${dependencies})
+target_link_libraries(explain_and_focus ${PROJECT_NAME})
+
 add_executable(just_find src/examples/main_just_find.cpp)
 ament_target_dependencies(just_find ${dependencies})
 target_link_libraries(just_find ${PROJECT_NAME})
@@ -100,6 +104,7 @@ install(TARGETS
   example_nav
   example_repeat
   just_explain
+  explain_and_focus
   just_find
   just_measure
   gait_speed
