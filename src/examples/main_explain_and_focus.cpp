@@ -25,7 +25,7 @@ int main(int argc, char * argv[])
   auto node = std::make_shared<rclcpp_cascade_lifecycle::CascadeLifecycleNode>("bt_node");
   auto blackboard = BT::Blackboard::create();
   blackboard->set("node", node);
-  
+
   node->trigger_transition(lifecycle_msgs::msg::Transition::TRANSITION_CONFIGURE);
   node->trigger_transition(lifecycle_msgs::msg::Transition::TRANSITION_ACTIVATE);
 
@@ -36,42 +36,47 @@ int main(int argc, char * argv[])
   plugins = {
     "speak_bt_node",
     "listen_bt_node",
-    "dialog_confirmation_bt_node"
+    "dialog_confirmation_bt_node",
+    "is_detected_bt_node",
+    "identify_bt_node",
+    "is_in_front_bt_node",
+    "spin_bt_node",
+    "get_detection_from_tf_bt_node"
   };
 
-  auto explain = std::make_shared<gait_speed::BehaviorRunner>(
+  auto explain_and_focus = std::make_shared<gait_speed::BehaviorRunner>(
     blackboard,
-    "explain",
-    "/bt_xml/just_explain.xml",
+    "gait_speed_node",
+    "/bt_xml/explain_and_focus.xml", 
     plugins
   );
  
-  exec.add_node(explain->get_node_base_interface());
+  exec.add_node(explain_and_focus->get_node_base_interface());
   
   RCLCPP_INFO(node->get_logger(), "Behaviors added to executor");
 
-  explain->trigger_transition(lifecycle_msgs::msg::Transition::TRANSITION_CONFIGURE);
-  explain->trigger_transition(lifecycle_msgs::msg::Transition::TRANSITION_ACTIVATE);
+  explain_and_focus->trigger_transition(lifecycle_msgs::msg::Transition::TRANSITION_CONFIGURE);
+  explain_and_focus->trigger_transition(lifecycle_msgs::msg::Transition::TRANSITION_ACTIVATE);
 
-  RCLCPP_INFO(node->get_logger(), "Explain state: %s", explain->get_current_state().label().c_str());
+  RCLCPP_INFO(node->get_logger(), "Explain state: %s", explain_and_focus->get_current_state().label().c_str());
   
   RCLCPP_INFO(node->get_logger(), "Behaviors configured");
  
   while (rclcpp::ok()) {
     exec.spin_some();
-    if (explain->get_bt_status() == BT::NodeStatus::SUCCESS) {
-      RCLCPP_INFO(node->get_logger(), "Explain stopped: SUCCESS");
-      explain->trigger_transition(lifecycle_msgs::msg::Transition::TRANSITION_DEACTIVATE);
+    if (explain_and_focus->get_bt_status() == BT::NodeStatus::SUCCESS) {
+      RCLCPP_INFO(node->get_logger(), "Explain and focus stopped: SUCCESS");
+      explain_and_focus->trigger_transition(lifecycle_msgs::msg::Transition::TRANSITION_DEACTIVATE);
       break;
     }
-    if (explain->get_bt_status() == BT::NodeStatus::FAILURE) {
-      RCLCPP_INFO(node->get_logger(), "Explain stopped: FAILURE");
-      explain->trigger_transition(lifecycle_msgs::msg::Transition::TRANSITION_DEACTIVATE);
+    if (explain_and_focus->get_bt_status() == BT::NodeStatus::FAILURE) {
+      RCLCPP_INFO(node->get_logger(), "Explain and focus stopped: FAILURE");
+      explain_and_focus->trigger_transition(lifecycle_msgs::msg::Transition::TRANSITION_DEACTIVATE);
       break;
     }
   }
 
-  RCLCPP_INFO(node->get_logger(), "Explain state: %s", explain->get_current_state().label().c_str());
+  RCLCPP_INFO(node->get_logger(), "Explain and focus state: %s", explain_and_focus->get_current_state().label().c_str());
   
   rclcpp::shutdown();
 
