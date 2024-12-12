@@ -125,7 +125,6 @@ GaitSpeedSimple::go_to_state(State state)
       remove_activation("measure_gait_speed");
       // cleanup();
       // deactivate();
-      
       break;
     default:
       RCLCPP_ERROR(get_logger(), "Unknown state in gait speed test");

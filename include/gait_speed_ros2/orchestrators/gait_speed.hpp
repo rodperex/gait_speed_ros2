@@ -31,29 +31,11 @@ namespace gait_speed
 using namespace std::chrono_literals;
 using std::placeholders::_1;
 
-// enum class State : int {
-//     INIT = 0,
-//     FIND = 1,
-//     EXPLAIN = 2,
-//     PREPARE = 3,
-//     MEASURE = 4,
-//     STOP = 5,
-//     ERROR = 6,
-// };
-
 class GaitSpeed : public rclcpp_cascade_lifecycle::CascadeLifecycleNode
 {
 public:
   GaitSpeed(BT::Blackboard::Ptr blackboard);
   State get_state() { return state_; }
-
-  // static const int INIT = 0;
-  // static const int FIND = 1;
-  // static const int EXPLAIN = 2;
-  // static const int PREPARE = 3;
-  // static const int MEASURE = 4;
-  // static const int STOP = 5;
-  // static const int ERROR = 6;
 
 private:
   void control_cycle();
@@ -74,7 +56,6 @@ private:
   std::string status_received_, last_status_;
   BT::Blackboard::Ptr blackboard_;
   
-  std::string mode_;
   bool robot_moves_;
 
   bool started_ = false;

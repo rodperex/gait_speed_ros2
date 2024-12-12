@@ -47,7 +47,7 @@ int main(int argc, char * argv[])
 
   auto find_person_node = std::make_shared<gait_speed::BehaviorRunner>(
     blackboard,
-    "find_person",
+    "find_patient",
     "/bt_xml/find_person.xml",
     plugins
   );
