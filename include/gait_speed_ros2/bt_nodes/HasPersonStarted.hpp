@@ -44,6 +44,7 @@ public:
     return BT::PortsList(
       {
         BT::InputPort<float>("min_distance", "Minimum distance to consider the person has started the test"),
+        BT::InputPort<std::string>("person_frame", "Frame of the person"),
       });
   }
 
@@ -52,7 +53,9 @@ private:
 
   std::shared_ptr<rclcpp_cascade_lifecycle::CascadeLifecycleNode> node_;
   
+  std::string frame_;
   float min_distance_;
+  
   tf2::BufferCore tf_buffer_;
   tf2_ros::TransformListener tf_listener_;  
 };

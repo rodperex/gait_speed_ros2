@@ -2,11 +2,15 @@
 <root main_tree_to_execute="BehaviorTree">
     <!-- ////////// -->
     <BehaviorTree ID="BehaviorTree">
-        <Timeout msec="3000">
-            <RetryUntilSuccessful num_attempts="-1">
-                <Condition ID="IsDetected" best_detection="{patient_detection}" confidence="0.6" frame_name="patient" interest="person" max_depth="50" max_entities="1" order="depth"/>
-            </RetryUntilSuccessful>
-        </Timeout>
+        <Sequence>
+            <Timeout msec="3000">
+                <RetryUntilSuccessful num_attempts="-1">
+                    <Condition ID="IsDetected" best_detection="{patient_detection}" confidence="0.6" frame="{frame}" interest="person" max_depth="50" max_entities="1" model="people" n_detections="" order="depth"/>
+                </RetryUntilSuccessful>
+            </Timeout>
+            <Action ID="Identify" confidence="0.0" detection="{patient_detection}" entity_to_identify="patient"/>
+            <Action ID="NavigateTo" distance_tolerance="0.5" tf_frame="patient" will_finish="true" x="" y=""/>
+        </Sequence>
     </BehaviorTree>
     <!-- ////////// -->
     <TreeNodesModel>
@@ -18,7 +22,7 @@
             <input_port name="distance"/>
         </Condition>
         <Action ID="EndTest">
-            <output_port name="result">Time needed to complete the gait speed test</output_port>
+            <output_port name="time">Time needed to complete the gait speed test</output_port>
         </Action>
         <Action ID="FilterEntity">
             <inout_port name="frame"/>
@@ -29,10 +33,6 @@
             <output_port name="detection"/>
             <input_port name="frame"/>
         </Action>
-        <Condition ID="HasPersonStarted">
-            <input_port default="0.2" name="min_distance"/>
-            <input_port name="person_frame"/>
-        </Condition>
         <Action ID="Identify">
             <input_port name="confidence"/>
             <input_port name="detection"/>
@@ -41,18 +41,17 @@
         <Condition ID="IsDetected">
             <output_port name="best_detection"/>
             <input_port default="0.6" name="confidence"/>
-            <input_port name="frame_name"/>
+            <output_port name="frame"/>
             <input_port default="person" name="interest"/>
             <input_port default="2" name="max_depth"/>
             <input_port default="1" name="max_entities"/>
+            <input_port name="model"/>
+            <output_port name="n_detections"/>
             <input_port default="depth_nearest" name="order"/>
         </Condition>
         <Condition ID="IsInFront">
             <output_port name="direction"/>
             <input_port name="entity_to_identify"/>
-        </Condition>
-        <Condition ID="IsInView">
-            <input_port name="frame"/>
         </Condition>
         <Condition ID="IsPointing">
             <output_port name="detection"/>
@@ -94,7 +93,7 @@
         </Action>
         <Action ID="Speak">
             <input_port name="param"/>
-            <input_port name="speech_text"/>
+            <input_port name="say_text"/>
         </Action>
         <Action ID="Spin">
             <input_port name="angle"/>
@@ -104,9 +103,6 @@
         <Action ID="StartTest"/>
         <Condition ID="TargetReached"/>
         <Condition ID="TargetReachedStatic"/>
-        <SubTree ID="check_test_started">
-            <input_port default="true" name="__shared_blackboard">If false (default), the Subtree has an isolated blackboard and needs port remapping</input_port>
-        </SubTree>
         <SubTree ID="confirm"/>
         <SubTree ID="confirm_old">
             <input_port default="false" name="__shared_blackboard">If false (default), the Subtree has an isolated blackboard and needs port remapping</input_port>
@@ -130,9 +126,6 @@
             <input_port name="person_frame"/>
         </Condition>
         <SubTree ID="listen"/>
-        <SubTree ID="measure_gait_speed">
-            <input_port default="true" name="__shared_blackboard">If false (default), the Subtree has an isolated blackboard and needs port remapping</input_port>
-        </SubTree>
         <SubTree ID="provide_instructions"/>
         <SubTree ID="stay_aligned">
             <input_port default="true" name="__shared_blackboard">If false (default), the Subtree has an isolated blackboard and needs port remapping</input_port>

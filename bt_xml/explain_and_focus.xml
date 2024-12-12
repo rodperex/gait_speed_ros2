@@ -8,9 +8,12 @@
                     <Condition ID="IsDetected" best_detection="{patient}" confidence="0.6" frame="" interest="person" max_depth="20" max_entities="1" model="people" n_detections="" order="depth_nearest"/>
                 </RetryUntilSuccessful>
             </Timeout>
-            <Parallel failure_threshold="1" success_threshold="1">
+            <Action ID="Identify" confidence="0.0" detection="{patient}" entity_to_identify="patient"/>
+            <Parallel failure_threshold="2" success_threshold="1">
                 <SubTree ID="provide_instructions" __shared_blackboard="true"/>
-                <SubTree ID="stay_aligned" __shared_blackboard="true"/>
+                <RetryUntilSuccessful num_attempts="-1">
+                    <SubTree ID="stay_aligned" __shared_blackboard="true"/>
+                </RetryUntilSuccessful>
             </Parallel>
         </Sequence>
     </BehaviorTree>
@@ -92,20 +95,18 @@
     </BehaviorTree>
     <!-- ////////// -->
     <BehaviorTree ID="stay_aligned">
-        <RetryUntilSuccessful num_attempts="-1">
-            <ForceFailure>
-                <Sequence>
-                    <ReactiveFallback>
-                        <ForceFailure>
-                            <Action ID="Identify" confidence="0.0" detection="{patient}" entity_to_identify="patient"/>
-                        </ForceFailure>
-                        <Condition ID="IsInFront" direction="{dir}" entity_to_identify="patient"/>
-                        <Action ID="Spin" angle="{dir}" forever="true" speed="0.1"/>
-                    </ReactiveFallback>
-                    <Action ID="GetDetectionFromTF" detection="{patient}" frame="patient"/>
-                </Sequence>
-            </ForceFailure>
-        </RetryUntilSuccessful>
+        <ForceFailure>
+            <Sequence>
+                <Action ID="GetDetectionFromTF" detection="{patient}" frame="patient"/>
+                <ReactiveFallback>
+                    <ForceFailure>
+                        <Action ID="Identify" confidence="0.0" detection="{patient}" entity_to_identify="patient"/>
+                    </ForceFailure>
+                    <Condition ID="IsInFront" direction="{dir}" entity_to_identify="patient"/>
+                    <Action ID="Spin" angle="{dir}" forever="true" speed="0.1"/>
+                </ReactiveFallback>
+            </Sequence>
+        </ForceFailure>
     </BehaviorTree>
     <!-- ////////// -->
     <TreeNodesModel>

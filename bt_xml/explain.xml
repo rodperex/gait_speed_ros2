@@ -3,22 +3,9 @@
     <!-- ////////// -->
     <BehaviorTree ID="BehaviorTree">
         <Parallel failure_threshold="1" success_threshold="2">
-            <SubTree ID="align" __shared_blackboard="true"/>
             <SubTree ID="provide_instructions"/>
+            <SubTree ID="stay_aligned" __shared_blackboard="true"/>
         </Parallel>
-    </BehaviorTree>
-    <!-- ////////// -->
-    <BehaviorTree ID="align">
-        <Sequence>
-            <Action ID="GetDetectionFromTF" detection="{patient}" frame="patient"/>
-            <ReactiveFallback>
-                <ForceFailure>
-                    <Action ID="Identify" confidence="0.0" detection="{patient}" entity_to_identify="patient"/>
-                </ForceFailure>
-                <Condition ID="IsInFront" direction="{dir}" entity_to_identify="patient"/>
-                <Action ID="Spin" angle="{dir}" forever="true" speed="0.3"/>
-            </ReactiveFallback>
-        </Sequence>
     </BehaviorTree>
     <!-- ////////// -->
     <BehaviorTree ID="confirm">
@@ -94,6 +81,19 @@
                     <Action ID="Speak" param="" say_text="Lo siento, no vamos a poder hacer la prueba"/>
                 </ForceFailure>
             </Fallback>
+        </Sequence>
+    </BehaviorTree>
+    <!-- ////////// -->
+    <BehaviorTree ID="stay_aligned">
+        <Sequence>
+            <Action ID="GetDetectionFromTF" detection="{patient}" frame="patient"/>
+            <ReactiveFallback>
+                <ForceFailure>
+                    <Action ID="Identify" confidence="0.0" detection="{patient}" entity_to_identify="patient"/>
+                </ForceFailure>
+                <Condition ID="IsInFront" direction="{dir}" entity_to_identify="patient"/>
+                <Action ID="Spin" angle="{dir}" forever="true" speed="0.1"/>
+            </ReactiveFallback>
         </Sequence>
     </BehaviorTree>
     <!-- ////////// -->
@@ -184,9 +184,6 @@
         <Action ID="StartTest"/>
         <Condition ID="TargetReached"/>
         <Condition ID="TargetReachedStatic"/>
-        <SubTree ID="align">
-            <input_port default="true" name="__shared_blackboard">If false (default), the Subtree has an isolated blackboard and needs port remapping</input_port>
-        </SubTree>
         <SubTree ID="confirm"/>
         <SubTree ID="confirm_old">
             <input_port default="false" name="__shared_blackboard">If false (default), the Subtree has an isolated blackboard and needs port remapping</input_port>
@@ -211,6 +208,9 @@
         </Condition>
         <SubTree ID="listen"/>
         <SubTree ID="provide_instructions"/>
+        <SubTree ID="stay_aligned">
+            <input_port default="true" name="__shared_blackboard">If false (default), the Subtree has an isolated blackboard and needs port remapping</input_port>
+        </SubTree>
     </TreeNodesModel>
     <!-- ////////// -->
 </root>

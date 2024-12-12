@@ -44,6 +44,8 @@ public:
   {
     return BT::PortsList(
       {
+        BT::InputPort<std::string>("frame_name"),
+        BT::InputPort<std::string>("mode"),
       });
   }
 
@@ -56,7 +58,7 @@ private:
   float target_;
   tf2::BufferCore tf_buffer_;
   tf2_ros::TransformListener tf_listener_;
-  std::string mode_;
+  std::string mode_, frame_name_;
   
 };
 

@@ -56,8 +56,6 @@ State state_;
   std::string status_received_, last_status_;
   BT::Blackboard::Ptr blackboard_;
 
-  bool started_ = false;
-
   rclcpp_lifecycle::LifecyclePublisher<std_msgs::msg::Float64>::SharedPtr result_pub_;
 
 };

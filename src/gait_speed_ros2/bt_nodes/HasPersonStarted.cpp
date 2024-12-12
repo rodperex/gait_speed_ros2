@@ -26,17 +26,24 @@ HasPersonStarted::HasPersonStarted(
   tf_listener_(tf_buffer_)
 {
   config().blackboard->get("node", node_);
+  // config().blackboard->get("person_frame", frame_);
 
   getInput("min_distance", min_distance_);
+  getInput("person_frame", frame_);
 }
 
 BT::NodeStatus
 HasPersonStarted::tick()
 {
+  RCLCPP_DEBUG(node_->get_logger(), "HAS_PERSON_STARTED");
+  RCLCPP_INFO(node_->get_logger(), "Distance travelled (min = %.2f): %.2f", min_distance_, get_distance_travelled());
+
   if (get_distance_travelled() < min_distance_) {
+    RCLCPP_DEBUG(node_->get_logger(), "Person has not started yet. Distance travelled: %.2f", get_distance_travelled());
     config().blackboard->set("start_time", node_->now());
     return BT::NodeStatus::FAILURE;
   } else {
+    RCLCPP_INFO(node_->get_logger(), "Person has started the test. Moved %.2f meters.", get_distance_travelled());
     return BT::NodeStatus::SUCCESS;
   }
 }
@@ -46,15 +53,17 @@ HasPersonStarted::get_distance_travelled()
 {
   try
     {
-      tf2::Stamped<tf2::Transform> odom2patient_at_start;
-      config().blackboard->get("map2start", odom2patient_at_start);
+      tf2::Stamped<tf2::Transform> map2start;
+      config().blackboard->get("map2start", map2start);
 
-      auto odom2patient_msg = tf_buffer_.lookupTransform("odom", "patient", tf2::TimePointZero);
-      tf2::Stamped<tf2::Transform> odom2patient;
-      tf2::fromMsg(odom2patient_msg, odom2patient);
+      RCLCPP_DEBUG(node_->get_logger(), "Getting distance travelled for frame %s", frame_.c_str());
 
-      auto person_at_start2person = odom2patient_at_start.inverse() * odom2patient;
-      return person_at_start2person.getOrigin().length();
+      auto map2person_msg = tf_buffer_.lookupTransform("map", frame_, tf2::TimePointZero);
+      tf2::Stamped<tf2::Transform> map2person; // Current position of the person
+      tf2::fromMsg(map2person_msg, map2person);
+
+      auto start2person = map2start.inverse() * map2person;
+      return start2person.getOrigin().length();
     }
     catch (tf2::TransformException &ex)
     {

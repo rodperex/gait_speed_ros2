@@ -2,11 +2,14 @@
 <root main_tree_to_execute="BehaviorTree">
     <!-- ////////// -->
     <BehaviorTree ID="BehaviorTree">
-        <Timeout msec="3000">
-            <RetryUntilSuccessful num_attempts="-1">
-                <Condition ID="IsDetected" best_detection="{patient_detection}" confidence="0.6" frame_name="patient" interest="person" max_depth="50" max_entities="1" order="depth"/>
-            </RetryUntilSuccessful>
-        </Timeout>
+        <Sequence>
+            <Timeout msec="3000">
+                <RetryUntilSuccessful num_attempts="-1">
+                    <Condition ID="IsDetected" best_detection="{patient_detection}" confidence="0.6" interest="person" max_depth="50" max_entities="1" order="depth"/>
+                </RetryUntilSuccessful>
+            </Timeout>
+            <Action ID="Identify" confidence="0.0" detection="{patient_detection}" entity_to_identify="patient"/>
+        </Sequence>
     </BehaviorTree>
     <!-- ////////// -->
     <TreeNodesModel>
@@ -41,7 +44,6 @@
         <Condition ID="IsDetected">
             <output_port name="best_detection"/>
             <input_port default="0.6" name="confidence"/>
-            <input_port name="frame_name"/>
             <input_port default="person" name="interest"/>
             <input_port default="2" name="max_depth"/>
             <input_port default="1" name="max_entities"/>

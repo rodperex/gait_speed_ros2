@@ -28,15 +28,23 @@ CheckEndTest::CheckEndTest(
   config().blackboard->get("node", node_);
   config().blackboard->get("mode", mode_);
   config().blackboard->get("target", target_);
+
+  getInput("frame_name", frame_name_);
 }
 
 BT::NodeStatus
 CheckEndTest::tick()
 {
+  RCLCPP_DEBUG(node_->get_logger(), "CHECK_END_TEST");
+  RCLCPP_DEBUG(node_->get_logger(), "Target: %.2f, Mode: %s.", target_, mode_.c_str());
+  rclcpp::spin_some(node_->get_node_base_interface());
+
   float target;
   if (mode_ == "distance") {
     target = get_distance_travelled();
+    RCLCPP_INFO(node_->get_logger(), "Distance travelled: %.2f m.", get_distance_travelled());
     if (target >= target_) {
+      RCLCPP_INFO(node_->get_logger(), "Target reached. Finishing test.");
       config().blackboard->set("time_elapsed", get_time_elapsed());
       return BT::NodeStatus::SUCCESS;
     }
@@ -47,6 +55,7 @@ CheckEndTest::tick()
       return BT::NodeStatus::SUCCESS;
     }
   }
+  RCLCPP_INFO(node_->get_logger(), "Target (%.2f) not reached. Continuing test.", target_);
   return BT::NodeStatus::RUNNING;
 }
 
@@ -58,7 +67,7 @@ CheckEndTest::get_distance_travelled()
       tf2::Stamped<tf2::Transform> odom2patient_at_start;
       config().blackboard->get("map2start", odom2patient_at_start);
 
-      auto odom2patient_msg = tf_buffer_.lookupTransform("odom", "patient", tf2::TimePointZero);
+      auto odom2patient_msg = tf_buffer_.lookupTransform("odom", frame_name_, tf2::TimePointZero);
       tf2::Stamped<tf2::Transform> odom2patient;
       tf2::fromMsg(odom2patient_msg, odom2patient);
 
@@ -79,7 +88,8 @@ CheckEndTest::get_time_elapsed()
   rclcpp::Time start_time, current_time;
   config().blackboard->get("start_time", start_time);
   current_time = node_->now();
-  rclcpp::Duration duration = current_time - start_time;
+  rclcpp::Duration duration = current_time - start_time;  
+  RCLCPP_INFO(node_->get_logger(), "Time elapsed: %.2f seconds.", duration.nanoseconds() / 1e9);
   return duration.nanoseconds() / 1e9;
 
 }

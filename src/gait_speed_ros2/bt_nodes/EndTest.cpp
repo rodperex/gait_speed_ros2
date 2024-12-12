@@ -27,6 +27,8 @@ EndTest::EndTest(const std::string & xml_tag_name, const BT::NodeConfiguration &
 BT::NodeStatus
 EndTest::tick()
 {
+    RCLCPP_DEBUG(node_->get_logger(), "END_TEST");
+    
     if (mode_ == "distance") {
         float time_elapsed;
         config().blackboard->get("time_elapsed", time_elapsed);
@@ -34,6 +36,7 @@ EndTest::tick()
         if (time_elapsed > 0.0) {
             RCLCPP_INFO(node_->get_logger(), "Test finished. Time: %f seconds", time_elapsed);
             config().blackboard->set("gait_speed_result", time_elapsed);
+            setOutput("result", time_elapsed);
             return BT::NodeStatus::SUCCESS;
         }
     } else {
@@ -43,6 +46,7 @@ EndTest::tick()
         if (distance_travelled > 0) {
             RCLCPP_INFO(node_->get_logger(), "Test finished. Distance: %f meters", distance_travelled);
             config().blackboard->set("gait_speed_result", distance_travelled);
+            setOutput("result", distance_travelled);
             return BT::NodeStatus::SUCCESS;
         }
     }

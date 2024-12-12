@@ -2,15 +2,103 @@
 <root main_tree_to_execute="BehaviorTree">
     <!-- ////////// -->
     <BehaviorTree ID="BehaviorTree">
-        <Timeout msec="3000">
+        <Parallel failure_threshold="1" success_threshold="1">
+            <Sequence>
+                <Timeout msec="3000">
+                    <RetryUntilSuccessful num_attempts="-1">
+                        <Condition ID="IsDetected" best_detection="{patient_detection}" confidence="0.6" frame="" frame_name="patient" interest="person" max_depth="50" max_entities="1" model="people" n_detections="" order="depth"/>
+                    </RetryUntilSuccessful>
+                </Timeout>
+                <RetryUntilSuccessful num_attempts="-1">
+                    <Action ID="StartTest" frame_name="patient_1"/>
+                </RetryUntilSuccessful>
+                <SubTree ID="check_test_started" __shared_blackboard="true"/>
+                <SubTree ID="measure_gait_speed" __shared_blackboard="true"/>
+            </Sequence>
             <RetryUntilSuccessful num_attempts="-1">
-                <Condition ID="IsDetected" best_detection="{patient_detection}" confidence="0.6" frame_name="patient" interest="person" max_depth="50" max_entities="1" order="depth"/>
+                <SubTree ID="stay_aligned" __shared_blackboard="true"/>
+            </RetryUntilSuccessful>
+        </Parallel>
+    </BehaviorTree>
+    <!-- ////////// -->
+    <BehaviorTree ID="check_test_started">
+        <Timeout msec="20000">
+            <RetryUntilSuccessful num_attempts="-1">
+                <Sequence>
+                    <Action ID="Identify" confidence="0.0" detection="{patient_detection}" entity_to_identify="patient_1"/>
+                    <Condition ID="HasPersonStarted" min_distance="0.2" person_frame="patient_1"/>
+                </Sequence>
             </RetryUntilSuccessful>
         </Timeout>
     </BehaviorTree>
     <!-- ////////// -->
+    <BehaviorTree ID="find_patient_rotating">
+        <ReactiveFallback>
+            <Condition ID="IsInFront" direction="{dir}" entity_to_identify="patient"/>
+            <Action ID="Spin" angle="{dir}" forever="true" speed="0.5"/>
+        </ReactiveFallback>
+    </BehaviorTree>
+    <!-- ////////// -->
+    <BehaviorTree ID="find_waving_person">
+        <Fallback>
+            <Timeout msec="15000">
+                <ReactiveFallback>
+                    <Action ID="IsWaving" cam_frame="head_front_camera_link_color_optical_frame" person_frame="{tf_patient}"/>
+                    <Action ID="Pan" period="10" pitch_angle="0" range="45"/>
+                </ReactiveFallback>
+            </Timeout>
+            <ReactiveFallback>
+                <Action ID="IsWaving" cam_frame="head_front_camera_link_color_optical_frame" person_frame="{tf_person}"/>
+                <Action ID="Spin" angle="" forever="" speed=""/>
+            </ReactiveFallback>
+        </Fallback>
+    </BehaviorTree>
+    <!-- ////////// -->
+    <BehaviorTree ID="gait_speed_dist_following">
+        <Sequence>
+            <ReactiveSequence>
+                <Inverter>
+                    <Condition ID="TargetReached"/>
+                </Inverter>
+                <Action ID="FollowPerson"/>
+            </ReactiveSequence>
+            <Action ID="EndTest" result=""/>
+        </Sequence>
+    </BehaviorTree>
+    <!-- ////////// -->
+    <BehaviorTree ID="measure_gait_speed">
+        <ReactiveSequence>
+            <ReactiveFallback>
+                <Timeout msec="3000">
+                    <Condition ID="IsInView" frame="patient_1"/>
+                </Timeout>
+                <Action ID="NavigateTo" distance_tolerance="0.5" tf_frame="patient_1" will_finish="yes" x="" y=""/>
+            </ReactiveFallback>
+            <Action ID="Identify" confidence="0.0" detection="{patient_detection}" entity_to_identify="patient_1"/>
+            <Action ID="CheckEndTest" frame_name="patient_1"/>
+            <Action ID="EndTest" result=""/>
+        </ReactiveSequence>
+    </BehaviorTree>
+    <!-- ////////// -->
+    <BehaviorTree ID="stay_aligned">
+        <ForceFailure>
+            <Sequence>
+                <Action ID="GetDetectionFromTF" detection="{patient}" frame="patient_1"/>
+                <ReactiveFallback>
+                    <ForceFailure>
+                        <Action ID="Identify" confidence="0.0" detection="{patient}" entity_to_identify="focus"/>
+                    </ForceFailure>
+                    <Condition ID="IsInFront" direction="{dir}" entity_to_identify="focus"/>
+                    <Action ID="Spin" angle="{dir}" forever="true" speed="0.1"/>
+                </ReactiveFallback>
+            </Sequence>
+        </ForceFailure>
+    </BehaviorTree>
+    <!-- ////////// -->
     <TreeNodesModel>
-        <Action ID="CheckEndTest"/>
+        <Action ID="CheckEndTest">
+            <input_port name="frame_name"/>
+        </Action>
         <Action ID="DialogConfirmation">
             <input_port default="en" name="language"/>
         </Action>
@@ -41,10 +129,13 @@
         <Condition ID="IsDetected">
             <output_port name="best_detection"/>
             <input_port default="0.6" name="confidence"/>
+            <output_port name="frame"/>
             <input_port name="frame_name"/>
             <input_port default="person" name="interest"/>
             <input_port default="2" name="max_depth"/>
             <input_port default="1" name="max_entities"/>
+            <input_port name="model"/>
+            <output_port name="n_detections"/>
             <input_port default="depth_nearest" name="order"/>
         </Condition>
         <Condition ID="IsInFront">
@@ -101,7 +192,9 @@
             <input_port name="forever"/>
             <input_port name="speed"/>
         </Action>
-        <Action ID="StartTest"/>
+        <Action ID="StartTest">
+            <input_port name="frame_name"/>
+        </Action>
         <Condition ID="TargetReached"/>
         <Condition ID="TargetReachedStatic"/>
         <SubTree ID="check_test_started">

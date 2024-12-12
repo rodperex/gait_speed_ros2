@@ -24,19 +24,23 @@ StartTest::StartTest(const std::string & xml_tag_name, const BT::NodeConfigurati
   tf_listener_(tf_buffer_)
 {
     config().blackboard->get("node", node_);
+    getInput("frame_name", frame_name_);
 }
 
 BT::NodeStatus
 StartTest::tick()
 {
-    RCLCPP_INFO(node_->get_logger(), "Starting gait speed test");
+    RCLCPP_INFO(node_->get_logger(), "START_TEST");
+    rclcpp::spin_some(node_->get_node_base_interface());
 
+    RCLCPP_DEBUG(node_->get_logger(), "Frame name: %s", frame_name_.c_str());
     try
     {
-        auto map2start_msg = tf_buffer_.lookupTransform("map", "patient", tf2::TimePointZero);
+        auto map2start_msg = tf_buffer_.lookupTransform("map", frame_name_, tf2::TimePointZero);
         tf2::Stamped<tf2::Transform> map2start;
         tf2::fromMsg(map2start_msg, map2start);
-    
+
+        RCLCPP_INFO(node_->get_logger(), "Populating blackboard with map2start");
         config().blackboard->set("map2start", map2start);
         config().blackboard->set("start_time", node_->now());
     
@@ -44,7 +48,7 @@ StartTest::tick()
     }
     catch(const std::exception& ex)
     {
-        RCLCPP_WARN(node_->get_logger(), "%s", ex.what());
+        RCLCPP_WARN(node_->get_logger(), "Start Test failed: %s", ex.what());
         return BT::NodeStatus::FAILURE;
     }
     

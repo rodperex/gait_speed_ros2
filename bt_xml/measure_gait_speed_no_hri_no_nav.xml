@@ -2,41 +2,22 @@
 <root main_tree_to_execute="BehaviorTree">
     <!-- ////////// -->
     <BehaviorTree ID="BehaviorTree">
-        <Sequence>
-            <Timeout msec="3000">
-                <RetryUntilSuccessful num_attempts="-1">
-                    <Condition ID="IsDetected" best_detection="{patient}" confidence="0.6" interest="person" max_depth="20" max_entities="1" order="depth"/>
-                </RetryUntilSuccessful>
-            </Timeout>
-            <Action ID="Identify" confidence="0.6" detection="{patient}" entity_to_identify="patient"/>
-            <Timeout msec="15000">
-                <SubTree ID="align"/>
-            </Timeout>
-            <SubTree ID="gait_speed_dist_no_speak" __shared_blackboard="true"/>
-        </Sequence>
-    </BehaviorTree>
-    <!-- ////////// -->
-    <BehaviorTree ID="align">
-        <ReactiveFallback>
-            <ForceFailure>
-                <Action ID="Identify" confidence="0.0" detection="{detection}" entity_to_identify="patient"/>
-            </ForceFailure>
-            <Condition ID="IsInFront" direction="{dir}" entity_to_identify="patient"/>
-            <Action ID="Spin" angle="{dir}" forever="true" speed="0.3"/>
-        </ReactiveFallback>
+        <Parallel failure_threshold="1" success_threshold="1">
+            <Sequence>
+                <Action ID="StartTest"/>
+                <SubTree ID="check_test_started" __shared_blackboard="true"/>
+                <SubTree ID="measure_gait_speed" __shared_blackboard="true"/>
+            </Sequence>
+            <RetryUntilSuccessful num_attempts="-1">
+                <SubTree ID="stay_aligned" __shared_blackboard="true"/>
+            </RetryUntilSuccessful>
+        </Parallel>
     </BehaviorTree>
     <!-- ////////// -->
     <BehaviorTree ID="check_test_started">
         <Timeout msec="20000">
             <RetryUntilSuccessful num_attempts="-1">
-                <ReactiveFallback>
-                    <Condition ID="HasPersonStarted" min_distance="0.2"/>
-                    <Timeout msec="1000">
-                        <ForceFailure>
-                            <Action ID="Speak" param="" say_text="Comienza a caminar"/>
-                        </ForceFailure>
-                    </Timeout>
-                </ReactiveFallback>
+                <Condition ID="HasPersonStarted" min_distance="0.2" person_frame="patient"/>
             </RetryUntilSuccessful>
         </Timeout>
     </BehaviorTree>
@@ -71,24 +52,30 @@
                 </Inverter>
                 <Action ID="FollowPerson"/>
             </ReactiveSequence>
-            <Action ID="EndTest"/>
+            <Action ID="EndTest" result=""/>
         </Sequence>
     </BehaviorTree>
     <!-- ////////// -->
-    <BehaviorTree ID="gait_speed_dist_no_speak">
-        <Sequence>
-            <Action ID="StartTest"/>
-            <ReactiveSequence>
+    <BehaviorTree ID="measure_gait_speed">
+        <ReactiveSequence>
+            <Action ID="CheckEndTest"/>
+            <Action ID="EndTest" result=""/>
+        </ReactiveSequence>
+    </BehaviorTree>
+    <!-- ////////// -->
+    <BehaviorTree ID="stay_aligned">
+        <ForceFailure>
+            <Sequence>
+                <Action ID="GetDetectionFromTF" detection="{patient}" frame="patient"/>
                 <ReactiveFallback>
-                    <Timeout msec="3000">
-                        <SubTree ID="find_patient_rotating" __shared_blackboard="true"/>
-                    </Timeout>
-                    <Action ID="NavigateTo" distance_tolerance="0.5" tf_frame="patient" will_finish="yes" x="" y=""/>
+                    <ForceFailure>
+                        <Action ID="Identify" confidence="0.0" detection="{patient}" entity_to_identify="patient"/>
+                    </ForceFailure>
+                    <Condition ID="IsInFront" direction="{dir}" entity_to_identify="patient"/>
+                    <Action ID="Spin" angle="{dir}" forever="true" speed="0.1"/>
                 </ReactiveFallback>
-                <Action ID="CheckEndTest"/>
-                <Action ID="EndTest"/>
-            </ReactiveSequence>
-        </Sequence>
+            </Sequence>
+        </ForceFailure>
     </BehaviorTree>
     <!-- ////////// -->
     <TreeNodesModel>
@@ -96,20 +83,24 @@
         <Action ID="DialogConfirmation">
             <input_port default="en" name="language"/>
         </Action>
+        <Condition ID="DistanceReached">
+            <input_port name="distance"/>
+        </Condition>
         <Action ID="EndTest">
-            <output_port name="time">Time needed to complete the gait speed test</output_port>
+            <output_port name="result">Time needed to complete the gait speed test</output_port>
         </Action>
         <Action ID="FilterEntity">
             <inout_port name="frame"/>
             <inout_port name="lambda"/>
         </Action>
         <Action ID="FollowPerson"/>
-        <Action ID="GetDetectionFromTf">
+        <Action ID="GetDetectionFromTF">
             <output_port name="detection"/>
             <input_port name="frame"/>
         </Action>
         <Condition ID="HasPersonStarted">
             <input_port default="0.2" name="min_distance"/>
+            <input_port name="person_frame"/>
         </Condition>
         <Action ID="Identify">
             <input_port name="confidence"/>
@@ -127,6 +118,9 @@
         <Condition ID="IsInFront">
             <output_port name="direction"/>
             <input_port name="entity_to_identify"/>
+        </Condition>
+        <Condition ID="IsInView">
+            <input_port name="frame"/>
         </Condition>
         <Condition ID="IsPointing">
             <output_port name="detection"/>
@@ -168,7 +162,7 @@
         </Action>
         <Action ID="Speak">
             <input_port name="param"/>
-            <input_port name="say_text"/>
+            <input_port name="speech_text"/>
         </Action>
         <Action ID="Spin">
             <input_port name="angle"/>
@@ -177,7 +171,7 @@
         </Action>
         <Action ID="StartTest"/>
         <Condition ID="TargetReached"/>
-        <SubTree ID="align"/>
+        <Condition ID="TargetReachedStatic"/>
         <SubTree ID="check_test_started">
             <input_port default="true" name="__shared_blackboard">If false (default), the Subtree has an isolated blackboard and needs port remapping</input_port>
         </SubTree>
@@ -199,10 +193,17 @@
         <SubTree ID="gait_speed_dist_following">
             <input_port default="false" name="__shared_blackboard">If false (default), the Subtree has an isolated blackboard and needs port remapping</input_port>
         </SubTree>
-        <SubTree ID="gait_speed_dist_no_speak">
+        <Condition ID="isMyPerson">
+            <input_port name="person_frame"/>
+        </Condition>
+        <SubTree ID="listen"/>
+        <SubTree ID="measure_gait_speed">
             <input_port default="true" name="__shared_blackboard">If false (default), the Subtree has an isolated blackboard and needs port remapping</input_port>
         </SubTree>
-        <SubTree ID="listen"/>
+        <SubTree ID="provide_instructions"/>
+        <SubTree ID="stay_aligned">
+            <input_port default="true" name="__shared_blackboard">If false (default), the Subtree has an isolated blackboard and needs port remapping</input_port>
+        </SubTree>
     </TreeNodesModel>
     <!-- ////////// -->
 </root>

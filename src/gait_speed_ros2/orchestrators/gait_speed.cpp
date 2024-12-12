@@ -67,7 +67,7 @@ GaitSpeed::control_cycle()
 
   if (!started_) {
     RCLCPP_INFO(get_logger(), "Not started yet");
-    return;
+    // return;
   }
 
   switch (state_) {
@@ -171,7 +171,7 @@ GaitSpeed::go_to_state(State state)
 bool
 GaitSpeed::check_behavior_finished()
 {
-  return last_status_ != "RUNNING";
+  return last_status_ == "SUCCESS" || last_status_ == "FAILURE";
 }
 
 

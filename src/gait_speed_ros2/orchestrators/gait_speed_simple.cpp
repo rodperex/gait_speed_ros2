@@ -25,11 +25,15 @@ GaitSpeedSimple::GaitSpeedSimple(BT::Blackboard::Ptr blackboard)
   blackboard_(blackboard)
 {
   this->declare_parameter<float>("value", 4.0);
+  this->declare_parameter<std::string>("mode", "distance");
+  
   double value = this->get_parameter("value").as_double();
+  std::string mode = this->get_parameter("mode").as_string();
 
-  RCLCPP_INFO(get_logger(), "GaitSpeedSimple constructor: %f meters", value);
+  RCLCPP_INFO(get_logger(), "GaitSpeedSimple constructor: %.2f meters", value);
   
   blackboard_->set("target", value);
+  blackboard_->set("mode", mode);
 
   status_sub_ = create_subscription<std_msgs::msg::String>(
     "behavior_status", 10, std::bind(&GaitSpeedSimple::status_callback, this, _1));
@@ -43,9 +47,9 @@ void
 GaitSpeedSimple::status_callback(std_msgs::msg::String::UniquePtr msg)
 {
   last_status_ = msg.get()->data;
-  
-  if (!started_) {
-    started_ = true;
+  RCLCPP_DEBUG(get_logger(), "Status received: %s", last_status_.c_str());
+  if (last_status_ == "DEACTIVATED") {
+    last_status_ = "";
   }
 }
 
@@ -54,33 +58,30 @@ GaitSpeedSimple::control_cycle()
 {
   std_msgs::msg::Float64 result_msg;
 
-  if (!started_) {
-    RCLCPP_INFO(get_logger(), "Not started yet");
-    return;
-  }
-
   switch (state_) {
     case State::INIT:
-      if (check_behavior_finished()) {
-          go_to_state(State::FIND);
-      } else {
-          go_to_state(State::STOP);
-      }
+      go_to_state(State::FIND);
       break;
     case State::FIND:
+      if(last_status_ == "") {
+        RCLCPP_INFO(get_logger(), "BT not started yet");
+        break;
+      }
       if (last_status_ == "SUCCESS") {
+        RCLCPP_INFO(get_logger(), "Patient found");
         go_to_state(State::MEASURE);
-      } else {
+      } else if (last_status_ == "FAILURE") {
+        RCLCPP_INFO(get_logger(), "Stopping FSM");
         go_to_state(State::STOP);
       }
       break;
     case State::MEASURE:
       if (check_behavior_finished()) {
+        RCLCPP_INFO(get_logger(), "Gait speed test finished");
         go_to_state(State::STOP);
       }
       break;
     case State::STOP:
-      clear_activation();
       if (last_status_ == "SUCCESS") {
         blackboard_->get("gait_speed_time", result_msg.data);
         RCLCPP_INFO(get_logger(), "Gait speed test finished successfully");
@@ -98,25 +99,36 @@ GaitSpeedSimple::control_cycle()
 void
 GaitSpeedSimple::go_to_state(State state)
 {
-  clear_activation();
+  // clear_activation();
   state_ = state;
+  last_status_ = "";
+
+  RCLCPP_INFO(get_logger(), "Going to state %d.", static_cast<int>(state_));
 
   switch (state_) {
+    case State::INIT:
+      RCLCPP_INFO(get_logger(), "State: INIT");
+      break;
     case State::FIND:
-      RCLCPP_INFO(get_logger(), "State: State::FIND");
-      add_activation("State::FIND_person");
+      RCLCPP_INFO(get_logger(), "State: FIND");
+      add_activation("find_patient");
       // on_activate(get_current_state());
       break;
     case State::MEASURE:
-      RCLCPP_INFO(get_logger(), "State: State::MEASURE");
-      add_activation("State::MEASURE_gait_speed_dist");
+      RCLCPP_INFO(get_logger(), "State: MEASURE");
+      remove_activation("find_patient");
+      add_activation("measure_gait_speed");
       // on_activate(get_current_state());
       break;
+    case State::STOP:
+      RCLCPP_INFO(get_logger(), "State: STOP");
+      remove_activation("measure_gait_speed");
+      // cleanup();
+      // deactivate();
+      
+      break;
     default:
-      state_ = State::STOP;
-      RCLCPP_INFO(get_logger(), "Deactivating");
-      cleanup();
-      deactivate();
+      RCLCPP_ERROR(get_logger(), "Unknown state in gait speed test");
       break;
   }
 }
@@ -124,7 +136,8 @@ GaitSpeedSimple::go_to_state(State state)
 bool
 GaitSpeedSimple::check_behavior_finished()
 {
-  return last_status_ != "RUNNING";
+  RCLCPP_DEBUG(get_logger(), "State %d. Checking behavior finished: %s",  static_cast<int>(state_), last_status_.c_str());
+  return last_status_ == "FAILURE" || last_status_ == "SUCCESS";
 }
 
 

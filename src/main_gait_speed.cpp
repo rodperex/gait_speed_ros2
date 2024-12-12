@@ -55,7 +55,12 @@ int main(int argc, char * argv[])
   plugins = {
     "speak_bt_node",
     "listen_bt_node",
-    "dialog_confirmation_bt_node"
+    "dialog_confirmation_bt_node",
+    "is_detected_bt_node",
+    "identify_bt_node",
+    "is_in_front_bt_node",
+    "spin_bt_node",
+    "get_detection_from_tf_bt_node"
   };
 
   auto explain_gait_speed_node = std::make_shared<gait_speed::BehaviorRunner>(
@@ -69,6 +74,7 @@ int main(int argc, char * argv[])
   plugins = {
     "start_test_bt_node",
     "spin_bt_node",
+    "is_in_view_bt_node",
     "identify_person_bt_node",
     "speak_bt_node",
     "check_end_test_bt_node",

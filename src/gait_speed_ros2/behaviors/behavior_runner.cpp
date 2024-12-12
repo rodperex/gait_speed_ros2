@@ -47,19 +47,21 @@ BehaviorRunner::control_cycle()
   std_msgs::msg::String msg;
   status_ = tree_.rootNode()->executeTick();
 
+  RCLCPP_DEBUG(get_logger(), "TICK. Node status: %s.", node_->get_current_state().label().c_str());
+
   switch (status_) {
     case BT::NodeStatus::SUCCESS:
-      RCLCPP_INFO(get_logger(), "Behavior tree executed successfully");
+      RCLCPP_INFO(get_logger(), "Behavior tree: SUCCESS");
       msg.data = "SUCCESS";
       status_pub_->publish(msg);
       break;
     case BT::NodeStatus::RUNNING:
-      RCLCPP_DEBUG(get_logger(), "Behavior tree is running");
+      RCLCPP_DEBUG(get_logger(), "Behavior tree: RUNNING");
       msg.data = "RUNNING";
       status_pub_->publish(msg);
       break;
     default:
-      RCLCPP_ERROR(get_logger(), "Behavior tree failed");
+      RCLCPP_ERROR(get_logger(), "Behavior tree: FAILURE");
       msg.data = "FAILURE";
       status_pub_->publish(msg);
       break;
@@ -101,6 +103,8 @@ BehaviorRunner::on_activate(const rclcpp_lifecycle::State & previous_state)
   timer_ =
     create_wall_timer(50ms, std::bind(&BehaviorRunner::control_cycle, this));
 
+  RCLCPP_INFO(get_logger(), "Timer created");
+
   return rclcpp_lifecycle::node_interfaces::LifecycleNodeInterface::CallbackReturn::SUCCESS;
 }
 
@@ -109,6 +113,9 @@ BehaviorRunner::on_deactivate(const rclcpp_lifecycle::State & previous_state)
 {
   (void)previous_state;
   RCLCPP_INFO(get_logger(), "BehaviorRunner(%s) on_deactivate", get_name());
+  std_msgs::msg::String msg;
+  msg.data = "DEACTIVATED";
+  status_pub_->publish(msg);
 
   timer_ = nullptr;
   status_pub_->on_deactivate();
