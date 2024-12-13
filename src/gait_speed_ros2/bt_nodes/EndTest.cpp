@@ -34,7 +34,7 @@ EndTest::tick()
         config().blackboard->get("time_elapsed", time_elapsed);
         
         if (time_elapsed > 0.0) {
-            RCLCPP_INFO(node_->get_logger(), "Test finished. Time: %f seconds", time_elapsed);
+            RCLCPP_INFO(node_->get_logger(), "Test finished. Time: %.2f seconds", time_elapsed);
             config().blackboard->set("gait_speed_result", time_elapsed);
             setOutput("result", time_elapsed);
             return BT::NodeStatus::SUCCESS;
