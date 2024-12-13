@@ -41,7 +41,8 @@ int main(int argc, char * argv[])
   plugins = {
     "is_detected_bt_node",
     "identify_bt_node",
-    "navigate_to_bt_node"
+    "navigate_to_bt_node",
+    "save_detection_in_bb_bt_node"
   };
 
   auto find_person_node = std::make_shared<gait_speed::BehaviorRunner>(
@@ -64,7 +65,8 @@ int main(int argc, char * argv[])
     "is_in_front_bt_node",
     "is_detected_bt_node",
     "activate_attention_bt_node",
-    "deactivate_attention_bt_node"
+    "deactivate_attention_bt_node",
+    "get_detection_from_bb_bt_node",
   };
 
   auto measure_node = std::make_shared<gait_speed::BehaviorRunner>(
