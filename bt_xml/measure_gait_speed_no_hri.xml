@@ -2,23 +2,20 @@
 <root main_tree_to_execute="BehaviorTree">
     <!-- ////////// -->
     <BehaviorTree ID="BehaviorTree">
-        <Parallel failure_threshold="1" success_threshold="1">
-            <Sequence>
-                <Timeout msec="3000">
-                    <RetryUntilSuccessful num_attempts="-1">
-                        <Condition ID="IsDetected" best_detection="{patient_detection}" confidence="0.6" frame="" frame_name="patient" interest="person" max_depth="50" max_entities="1" model="people" n_detections="" order="depth"/>
-                    </RetryUntilSuccessful>
-                </Timeout>
+        <Sequence>
+            <Timeout msec="3000">
                 <RetryUntilSuccessful num_attempts="-1">
-                    <Action ID="StartTest" frame_name="patient_1"/>
+                    <Condition ID="IsDetected" best_detection="{patient_detection}" confidence="0.6" frame="" frame_name="patient" interest="person" max_depth="50" max_entities="1" model="people" n_detections="" order="depth"/>
                 </RetryUntilSuccessful>
-                <SubTree ID="check_test_started" __shared_blackboard="true"/>
-                <SubTree ID="measure_gait_speed" __shared_blackboard="true"/>
-            </Sequence>
+            </Timeout>
+            <Action ID="ActivateAttention" frame_id="patient_1" what="base"/>
             <RetryUntilSuccessful num_attempts="-1">
-                <SubTree ID="stay_aligned" __shared_blackboard="true"/>
+                <Action ID="StartTest" frame_name="patient_1"/>
             </RetryUntilSuccessful>
-        </Parallel>
+            <SubTree ID="check_test_started" __shared_blackboard="true"/>
+            <SubTree ID="measure_gait_speed" __shared_blackboard="true"/>
+            <Action ID="DeactivateAttention" what="base"/>
+        </Sequence>
     </BehaviorTree>
     <!-- ////////// -->
     <BehaviorTree ID="check_test_started">
@@ -66,38 +63,45 @@
         </Sequence>
     </BehaviorTree>
     <!-- ////////// -->
+    <BehaviorTree ID="locate_person">
+        <Sequence>
+            <ReactiveFallback>
+                <Condition ID="IsInView" frame="patient_1"/>
+                <ForceFailure>
+                    <Action ID="DeactivateAttention" what="base"/>
+                </ForceFailure>
+                <Sequence>
+                    <Action ID="NavigateTo" distance_tolerance="0.5" tf_frame="patient_1" will_finish="yes" x="" y=""/>
+                    <Action ID="ActivateAttention" frame_id="patient_1" what="base"/>
+                </Sequence>
+            </ReactiveFallback>
+            <ReactiveFallback>
+                <Action ID="Identify" confidence="0.0" detection="{patient_detection}" entity_to_identify="patient_1"/>
+                <Action ID="Spin" angle="-1" forever="true" speed="0.3"/>
+            </ReactiveFallback>
+        </Sequence>
+    </BehaviorTree>
+    <!-- ////////// -->
     <BehaviorTree ID="measure_gait_speed">
         <ReactiveSequence>
-            <ReactiveFallback>
-                <Timeout msec="3000">
-                    <Condition ID="IsInView" frame="patient_1"/>
-                </Timeout>
-                <Action ID="NavigateTo" distance_tolerance="0.5" tf_frame="patient_1" will_finish="yes" x="" y=""/>
-            </ReactiveFallback>
+            <SubTree ID="locate_person" __shared_blackboard="true"/>
             <Action ID="Identify" confidence="0.0" detection="{patient_detection}" entity_to_identify="patient_1"/>
-            <Action ID="CheckEndTest" frame_name="patient_1"/>
+            <Action ID="CheckEndTest" frame_name="patient_1" mode="distance"/>
             <Action ID="EndTest" result=""/>
         </ReactiveSequence>
     </BehaviorTree>
     <!-- ////////// -->
-    <BehaviorTree ID="stay_aligned">
-        <ForceFailure>
-            <Sequence>
-                <Action ID="GetDetectionFromTF" detection="{patient}" frame="patient_1"/>
-                <ReactiveFallback>
-                    <ForceFailure>
-                        <Action ID="Identify" confidence="0.0" detection="{patient}" entity_to_identify="focus"/>
-                    </ForceFailure>
-                    <Condition ID="IsInFront" direction="{dir}" entity_to_identify="focus"/>
-                    <Action ID="Spin" angle="{dir}" forever="true" speed="0.1"/>
-                </ReactiveFallback>
-            </Sequence>
-        </ForceFailure>
-    </BehaviorTree>
-    <!-- ////////// -->
     <TreeNodesModel>
+        <Action ID="ActivateAttention">
+            <input_port name="frame_id"/>
+            <input_port name="what"/>
+        </Action>
         <Action ID="CheckEndTest">
             <input_port name="frame_name"/>
+            <input_port name="mode"/>
+        </Action>
+        <Action ID="DeactivateAttention">
+            <input_port name="what"/>
         </Action>
         <Action ID="DialogConfirmation">
             <input_port default="en" name="language"/>
@@ -223,13 +227,13 @@
             <input_port name="person_frame"/>
         </Condition>
         <SubTree ID="listen"/>
+        <SubTree ID="locate_person">
+            <input_port default="true" name="__shared_blackboard">If false (default), the Subtree has an isolated blackboard and needs port remapping</input_port>
+        </SubTree>
         <SubTree ID="measure_gait_speed">
             <input_port default="true" name="__shared_blackboard">If false (default), the Subtree has an isolated blackboard and needs port remapping</input_port>
         </SubTree>
         <SubTree ID="provide_instructions"/>
-        <SubTree ID="stay_aligned">
-            <input_port default="true" name="__shared_blackboard">If false (default), the Subtree has an isolated blackboard and needs port remapping</input_port>
-        </SubTree>
     </TreeNodesModel>
     <!-- ////////// -->
 </root>

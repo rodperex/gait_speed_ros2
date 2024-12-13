@@ -4,7 +4,7 @@
     <BehaviorTree ID="BehaviorTree">
         <Timeout msec="3000">
             <RetryUntilSuccessful num_attempts="-1">
-                <Condition ID="IsDetected" best_detection="{patient_detection}" confidence="0.6" frame_name="patient" interest="person" max_depth="50" max_entities="1" order="depth"/>
+                <Condition ID="IsDetected" best_detection="{patient_detection}" confidence="0.6" frame="" frame_name="patient" interest="person" max_depth="50" max_entities="1" model="people" n_detections="" order="depth"/>
             </RetryUntilSuccessful>
         </Timeout>
     </BehaviorTree>
@@ -41,10 +41,13 @@
         <Condition ID="IsDetected">
             <output_port name="best_detection"/>
             <input_port default="0.6" name="confidence"/>
+            <output_port name="frame"/>
             <input_port name="frame_name"/>
             <input_port default="person" name="interest"/>
             <input_port default="2" name="max_depth"/>
             <input_port default="1" name="max_entities"/>
+            <input_port name="model"/>
+            <output_port name="n_detections"/>
             <input_port default="depth_nearest" name="order"/>
         </Condition>
         <Condition ID="IsInFront">

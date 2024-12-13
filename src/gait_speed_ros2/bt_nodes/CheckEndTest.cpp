@@ -67,7 +67,7 @@ CheckEndTest::get_distance_travelled()
       tf2::Stamped<tf2::Transform> odom2patient_at_start;
       config().blackboard->get("map2start", odom2patient_at_start);
 
-      auto odom2patient_msg = tf_buffer_.lookupTransform("odom", frame_name_, tf2::TimePointZero);
+      auto odom2patient_msg = tf_buffer_.lookupTransform("map", frame_name_, tf2::TimePointZero);
       tf2::Stamped<tf2::Transform> odom2patient;
       tf2::fromMsg(odom2patient_msg, odom2patient);
 

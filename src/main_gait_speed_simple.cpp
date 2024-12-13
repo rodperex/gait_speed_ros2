@@ -62,7 +62,10 @@ int main(int argc, char * argv[])
     "navigate_to_bt_node",
     "get_detection_from_tf_bt_node",
     "is_in_front_bt_node",
-    "is_detected_bt_node"};
+    "is_detected_bt_node",
+    "activate_attention_bt_node",
+    "deactivate_attention_bt_node"
+  };
 
   auto measure_node = std::make_shared<gait_speed::BehaviorRunner>(
     blackboard,
