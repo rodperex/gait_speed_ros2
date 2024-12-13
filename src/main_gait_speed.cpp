@@ -41,14 +41,15 @@ int main(int argc, char * argv[])
   plugins = {
     "is_pointing_bt_node",
     "spin_bt_node",
-    "identify_person_bt_node",
-    "navigate_to_bt_node"
+    "identify_bt_node",
+    "navigate_to_bt_node",
+    "save_detection_in_bb_bt_node"
   };
 
   auto find_person_node = std::make_shared<gait_speed::BehaviorRunner>(
     blackboard,
     "find_patient",
-    "/bt_xml/find_person.xml",
+    "/bt_xml/find_patient.xml",
     plugins
   );
 
@@ -56,11 +57,11 @@ int main(int argc, char * argv[])
     "speak_bt_node",
     "listen_bt_node",
     "dialog_confirmation_bt_node",
-    "is_detected_bt_node",
     "identify_bt_node",
     "is_in_front_bt_node",
-    "spin_bt_node",
-    "get_detection_from_tf_bt_node"
+    "save_detection_in_bb_bt_node",
+    "activate_attention_bt_node",
+    "deactivate_attention_bt_node",
   };
 
   auto explain_gait_speed_node = std::make_shared<gait_speed::BehaviorRunner>(
@@ -75,10 +76,19 @@ int main(int argc, char * argv[])
     "start_test_bt_node",
     "spin_bt_node",
     "is_in_view_bt_node",
-    "identify_person_bt_node",
-    "speak_bt_node",
+    "identify_bt_node",
     "check_end_test_bt_node",
-    "end_test_bt_node"};
+    "end_test_bt_node",
+    "has_person_started_bt_node",
+    "navigate_to_bt_node",
+    "get_detection_from_tf_bt_node",
+    "is_in_front_bt_node",
+    "is_detected_bt_node",
+    "activate_attention_bt_node",
+    "deactivate_attention_bt_node",
+    "get_detection_from_bb_bt_node",
+    "speak_bt_node",
+  };
 
   auto measure_node = std::make_shared<gait_speed::BehaviorRunner>(
     blackboard,
