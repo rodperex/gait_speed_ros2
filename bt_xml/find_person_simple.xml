@@ -2,11 +2,14 @@
 <root main_tree_to_execute="BehaviorTree">
     <!-- ////////// -->
     <BehaviorTree ID="BehaviorTree">
-        <Timeout msec="3000">
-            <RetryUntilSuccessful num_attempts="-1">
-                <Condition ID="IsDetected" best_detection="{patient_detection}" confidence="0.6" frame="" frame_name="patient" interest="person" max_depth="50" max_entities="1" model="people" n_detections="" order="depth"/>
-            </RetryUntilSuccessful>
-        </Timeout>
+        <Sequence>
+            <Timeout msec="3000">
+                <RetryUntilSuccessful num_attempts="-1">
+                    <Condition ID="IsDetected" best_detection="{patient_detection}" confidence="0.6" frame="" frame_name="patient" interest="person" max_depth="50" max_entities="1" model="people" n_detections="" order="depth"/>
+                </RetryUntilSuccessful>
+            </Timeout>
+            <Action ID="SaveDetectionInBB" detection="{patient_detection}" key="detection"/>
+        </Sequence>
     </BehaviorTree>
     <!-- ////////// -->
     <TreeNodesModel>
@@ -94,6 +97,10 @@
         </Action>
         <Action ID="PublishCurrentInterestPose">
             <input_port name="interest">Current interest of the robot. A static transform in relation to odom will be published</input_port>
+        </Action>
+        <Action ID="SaveDetectionInBB">
+            <input_port name="detection"/>
+            <input_port name="key"/>
         </Action>
         <Action ID="Speak">
             <input_port name="param"/>

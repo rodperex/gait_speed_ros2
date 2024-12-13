@@ -3,15 +3,10 @@
     <!-- ////////// -->
     <BehaviorTree ID="BehaviorTree">
         <Sequence>
-            <Timeout msec="3000">
-                <RetryUntilSuccessful num_attempts="-1">
-                    <Condition ID="IsDetected" best_detection="{patient_detection}" confidence="0.6" frame="" frame_name="patient" interest="person" max_depth="50" max_entities="1" model="people" n_detections="" order="depth"/>
-                </RetryUntilSuccessful>
-            </Timeout>
+            <Action ID="GetDetectionFromBB" detection="{patient_detection}" key="detection"/>
+            <Action ID="Identify" confidence="0.0" detection="{patient_detection}" entity_to_identify="patient_1"/>
             <Action ID="ActivateAttention" frame_id="patient_1" what="base"/>
-            <RetryUntilSuccessful num_attempts="-1">
-                <Action ID="StartTest" frame_name="patient_1"/>
-            </RetryUntilSuccessful>
+            <Action ID="StartTest" frame_name="patient_1"/>
             <SubTree ID="check_test_started" __shared_blackboard="true"/>
             <SubTree ID="measure_gait_speed" __shared_blackboard="true"/>
             <Action ID="DeactivateAttention" what="base"/>
@@ -110,13 +105,17 @@
             <input_port name="distance"/>
         </Condition>
         <Action ID="EndTest">
-            <output_port name="result">Time needed to complete the gait speed test</output_port>
+            <output_port name="time">Time needed to complete the gait speed test</output_port>
         </Action>
         <Action ID="FilterEntity">
             <inout_port name="frame"/>
             <inout_port name="lambda"/>
         </Action>
         <Action ID="FollowPerson"/>
+        <Action ID="GetDetectionFromBB">
+            <output_port name="detection"/>
+            <input_port name="key"/>
+        </Action>
         <Action ID="GetDetectionFromTF">
             <output_port name="detection"/>
             <input_port name="frame"/>
@@ -126,25 +125,23 @@
             <input_port name="person_frame"/>
         </Condition>
         <Action ID="Identify">
-            <input_port name="confidence"/>
             <input_port name="detection"/>
             <input_port name="entity_to_identify"/>
         </Action>
         <Condition ID="IsDetected">
-            <output_port name="best_detection"/>
             <input_port default="0.6" name="confidence"/>
-            <output_port name="frame"/>
-            <input_port name="frame_name"/>
+            <output_port name="frames"/>
             <input_port default="person" name="interest"/>
             <input_port default="2" name="max_depth"/>
             <input_port default="1" name="max_entities"/>
-            <input_port name="model"/>
-            <output_port name="n_detections"/>
             <input_port default="depth_nearest" name="order"/>
         </Condition>
         <Condition ID="IsInFront">
+            <input_port name="confidence"/>
             <output_port name="direction"/>
             <input_port name="entity_to_identify"/>
+            <input_port name="target"/>
+            <input_port name="what"/>
         </Condition>
         <Condition ID="IsInView">
             <input_port name="frame"/>
@@ -188,7 +185,7 @@
             <input_port name="interest">Current interest of the robot. A static transform in relation to odom will be published</input_port>
         </Action>
         <Action ID="Speak">
-            <input_port name="param"/>
+            <input_port name="params"/>
             <input_port name="speech_text"/>
         </Action>
         <Action ID="Spin">
@@ -233,7 +230,9 @@
         <SubTree ID="measure_gait_speed">
             <input_port default="true" name="__shared_blackboard">If false (default), the Subtree has an isolated blackboard and needs port remapping</input_port>
         </SubTree>
-        <SubTree ID="provide_instructions"/>
+        <SubTree ID="provide_instructions">
+            <input_port default="true" name="__shared_blackboard">If false (default), the Subtree has an isolated blackboard and needs port remapping</input_port>
+        </SubTree>
     </TreeNodesModel>
     <!-- ////////// -->
 </root>

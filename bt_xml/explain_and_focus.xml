@@ -9,7 +9,7 @@
                 </RetryUntilSuccessful>
             </Timeout>
             <Action ID="Identify" confidence="0.0" detection="{patient}" entity_to_identify="patient_1"/>
-            <Action ID="ActivateAttention" frame_id="patpatient_1ient" what="base"/>
+            <Action ID="ActivateAttention" frame_id="patient_1" what="base"/>
             <SubTree ID="provide_instructions" __shared_blackboard="true"/>
             <Action ID="DeactivateAttention" what="base"/>
         </Sequence>
@@ -119,25 +119,23 @@
             <input_port name="frame"/>
         </Action>
         <Action ID="Identify">
-            <input_port name="confidence"/>
             <input_port name="detection"/>
             <input_port name="entity_to_identify"/>
         </Action>
         <Condition ID="IsDetected">
-            <output_port name="best_detection"/>
             <input_port default="0.6" name="confidence"/>
-            <output_port name="frame"/>
-            <input_port name="frame_name"/>
+            <output_port name="frames"/>
             <input_port default="person" name="interest"/>
             <input_port default="2" name="max_depth"/>
             <input_port default="1" name="max_entities"/>
-            <input_port name="model"/>
-            <output_port name="n_detections"/>
             <input_port default="depth_nearest" name="order"/>
         </Condition>
         <Condition ID="IsInFront">
+            <input_port name="confidence"/>
             <output_port name="direction"/>
             <input_port name="entity_to_identify"/>
+            <input_port name="target"/>
+            <input_port name="what"/>
         </Condition>
         <Condition ID="IsPointing">
             <output_port name="detection"/>
@@ -178,8 +176,8 @@
             <input_port name="interest">Current interest of the robot. A static transform in relation to odom will be published</input_port>
         </Action>
         <Action ID="Speak">
-            <input_port name="params"/>
-            <input_port name="speech_text"/>
+            <input_port name="param"/>
+            <input_port name="say_text"/>
         </Action>
         <Action ID="Spin">
             <input_port name="angle"/>
@@ -189,9 +187,7 @@
         <Action ID="StartTest"/>
         <Condition ID="TargetReached"/>
         <Condition ID="TargetReachedStatic"/>
-        <SubTree ID="confirm">
-            <input_port default="true" name="__shared_blackboard">If false (default), the Subtree has an isolated blackboard and needs port remapping</input_port>
-        </SubTree>
+        <SubTree ID="confirm"/>
         <SubTree ID="confirm_old">
             <input_port default="false" name="__shared_blackboard">If false (default), the Subtree has an isolated blackboard and needs port remapping</input_port>
         </SubTree>

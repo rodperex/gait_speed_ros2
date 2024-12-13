@@ -2,13 +2,13 @@
 <root main_tree_to_execute="BehaviorTree">
     <!-- ////////// -->
     <BehaviorTree ID="BehaviorTree">
-        <Action ID="Speak" params="" speech_text="No he sido capaz de medir su velocidad de la marcha, lo siento"/>
+        <Action ID="Speak" params="" speech_text="Lo siento, ha habido un error"/>
     </BehaviorTree>
     <!-- ////////// -->
     <TreeNodesModel>
         <Action ID="Speak">
-            <input_port name="param"/>
-            <input_port name="say_text"/>
+            <input_port name="params"/>
+            <input_port name="speech_text"/>
         </Action>
     </TreeNodesModel>
     <!-- ////////// -->
