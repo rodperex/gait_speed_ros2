@@ -26,10 +26,10 @@ CheckEndTest::CheckEndTest(
   tf_listener_(tf_buffer_)
 {
   config().blackboard->get("node", node_);
-  config().blackboard->get("mode", mode_);
-  config().blackboard->get("target", target_);
+  config().blackboard->get("target", target_); // aquí está el error
 
   getInput("frame_name", frame_name_);
+  getInput("mode", mode_);
 }
 
 BT::NodeStatus
@@ -39,23 +39,23 @@ CheckEndTest::tick()
   RCLCPP_DEBUG(node_->get_logger(), "Target: %.2f, Mode: %s.", target_, mode_.c_str());
   rclcpp::spin_some(node_->get_node_base_interface());
 
-  float target;
+  float current;
   if (mode_ == "distance") {
-    target = get_distance_travelled();
+    current = get_distance_travelled();
     RCLCPP_INFO(node_->get_logger(), "Distance travelled: %.2f m.", get_distance_travelled());
-    if (target >= target_) {
+    if (current >= target_) {
       RCLCPP_INFO(node_->get_logger(), "Target reached. Finishing test.");
       config().blackboard->set("time_elapsed", get_time_elapsed());
       return BT::NodeStatus::SUCCESS;
     }
   } else if (mode_ == "time") {
-    target = get_time_elapsed();
-    if (target >= target_) {
+    current = get_time_elapsed();
+    if (current >= target_) {
       config().blackboard->set("distance_travelled", get_distance_travelled());
       return BT::NodeStatus::SUCCESS;
     }
   }
-  RCLCPP_INFO(node_->get_logger(), "Target (%.2f) not reached. Continuing test.", target_);
+  // RCLCPP_INFO(node_->get_logger(), "Target (%.2f) not reached. Continuing test.", target_);
   return BT::NodeStatus::RUNNING;
 }
 
@@ -76,7 +76,7 @@ CheckEndTest::get_distance_travelled()
     }
     catch (tf2::TransformException &ex)
     {
-      RCLCPP_WARN(node_->get_logger(), "%s", ex.what());
+      RCLCPP_WARN(node_->get_logger(), "[CHECK_END_TEST]: %s", ex.what());
       return -1;
     }
   return 0.0;

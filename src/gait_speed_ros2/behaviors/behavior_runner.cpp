@@ -93,8 +93,9 @@ BehaviorRunner::on_activate(const rclcpp_lifecycle::State & previous_state)
     RCLCPP_INFO(get_logger(), "Plugin loaded: %s", plugin.c_str());
   }
 
-  RCLCPP_INFO(get_logger(), "Creating BT from XML");
+  RCLCPP_INFO(get_logger(), "Getting node from blackboard");
   blackboard_->get("node", node_);
+  RCLCPP_INFO(get_logger(), "Creating BT from XML");
   tree_ = factory.createTreeFromFile(xml_file, blackboard_);
   RCLCPP_INFO(get_logger(), "BT created from XML");
 

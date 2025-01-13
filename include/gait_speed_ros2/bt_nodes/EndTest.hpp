@@ -40,7 +40,8 @@ public:
   {
     return BT::PortsList(
       {
-        BT::OutputPort<float>("result", "Result of the test")
+        BT::OutputPort<float>("result", "Result of the test"),
+        BT::InputPort<std::string>("mode"),
       });
   }
 

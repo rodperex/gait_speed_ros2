@@ -2,7 +2,7 @@ gait_speed_node:
   ros__parameters:
     use_sim_time: true
     tf_frame_map: map # map / base_footprint
-    tf_frame_camera: head_front_camera_optical_frame # oak_rgb_camera_optical_frame / head_front_camera_optical_frame
+    tf_frame_camera: head_front_camera_optical_frame # oak_rgb_camera_optical_frame / head_front_camera_optical_frame / camera_rgb_optical_frame
     robot_moves: false # true or false
     mode: "distance" # "time" or "distance"
-    value: 1.0 # seconds or meters
+    value: 1.2 # seconds or meters

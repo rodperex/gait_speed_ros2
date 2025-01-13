@@ -21,7 +21,7 @@ EndTest::EndTest(const std::string & xml_tag_name, const BT::NodeConfiguration &
 : BT::ActionNodeBase(xml_tag_name, conf)
 {
     config().blackboard->get("node", node_);
-    config().blackboard->get("mode", mode_);
+    getInput("mode", mode_);
 }
 
 BT::NodeStatus

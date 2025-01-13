@@ -27,7 +27,7 @@ GaitSpeedSimple::GaitSpeedSimple(BT::Blackboard::Ptr blackboard)
   this->declare_parameter<float>("value", 4.0);
   this->declare_parameter<std::string>("mode", "distance");
   
-  double value = this->get_parameter("value").as_double();
+  float value = this->get_parameter("value").as_double();
   std::string mode = this->get_parameter("mode").as_string();
 
   RCLCPP_INFO(get_logger(), "GaitSpeedSimple constructor: %.2f meters", value);
