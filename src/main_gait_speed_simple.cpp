@@ -28,6 +28,7 @@ int main(int argc, char * argv[])
   node->trigger_transition(lifecycle_msgs::msg::Transition::TRANSITION_ACTIVATE);
 
   auto blackboard = BT::Blackboard::create();
+  blackboard->clear();
   blackboard->set("node", node);
 
   // orchestrator
@@ -98,6 +99,8 @@ int main(int argc, char * argv[])
       gait_speed_node->trigger_transition(lifecycle_msgs::msg::Transition::TRANSITION_DEACTIVATE);
       node->trigger_transition(lifecycle_msgs::msg::Transition::TRANSITION_DEACTIVATE);
 
+      sleep(1);
+
       break;
     }
   }
@@ -105,6 +108,10 @@ int main(int argc, char * argv[])
   RCLCPP_INFO(node->get_logger(), "gait_speed_node state: %s", gait_speed_node->get_current_state().label().c_str());
   RCLCPP_INFO(node->get_logger(), "find_person_node state: %s", find_person_node->get_current_state().label().c_str());
   RCLCPP_INFO(node->get_logger(), "measure_node state: %s", measure_node->get_current_state().label().c_str());
+
+  float resutlt = blackboard->get<float>("gait_speed_result");
+
+  RCLCPP_INFO(node->get_logger(), "\n*************************************************************\nGait speed result: %.2f seconds", resutlt);
 
   rclcpp::shutdown();
 
