@@ -42,9 +42,9 @@ CheckEndTest::tick()
   float current;
   if (mode_ == "distance") {
     current = get_distance_travelled();
-    RCLCPP_INFO(node_->get_logger(), "Distance travelled: %.2f m.", get_distance_travelled());
+    RCLCPP_INFO(node_->get_logger(), "[CHECK_END_TEST]: Distance travelled: %.2f m.", get_distance_travelled());
     if (current >= target_) {
-      RCLCPP_INFO(node_->get_logger(), "Target reached. Finishing test.");
+      RCLCPP_INFO(node_->get_logger(), "[CHECK_END_TEST]: Target reached. Finishing test.");
       config().blackboard->set("time_elapsed", get_time_elapsed());
       return BT::NodeStatus::SUCCESS;
     }
@@ -55,7 +55,7 @@ CheckEndTest::tick()
       return BT::NodeStatus::SUCCESS;
     }
   }
-  // RCLCPP_INFO(node_->get_logger(), "Target (%.2f) not reached. Continuing test.", target_);
+  RCLCPP_INFO(node_->get_logger(), "Target (%.2f/%.2f) not reached. Continuing test.", current, target_);
   return BT::NodeStatus::RUNNING;
 }
 
@@ -64,14 +64,14 @@ CheckEndTest::get_distance_travelled()
 {
   try
     {
-      tf2::Stamped<tf2::Transform> odom2patient_at_start;
-      config().blackboard->get("map2start", odom2patient_at_start);
+      tf2::Stamped<tf2::Transform> map2patient_at_start;
+      config().blackboard->get("map2start", map2patient_at_start);
 
-      auto odom2patient_msg = tf_buffer_.lookupTransform("map", frame_name_, tf2::TimePointZero);
-      tf2::Stamped<tf2::Transform> odom2patient;
-      tf2::fromMsg(odom2patient_msg, odom2patient);
+      auto map2patient_msg = tf_buffer_.lookupTransform("map", frame_name_, tf2::TimePointZero);
+      tf2::Stamped<tf2::Transform> map2patient;
+      tf2::fromMsg(map2patient_msg, map2patient);
 
-      auto person_at_start2person = odom2patient_at_start.inverse() * odom2patient;
+      auto person_at_start2person = map2patient_at_start.inverse() * map2patient;
       return person_at_start2person.getOrigin().length();
     }
     catch (tf2::TransformException &ex)
@@ -87,11 +87,12 @@ CheckEndTest::get_time_elapsed()
 {
   rclcpp::Time start_time, current_time;
   config().blackboard->get("start_time", start_time);
+  RCLCPP_INFO(node_->get_logger(), "[CHECK_END_TEST]: Start time: %.2f. End time: %.2f.", start_time.seconds(), current_time.seconds());
   current_time = node_->now();
   rclcpp::Duration duration = current_time - start_time;  
-  RCLCPP_INFO(node_->get_logger(), "Time elapsed: %.2f seconds.", duration.nanoseconds() / 1e9);
-  return duration.nanoseconds() / 1e9;
-
+  RCLCPP_INFO(node_->get_logger(), "[CHECK_END_TEST]: Time elapsed: %.2f seconds.", duration.seconds());
+  // return duration.nanoseconds() / 1e9;
+  return duration.seconds();
 }
 
 void

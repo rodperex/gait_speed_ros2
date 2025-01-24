@@ -36,14 +36,14 @@ BT::NodeStatus
 HasPersonStarted::tick()
 {
   RCLCPP_DEBUG(node_->get_logger(), "HAS_PERSON_STARTED");
-  RCLCPP_INFO(node_->get_logger(), "Distance travelled (min = %.2f): %.2f", min_distance_, get_distance_travelled());
+  RCLCPP_DEBUG(node_->get_logger(), "[HAS_PERSON_STARTED]: Distance travelled (%.2f/%.2f)", get_distance_travelled(), min_distance_);
 
   if (get_distance_travelled() < min_distance_) {
     RCLCPP_DEBUG(node_->get_logger(), "Person has not started yet. Distance travelled: %.2f", get_distance_travelled());
     config().blackboard->set("start_time", node_->now());
     return BT::NodeStatus::FAILURE;
   } else {
-    RCLCPP_INFO(node_->get_logger(), "Person has started the test. Moved %.2f meters.", get_distance_travelled());
+    RCLCPP_INFO(node_->get_logger(), "[HAS_PERSON_STARTED]: Test started (%.2f/%.2f).", get_distance_travelled(), min_distance_);
     return BT::NodeStatus::SUCCESS;
   }
 }
@@ -62,7 +62,10 @@ HasPersonStarted::get_distance_travelled()
       tf2::Stamped<tf2::Transform> map2person; // Current position of the person
       tf2::fromMsg(map2person_msg, map2person);
 
+      RCLCPP_INFO(node_->get_logger(), "[HAS_PERSON_STARTED]: Patient at %.2f meters from the map frame.", map2person.getOrigin().length());
+
       auto start2person = map2start.inverse() * map2person;
+      
       return start2person.getOrigin().length();
     }
     catch (tf2::TransformException &ex)

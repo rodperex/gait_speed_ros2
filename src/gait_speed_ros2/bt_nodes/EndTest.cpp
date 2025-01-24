@@ -34,7 +34,7 @@ EndTest::tick()
         config().blackboard->get("time_elapsed", time_elapsed);
         
         if (time_elapsed > 0.0) {
-            RCLCPP_INFO(node_->get_logger(), "Test finished. Time: %.2f seconds", time_elapsed);
+            RCLCPP_INFO(node_->get_logger(), "[END_TEST]: Test finished. Time: %.2f seconds", time_elapsed);
             config().blackboard->set("gait_speed_result", time_elapsed);
             setOutput("result", time_elapsed);
             return BT::NodeStatus::SUCCESS;
@@ -44,13 +44,13 @@ EndTest::tick()
         config().blackboard->get("distance_travelled", distance_travelled);
 
         if (distance_travelled > 0) {
-            RCLCPP_INFO(node_->get_logger(), "Test finished. Distance: %f meters", distance_travelled);
+            RCLCPP_INFO(node_->get_logger(), "[END_TEST]: Test finished. Distance: %f meters", distance_travelled);
             config().blackboard->set("gait_speed_result", distance_travelled);
             setOutput("result", distance_travelled);
             return BT::NodeStatus::SUCCESS;
         }
     }
-    RCLCPP_WARN(node_->get_logger(), "Gait speed test finished with error");
+    RCLCPP_WARN(node_->get_logger(), "[END_TEST]: Gait speed test finished with error");
     return BT::NodeStatus::FAILURE;
 }
 

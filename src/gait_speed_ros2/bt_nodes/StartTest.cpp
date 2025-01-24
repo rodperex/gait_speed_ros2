@@ -39,9 +39,10 @@ StartTest::tick()
         auto map2start_msg = tf_buffer_.lookupTransform("map", frame_name_, tf2::TimePointZero);
         tf2::Stamped<tf2::Transform> map2start;
         tf2::fromMsg(map2start_msg, map2start);
-
-        RCLCPP_INFO(node_->get_logger(), "Populating blackboard with map2start");
+        
+        RCLCPP_INFO(node_->get_logger(), "[START_TEST]: Patient at %.2f meters from the map frame.", map2start.getOrigin().length());
         config().blackboard->set("map2start", map2start);
+        RCLCPP_DEBUG(node_->get_logger(), "[START_TEST]: Setting start time to %.2f seconds", node_->now().seconds());
         config().blackboard->set("start_time", node_->now());
     
         return BT::NodeStatus::SUCCESS;
