@@ -8,7 +8,7 @@ This repo is WORK IN PROGRESS...
 
 Launch the **perception system** and activate it:
 ```bash
-ros2 launch perception_system perception3d.launch.py # perception3d_sim_kobuki.launch.py / perception3d_sim_tiago.launch.py
+ros2 launch perception_system perception3d.launch.py # perception3d_pose_sim_kobuki.launch.py / perception3d_pose_sim_tiago.launch.py
 ros2 lifecycle set /perception_system/perception_people_detection configure
 ros2 lifecycle set /perception_system/perception_people_detection activate
 ```
