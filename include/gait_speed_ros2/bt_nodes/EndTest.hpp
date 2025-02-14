@@ -18,9 +18,12 @@
 
 #include "rclcpp/rclcpp.hpp"
 #include "rclcpp_cascade_lifecycle/rclcpp_cascade_lifecycle.hpp"
+#include "rclcpp_lifecycle/lifecycle_node.hpp"
 
 #include "behaviortree_cpp_v3/behavior_tree.h"
 #include "behaviortree_cpp_v3/bt_factory.h"
+
+#include "std_msgs/msg/float64.hpp"
 
 namespace gait_speed
 {
@@ -47,6 +50,7 @@ public:
 
 private:
   std::shared_ptr<rclcpp_cascade_lifecycle::CascadeLifecycleNode> node_;
+  rclcpp_lifecycle::LifecyclePublisher<std_msgs::msg::Float64>::SharedPtr result_pub_;
 
   std::string mode_;
 };

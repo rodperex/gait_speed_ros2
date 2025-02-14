@@ -28,6 +28,7 @@ enum class State : int {
     MEASURE = 4,
     STOP = 5,
     ERROR = 6,
+    CLEAN = 7
 };
 
 

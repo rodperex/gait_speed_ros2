@@ -54,10 +54,12 @@ private:
   std::shared_ptr<rclcpp_cascade_lifecycle::CascadeLifecycleNode> node_;
   
   std::string frame_;
-  float min_distance_;
+  float min_distance_, distance_travelled_;
   
   tf2::BufferCore tf_buffer_;
-  tf2_ros::TransformListener tf_listener_;  
+  tf2_ros::TransformListener tf_listener_;
+
+  rclcpp::Time tf_time_;
 };
 
 } // namespace gait_speed

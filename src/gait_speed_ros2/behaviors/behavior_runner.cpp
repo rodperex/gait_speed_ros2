@@ -39,31 +39,39 @@ BehaviorRunner::BehaviorRunner(
   RCLCPP_INFO(get_logger(), "# plugins: %d", plugins_.size());
 
   status_pub_ = create_publisher<std_msgs::msg::String>("behavior_status", 10);
+
+  executed_ = false;
 }
 
 void
 BehaviorRunner::control_cycle()
 {
   std_msgs::msg::String msg;
-  status_ = tree_.rootNode()->executeTick();
+
+  if (!executed_) {
+    status_ = tree_.rootNode()->executeTick();
+  } 
+  
 
   RCLCPP_DEBUG(get_logger(), "TICK. Node status: %s.", node_->get_current_state().label().c_str());
 
   switch (status_) {
     case BT::NodeStatus::SUCCESS:
-      RCLCPP_INFO(get_logger(), "Behavior tree: SUCCESS");
       msg.data = "SUCCESS";
       status_pub_->publish(msg);
+      RCLCPP_INFO(get_logger(), "Behavior tree (%s): SUCCESS", get_name());
+      executed_ = true;
       break;
     case BT::NodeStatus::RUNNING:
-      RCLCPP_DEBUG(get_logger(), "Behavior tree: RUNNING");
       msg.data = "RUNNING";
       status_pub_->publish(msg);
+      RCLCPP_INFO_ONCE(get_logger(), "Behavior tree (%s): RUNNING", get_name());
       break;
     default:
-      RCLCPP_ERROR(get_logger(), "Behavior tree: FAILURE");
       msg.data = "FAILURE";
       status_pub_->publish(msg);
+      RCLCPP_INFO(get_logger(), "Behavior tree (%s): FAILURE", get_name());
+      executed_ = true;
       break;
   }
 
@@ -102,7 +110,7 @@ BehaviorRunner::on_activate(const rclcpp_lifecycle::State & previous_state)
   status_pub_->on_activate();
 
   timer_ =
-    create_wall_timer(50ms, std::bind(&BehaviorRunner::control_cycle, this));
+    create_wall_timer(10ms, std::bind(&BehaviorRunner::control_cycle, this));
 
   RCLCPP_INFO(get_logger(), "Timer created");
 
@@ -122,6 +130,13 @@ BehaviorRunner::on_deactivate(const rclcpp_lifecycle::State & previous_state)
   status_pub_->on_deactivate();
 
   return rclcpp_lifecycle::node_interfaces::LifecycleNodeInterface::CallbackReturn::SUCCESS;
+}
+
+void
+BehaviorRunner::refresh()
+{
+  executed_ = false;
+  status_ = BT::NodeStatus::IDLE;
 }
 
 } // namespace gait_speed

@@ -42,7 +42,7 @@ CheckEndTest::tick()
   float current;
   if (mode_ == "distance") {
     current = get_distance_travelled();
-    RCLCPP_INFO(node_->get_logger(), "[CHECK_END_TEST]: Distance travelled: %.2f m.", get_distance_travelled());
+    RCLCPP_INFO(node_->get_logger(), "[CHECK_END_TEST]: Distance travelled: %.2f m. Target: %.2f m", get_distance_travelled(), target_);
     if (current >= target_) {
       RCLCPP_INFO(node_->get_logger(), "[CHECK_END_TEST]: Target reached. Finishing test.");
       config().blackboard->set("time_elapsed", get_time_elapsed());
@@ -55,7 +55,7 @@ CheckEndTest::tick()
       return BT::NodeStatus::SUCCESS;
     }
   }
-  RCLCPP_INFO(node_->get_logger(), "Target (%.2f/%.2f) not reached. Continuing test.", current, target_);
+  RCLCPP_DEBUG(node_->get_logger(), "Target (%.2f/%.2f) not reached. Continuing test.", current, target_);
   return BT::NodeStatus::RUNNING;
 }
 
@@ -64,20 +64,23 @@ CheckEndTest::get_distance_travelled()
 {
   try
     {
-      tf2::Stamped<tf2::Transform> map2patient_at_start;
-      config().blackboard->get("map2start", map2patient_at_start);
+      tf2::Stamped<tf2::Transform> map2person_at_start;
+      config().blackboard->get("map2start", map2person_at_start);
 
-      auto map2patient_msg = tf_buffer_.lookupTransform("map", frame_name_, tf2::TimePointZero);
-      tf2::Stamped<tf2::Transform> map2patient;
-      tf2::fromMsg(map2patient_msg, map2patient);
+      auto map2person_msg = tf_buffer_.lookupTransform("map", frame_name_, tf2::TimePointZero);
+      tf2::Stamped<tf2::Transform> map2person;
+      tf2::fromMsg(map2person_msg, map2person);
 
-      auto person_at_start2person = map2patient_at_start.inverse() * map2patient;
+      auto person_at_start2person = map2person_at_start.inverse() * map2person;
+
+      tf_time_ = rclcpp::Time(map2person_msg.header.stamp, RCL_STEADY_TIME);
+
       return person_at_start2person.getOrigin().length();
     }
     catch (tf2::TransformException &ex)
     {
       RCLCPP_WARN(node_->get_logger(), "[CHECK_END_TEST]: %s", ex.what());
-      return -1;
+      return -1.0;
     }
   return 0.0;
 }
@@ -85,14 +88,16 @@ CheckEndTest::get_distance_travelled()
 float
 CheckEndTest::get_time_elapsed()
 {
-  rclcpp::Time start_time, current_time;
+  rclcpp::Time start_time, current_time;  
   config().blackboard->get("start_time", start_time);
+  current_time = tf_time_;
   RCLCPP_INFO(node_->get_logger(), "[CHECK_END_TEST]: Start time: %.2f. End time: %.2f.", start_time.seconds(), current_time.seconds());
-  current_time = node_->now();
-  rclcpp::Duration duration = current_time - start_time;  
-  RCLCPP_INFO(node_->get_logger(), "[CHECK_END_TEST]: Time elapsed: %.2f seconds.", duration.seconds());
+  // current_time = node_->now();
+  // rclcpp::Duration duration = tf_time_ - start_time;
+  float duration = current_time.seconds() - start_time.seconds();
+  RCLCPP_INFO(node_->get_logger(), "[CHECK_END_TEST]: Time elapsed: %.2f seconds.", duration);
   // return duration.nanoseconds() / 1e9;
-  return duration.seconds();
+  return duration;
 }
 
 void

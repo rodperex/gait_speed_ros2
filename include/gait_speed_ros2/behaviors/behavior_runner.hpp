@@ -48,6 +48,7 @@ private:
   on_activate(const rclcpp_lifecycle::State & previous_state);
   rclcpp_lifecycle::node_interfaces::LifecycleNodeInterface::CallbackReturn
   on_deactivate(const rclcpp_lifecycle::State & previous_state);
+  void refresh();
 
   rclcpp::TimerBase::SharedPtr timer_;
   std::shared_ptr<rclcpp_cascade_lifecycle::CascadeLifecycleNode> node_;
@@ -56,6 +57,7 @@ private:
   BT::Blackboard::Ptr blackboard_;
   std::string xml_path_;
   std::vector<std::string> plugins_;
+  bool executed_;
 
   rclcpp_lifecycle::LifecyclePublisher<std_msgs::msg::String>::SharedPtr status_pub_;
 

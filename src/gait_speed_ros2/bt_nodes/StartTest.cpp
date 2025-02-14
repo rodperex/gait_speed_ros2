@@ -30,7 +30,7 @@ StartTest::StartTest(const std::string & xml_tag_name, const BT::NodeConfigurati
 BT::NodeStatus
 StartTest::tick()
 {
-    RCLCPP_INFO(node_->get_logger(), "START_TEST");
+    RCLCPP_INFO_ONCE(node_->get_logger(), "START_TEST");
     rclcpp::spin_some(node_->get_node_base_interface());
 
     RCLCPP_DEBUG(node_->get_logger(), "Frame name: %s", frame_name_.c_str());
@@ -42,9 +42,12 @@ StartTest::tick()
         
         RCLCPP_INFO(node_->get_logger(), "[START_TEST]: Patient at %.2f meters from the map frame.", map2start.getOrigin().length());
         config().blackboard->set("map2start", map2start);
-        RCLCPP_DEBUG(node_->get_logger(), "[START_TEST]: Setting start time to %.2f seconds", node_->now().seconds());
-        config().blackboard->set("start_time", node_->now());
-    
+        config().blackboard->set("map2initial", map2start);
+
+        RCLCPP_INFO(node_->get_logger(), "[START_TEST]: Setting start time to %.2f seconds", map2start_msg.header.stamp.nanosec/1e9);
+        // config().blackboard->set("start_time", node_->now());
+        config().blackboard->set("start_time", rclcpp::Time(map2start_msg.header.stamp, RCL_STEADY_TIME));
+
         return BT::NodeStatus::SUCCESS;
     }
     catch(const std::exception& ex)

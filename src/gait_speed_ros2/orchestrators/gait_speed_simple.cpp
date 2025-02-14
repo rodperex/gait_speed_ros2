@@ -38,7 +38,7 @@ GaitSpeedSimple::GaitSpeedSimple(BT::Blackboard::Ptr blackboard)
   status_sub_ = create_subscription<std_msgs::msg::String>(
     "behavior_status", 10, std::bind(&GaitSpeedSimple::status_callback, this, _1));
 
-  result_pub_ = create_publisher<std_msgs::msg::Float64>("gait_speed_result", 10);
+  result_pub_ = create_publisher<std_msgs::msg::Float64>("gait_speed_test_result", 10);
 
   go_to_state(state_);
 }
@@ -64,32 +64,30 @@ GaitSpeedSimple::control_cycle()
       break;
     case State::FIND:
       if(last_status_ == "") {
-        RCLCPP_INFO(get_logger(), "BT not started yet");
+        RCLCPP_INFO(get_logger(), "[State - FIND]: BT not started yet");
         break;
       }
       if (last_status_ == "SUCCESS") {
-        RCLCPP_INFO(get_logger(), "Patient found");
+        RCLCPP_INFO(get_logger(), "[State - FIND]: Patient found");
         go_to_state(State::MEASURE);
       } else if (last_status_ == "FAILURE") {
-        RCLCPP_INFO(get_logger(), "Stopping FSM");
+        RCLCPP_INFO(get_logger(), "[State - FIND]: Stopping FSM");
         go_to_state(State::STOP);
       }
       break;
     case State::MEASURE:
       if (check_behavior_finished()) {
-        RCLCPP_INFO(get_logger(), "Gait speed test finished");
-        go_to_state(State::STOP);
+        blackboard_->get("gait_speed_result", result_msg.data);
+        RCLCPP_INFO(get_logger(), "[State - MEASURE]: Gait speed test finished (%.2f)", result_msg.data);
+        result_pub_->publish(result_msg);
+        go_to_state(State::CLEAN);
       }
       break;
+    case State::CLEAN:
+      RCLCPP_INFO(get_logger(), "[State - CLEAN]: Cleaning up");
+      go_to_state(State::STOP);
+      break;
     case State::STOP:
-      if (last_status_ == "SUCCESS") {
-        blackboard_->get("gait_speed_time", result_msg.data);
-        RCLCPP_INFO(get_logger(), "Gait speed test finished successfully");
-      } else {
-        result_msg.data = -1;
-        RCLCPP_ERROR(get_logger(), "Gait speed test failed");
-      }
-      result_pub_->publish(result_msg);
       break;
     default:
       break;
@@ -120,6 +118,11 @@ GaitSpeedSimple::go_to_state(State state)
       add_activation("measure_gait_speed");
       // on_activate(get_current_state());
       break;
+    case State::CLEAN:
+      RCLCPP_INFO(get_logger(), "State: CLEAN");
+      remove_activation("measure_gait_speed");
+
+      break;
     case State::STOP:
       RCLCPP_INFO(get_logger(), "State: STOP");
       remove_activation("measure_gait_speed");
@@ -147,7 +150,7 @@ GaitSpeedSimple::on_activate(const rclcpp_lifecycle::State & previous_state)
   RCLCPP_INFO(get_logger(), "GaitSpeedSimple on_activate");
 
   timer_ =
-    create_wall_timer(50ms, std::bind(&GaitSpeedSimple::control_cycle, this));
+    create_wall_timer(10ms, std::bind(&GaitSpeedSimple::control_cycle, this));
 
   result_pub_->on_activate();
 

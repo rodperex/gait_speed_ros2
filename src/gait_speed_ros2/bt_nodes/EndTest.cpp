@@ -22,12 +22,14 @@ EndTest::EndTest(const std::string & xml_tag_name, const BT::NodeConfiguration &
 {
     config().blackboard->get("node", node_);
     getInput("mode", mode_);
+    result_pub_ = node_->create_publisher<std_msgs::msg::Float64>("gait_speed_result", 1);
+    result_pub_->on_activate();
 }
 
 BT::NodeStatus
 EndTest::tick()
 {
-    RCLCPP_DEBUG(node_->get_logger(), "END_TEST");
+    RCLCPP_INFO(node_->get_logger(), "END_TEST");
     
     if (mode_ == "distance") {
         float time_elapsed;
@@ -37,6 +39,9 @@ EndTest::tick()
             RCLCPP_INFO(node_->get_logger(), "[END_TEST]: Test finished. Time: %.2f seconds", time_elapsed);
             config().blackboard->set("gait_speed_result", time_elapsed);
             setOutput("result", time_elapsed);
+            std_msgs::msg::Float64 msg;
+            msg.data = time_elapsed;
+            result_pub_->publish(msg);
             return BT::NodeStatus::SUCCESS;
         }
     } else {
@@ -47,9 +52,13 @@ EndTest::tick()
             RCLCPP_INFO(node_->get_logger(), "[END_TEST]: Test finished. Distance: %f meters", distance_travelled);
             config().blackboard->set("gait_speed_result", distance_travelled);
             setOutput("result", distance_travelled);
+            std_msgs::msg::Float64 msg;
+            msg.data = distance_travelled;
+            result_pub_->publish(msg);
             return BT::NodeStatus::SUCCESS;
         }
     }
+    config().blackboard->set("gait_speed_result", -1.0);
     RCLCPP_WARN(node_->get_logger(), "[END_TEST]: Gait speed test finished with error");
     return BT::NodeStatus::FAILURE;
 }
