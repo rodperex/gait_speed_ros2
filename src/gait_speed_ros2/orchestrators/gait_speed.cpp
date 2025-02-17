@@ -73,35 +73,32 @@ GaitSpeed::control_cycle()
         break;
       }
       if (last_status_ == "SUCCESS") {
-        RCLCPP_INFO(get_logger(), "Patient found");
+        RCLCPP_INFO(get_logger(), "[State - FIND]: Patient found");
         go_to_state(State::EXPLAIN);
       } else {
-        RCLCPP_INFO(get_logger(), "Stopping FSM");
-        go_to_state(State::STOP);
+        RCLCPP_INFO(get_logger(), "[State - FIND]: Stopping FSM");
+        go_to_state(State::CLEAN);
       }
       break;
     case State::EXPLAIN:
       if (check_behavior_finished()) {
-        RCLCPP_INFO(get_logger(), "Instructions given");
+        RCLCPP_INFO(get_logger(), "[State - EXPLAIN]: Instructions given");
         go_to_state(State::MEASURE);
       }
       break;
     case State::MEASURE:
       if (check_behavior_finished()) {
-        RCLCPP_INFO(get_logger(), "Gait speed test finished");
-        go_to_state(State::STOP);
+        blackboard_->get("gait_speed_result", result_msg.data);
+        RCLCPP_INFO(get_logger(), "[State - MEASURE]: Gait speed test finished (%.2f)", result_msg.data);
+        result_pub_->publish(result_msg);
+        go_to_state(State::CLEAN);
       }
       break;
+    case State::CLEAN:
+      RCLCPP_INFO(get_logger(), "[State - CLEAN]: Cleaning up");
+      go_to_state(State::STOP);
+      break;
     case State::STOP:
-      if (last_status_ == "SUCCESS") {
-        blackboard_->get("gait_speed_time", result_msg.data);
-        RCLCPP_INFO(get_logger(), "Gait speed test finished successfully");
-      } else { // The was an error in the process
-        go_to_state(State::ERROR);
-        result_msg.data = -1;
-        RCLCPP_ERROR(get_logger(), "Gait speed test failed");
-      }
-      result_pub_->publish(result_msg);
       break;
     default:
       break;
@@ -130,6 +127,10 @@ GaitSpeed::go_to_state(State state)
       RCLCPP_INFO(get_logger(), "State: MEASURE");
       remove_activation("explain_gait_speed");
       add_activation("measure_gait_speed_dist");
+      break;
+    case State::CLEAN:
+      RCLCPP_INFO(get_logger(), "State: CLEAN");
+      remove_activation("measure_gait_speed");
       break;
     case State::ERROR:
       clear_activation();
