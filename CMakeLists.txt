@@ -20,6 +20,7 @@ find_package(perception_bt_nodes REQUIRED)
 find_package(tf2_geometry_msgs REQUIRED)
 find_package(tf2 REQUIRED)
 find_package(tf2_ros REQUIRED)
+find_package(std_srvs REQUIRED)
 
 set(dependencies
   rclcpp
@@ -34,18 +35,21 @@ set(dependencies
   tf2_geometry_msgs
   tf2
   tf2_ros
+  std_srvs
 )
 
 include_directories(include)
 
 add_library(check_end_test_bt_node SHARED src/gait_speed_ros2/bt_nodes/CheckEndTest.cpp)
 add_library(start_test_bt_node SHARED src/gait_speed_ros2/bt_nodes/StartTest.cpp)
+add_library(start_test_mocap_bt_node SHARED src/gait_speed_ros2/bt_nodes/StartTestMocap.cpp)
 add_library(has_person_started_bt_node SHARED src/gait_speed_ros2/bt_nodes/HasPersonStarted.cpp)
 add_library(end_test_bt_node SHARED src/gait_speed_ros2/bt_nodes/EndTest.cpp)
 
 
 list(APPEND plugin_libs
   start_test_bt_node
+  start_test_mocap_bt_node
   has_person_started_bt_node
   check_end_test_bt_node
   end_test_bt_node
@@ -98,6 +102,10 @@ add_executable(gait_speed_simple src/main_gait_speed_simple.cpp)
 ament_target_dependencies(gait_speed_simple ${dependencies})
 target_link_libraries(gait_speed_simple ${PROJECT_NAME})
 
+add_executable(mocap_gait_speed_simple src/main_gait_speed_simple_mocap.cpp)
+ament_target_dependencies(mocap_gait_speed_simple ${dependencies})
+target_link_libraries(mocap_gait_speed_simple ${PROJECT_NAME})
+
 install(TARGETS
   ${plugin_libs}
   ${PROJECT_NAME}
@@ -109,6 +117,7 @@ install(TARGETS
   just_measure
   gait_speed
   gait_speed_simple
+  mocap_gait_speed_simple
   ARCHIVE DESTINATION lib
   LIBRARY DESTINATION lib
   RUNTIME DESTINATION lib/${PROJECT_NAME}

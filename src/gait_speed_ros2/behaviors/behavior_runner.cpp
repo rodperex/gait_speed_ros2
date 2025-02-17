@@ -36,7 +36,7 @@ BehaviorRunner::BehaviorRunner(
   plugins_ = plugins;
 
   RCLCPP_INFO(get_logger(), "XML path: %s", xml_path_.c_str());
-  RCLCPP_INFO(get_logger(), "# plugins: %d", plugins_.size());
+  RCLCPP_INFO(get_logger(), "# plugins: %ld", plugins_.size());
 
   status_pub_ = create_publisher<std_msgs::msg::String>("behavior_status", 10);
 
@@ -137,6 +137,11 @@ BehaviorRunner::refresh()
 {
   executed_ = false;
   status_ = BT::NodeStatus::IDLE;
+
+  tree_.rootNode()->halt();
+
+  RCLCPP_INFO(get_logger(), "BehaviorRunner refreshed (%s)", get_name());  
+  RCLCPP_INFO(node_->get_logger(), "Node status: %s", node_->get_current_state().label().c_str());
 }
 
 } // namespace gait_speed

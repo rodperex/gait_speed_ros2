@@ -6,7 +6,7 @@
             <Action ID="GetDetectionFromBB" detection="{patient_detection}" key="detection"/>
             <Action ID="Identify" confidence="0.0" detection="{patient_detection}" entity_to_identify="patient_1"/>
             <Action ID="ActivateAttention" frame_id="patient_1" what="base"/>
-            <Action ID="StartTest" frame_name="patient_1"/>
+            <Action ID="StartTestMocap" frame_name="patient_1"/>
             <SubTree ID="check_test_started" __shared_blackboard="true"/>
             <SubTree ID="measure_gait_speed" __shared_blackboard="true"/>
             <Action ID="DeactivateAttention" what="base"/>
@@ -200,7 +200,7 @@
             <input_port name="forever"/>
             <input_port name="speed"/>
         </Action>
-        <Action ID="StartTest">
+        <Action ID="StartTestMocap">
             <input_port name="frame_name"/>
         </Action>
         <Condition ID="TargetReached"/>
