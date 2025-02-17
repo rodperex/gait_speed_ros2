@@ -121,7 +121,6 @@ GaitSpeedSimple::go_to_state(State state)
     case State::CLEAN:
       RCLCPP_INFO(get_logger(), "State: CLEAN");
       remove_activation("measure_gait_speed");
-
       break;
     case State::STOP:
       RCLCPP_INFO(get_logger(), "State: STOP");
