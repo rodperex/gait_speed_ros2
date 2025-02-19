@@ -19,7 +19,7 @@
                 <Sequence>
                     <Action ID="Identify" detection="{patient_detection}" entity_to_identify="patient_1"/>
                     <ReactiveFallback>
-                        <Condition ID="HasPersonStarted" min_distance="0.2" person_frame="patient_1"/>
+                        <Condition ID="HasPersonStarted" min_distance="0.1" person_frame="patient_1"/>
                         <Action ID="Speak" params="" speech_text="Puedes comenzar a caminar"/>
                         <Timeout msec="1000">
                             <AlwaysFailure/>
