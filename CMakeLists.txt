@@ -98,6 +98,10 @@ add_executable(gait_speed src/main_gait_speed.cpp)
 ament_target_dependencies(gait_speed ${dependencies})
 target_link_libraries(gait_speed ${PROJECT_NAME})
 
+add_executable(sim_gait_speed src/sim_main_gait_speed.cpp)
+ament_target_dependencies(sim_gait_speed ${dependencies})
+target_link_libraries(sim_gait_speed ${PROJECT_NAME})
+
 add_executable(gait_speed_simple src/main_gait_speed_simple.cpp)
 ament_target_dependencies(gait_speed_simple ${dependencies})
 target_link_libraries(gait_speed_simple ${PROJECT_NAME})
@@ -116,6 +120,7 @@ install(TARGETS
   just_find
   just_measure
   gait_speed
+  sim_gait_speed
   gait_speed_simple
   mocap_gait_speed_simple
   ARCHIVE DESTINATION lib
