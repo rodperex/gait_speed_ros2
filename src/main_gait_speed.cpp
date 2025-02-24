@@ -34,6 +34,8 @@ int main(int argc, char * argv[])
 
   // orchestrator
   auto gait_speed_node = std::make_shared<gait_speed::GaitSpeed>(blackboard);
+  gait_speed_node->trigger_transition(lifecycle_msgs::msg::Transition::TRANSITION_CONFIGURE);
+  gait_speed_node->trigger_transition(lifecycle_msgs::msg::Transition::TRANSITION_ACTIVATE);
 
   // behaviors
   std::vector<std::string> plugins;

@@ -34,6 +34,8 @@ int main(int argc, char * argv[])
 
   // orchestrator
   auto gait_speed_node = std::make_shared<gait_speed::GaitSpeed>(blackboard);
+  gait_speed_node->trigger_transition(lifecycle_msgs::msg::Transition::TRANSITION_CONFIGURE);
+  gait_speed_node->trigger_transition(lifecycle_msgs::msg::Transition::TRANSITION_ACTIVATE);
 
   // behaviors
   std::vector<std::string> plugins;
@@ -122,6 +124,12 @@ int main(int argc, char * argv[])
   explain_gait_speed_node->trigger_transition(lifecycle_msgs::msg::Transition::TRANSITION_CONFIGURE);
   measure_node->trigger_transition(lifecycle_msgs::msg::Transition::TRANSITION_CONFIGURE);
   error_node->trigger_transition(lifecycle_msgs::msg::Transition::TRANSITION_CONFIGURE);
+
+  RCLCPP_INFO(node->get_logger(), "gait_speed_node state: %s", gait_speed_node->get_current_state().label().c_str());
+  RCLCPP_INFO(node->get_logger(), "find_person_node state: %s", find_person_node->get_current_state().label().c_str());
+  RCLCPP_INFO(node->get_logger(), "explain_gait_speed_node state: %s", explain_gait_speed_node->get_current_state().label().c_str());
+  RCLCPP_INFO(node->get_logger(), "measure_node state: %s", measure_node->get_current_state().label().c_str());
+  RCLCPP_INFO(node->get_logger(), "error_node state: %s", error_node->get_current_state().label().c_str());
   
   while (rclcpp::ok()) {
     exec.spin_some();
@@ -134,6 +142,16 @@ int main(int argc, char * argv[])
       break;
     }
   }
+  RCLCPP_INFO(node->get_logger(), "gait_speed_node state: %s", gait_speed_node->get_current_state().label().c_str());
+  RCLCPP_INFO(node->get_logger(), "find_person_node state: %s", find_person_node->get_current_state().label().c_str());
+  RCLCPP_INFO(node->get_logger(), "explain_gait_speed_node state: %s", explain_gait_speed_node->get_current_state().label().c_str());
+  RCLCPP_INFO(node->get_logger(), "measure_node state: %s", measure_node->get_current_state().label().c_str());
+  RCLCPP_INFO(node->get_logger(), "error_node state: %s", error_node->get_current_state().label().c_str());
+
+  float resutlt = blackboard->get<float>("gait_speed_result");
+
+  RCLCPP_INFO(node->get_logger(), "\n*************************************************************\nGait speed result: %.2f seconds", resutlt);
+  
   rclcpp::shutdown();
 
   return 0;
