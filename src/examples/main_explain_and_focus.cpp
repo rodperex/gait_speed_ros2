@@ -37,11 +37,10 @@ int main(int argc, char * argv[])
     "speak_bt_node",
     "listen_bt_node",
     "dialog_confirmation_bt_node",
+    "activate_attention_bt_node",
+    "deactivate_attention_bt_node",
     "is_detected_bt_node",
-    "identify_bt_node",
-    "is_in_front_bt_node",
-    "spin_bt_node",
-    "get_detection_from_tf_bt_node"
+    "identify_bt_node"
   };
 
   auto explain_and_focus = std::make_shared<gait_speed::BehaviorRunner>(

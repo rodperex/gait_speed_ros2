@@ -69,7 +69,7 @@ GaitSpeed::control_cycle()
       break;
     case State::FIND:
       if(last_status_ == "") {
-        RCLCPP_INFO(get_logger(), "BT not started yet");
+        RCLCPP_INFO_ONCE(get_logger(), "BT not started yet");
         break;
       }
       if (last_status_ == "SUCCESS") {
@@ -126,7 +126,7 @@ GaitSpeed::go_to_state(State state)
     case State::MEASURE: // TODO: add a check to see if the robot is moving to activate a different behavior
       RCLCPP_INFO(get_logger(), "State: MEASURE");
       remove_activation("explain_gait_speed");
-      add_activation("measure_gait_speed_dist");
+      add_activation("measure_gait_speed");
       break;
     case State::CLEAN:
       RCLCPP_INFO(get_logger(), "State: CLEAN");
