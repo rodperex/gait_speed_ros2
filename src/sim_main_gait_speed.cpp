@@ -112,7 +112,6 @@ int main(int argc, char * argv[])
   
   exec.add_node(node->get_node_base_interface());
 
-  exec.add_node(gait_speed_node->get_node_base_interface());
   exec.add_node(find_person_node->get_node_base_interface());
   exec.add_node(explain_gait_speed_node->get_node_base_interface());
   exec.add_node(measure_node->get_node_base_interface());
