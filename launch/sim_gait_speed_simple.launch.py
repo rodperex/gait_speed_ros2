@@ -26,23 +26,22 @@ def generate_launch_description():
     pkg_dir = get_package_share_directory('gait_speed_ros2')
     
     params_file = os.path.join(pkg_dir, 'config', 'params_sim.yaml')
+
     with open(params_file, 'r') as f:
         params = yaml.safe_load(f)['gait_speed_node']['ros__parameters']
 
     ld = LaunchDescription()
 
-    cmd = Node(
+    robot_cmd = Node(
         package='gait_speed_ros2',
-        executable='explain_and_focus',
+        executable='gait_speed_simple',
         output='screen',
         remappings=[
         ],
-        parameters=[{
-            'use_sim_time': True,
-        }, params]
+        parameters=[params]
     )
 
-    ld.add_action(cmd)
+    ld.add_action(robot_cmd)
 
     return ld
 
