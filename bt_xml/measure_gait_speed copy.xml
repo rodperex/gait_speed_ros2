@@ -1,0 +1,245 @@
+<?xml version="1.0"?>
+<root main_tree_to_execute="BehaviorTree">
+    <!-- ////////// -->
+    <BehaviorTree ID="BehaviorTree">
+        <Sequence>
+            <Action ID="GetDetectionFromBB" detection="{patient_detection}" key="detection"/>
+            <Action ID="Identify" detection="{patient_detection}" entity_to_identify="patient_1"/>
+            <Action ID="ActivateAttention" frame_id="patient_1" what="base"/>
+            <Action ID="StartTest" frame_name="patient_1"/>
+            <SubTree ID="check_test_started" __shared_blackboard="true"/>
+            <SubTree ID="measure_gait_speed" __shared_blackboard="true"/>
+            <Action ID="DeactivateAttention" what="base"/>
+        </Sequence>
+    </BehaviorTree>
+    <!-- ////////// -->
+    <BehaviorTree ID="check_test_started">
+        <Timeout msec="20000">
+            <RetryUntilSuccessful num_attempts="-1">
+                <Sequence>
+                    <Action ID="Identify" detection="{patient_detection}" entity_to_identify="patient_1"/>
+                    <ReactiveFallback>
+                        <Condition ID="HasPersonStarted" min_distance="0.1" person_frame="patient_1"/>
+                        <Action ID="Speak" params="" speech_text="Puedes comenzar a caminar"/>
+                        <Timeout msec="1000">
+                            <AlwaysFailure/>
+                        </Timeout>
+                    </ReactiveFallback>
+                </Sequence>
+            </RetryUntilSuccessful>
+        </Timeout>
+    </BehaviorTree>
+    <!-- ////////// -->
+    <BehaviorTree ID="find_patient_rotating">
+        <ReactiveFallback>
+            <Condition ID="IsInFront" confidence="" direction="{dir}" entity_to_identify="patient" target="" what=""/>
+            <Action ID="Spin" angle="{dir}" forever="true" speed="0.5"/>
+        </ReactiveFallback>
+    </BehaviorTree>
+    <!-- ////////// -->
+    <BehaviorTree ID="find_waving_person">
+        <Fallback>
+            <Timeout msec="15000">
+                <ReactiveFallback>
+                    <Action ID="IsWaving" cam_frame="head_front_camera_link_color_optical_frame" person_frame="{tf_patient}"/>
+                    <Action ID="Pan" period="10" pitch_angle="0" range="45"/>
+                </ReactiveFallback>
+            </Timeout>
+            <ReactiveFallback>
+                <Action ID="IsWaving" cam_frame="head_front_camera_link_color_optical_frame" person_frame="{tf_person}"/>
+                <Action ID="Spin" angle="" forever="" speed=""/>
+            </ReactiveFallback>
+        </Fallback>
+    </BehaviorTree>
+    <!-- ////////// -->
+    <BehaviorTree ID="gait_speed_dist_following">
+        <Sequence>
+            <ReactiveSequence>
+                <Inverter>
+                    <Condition ID="TargetReached"/>
+                </Inverter>
+                <Action ID="FollowPerson"/>
+            </ReactiveSequence>
+            <Action ID="EndTest" time=""/>
+        </Sequence>
+    </BehaviorTree>
+    <!-- ////////// -->
+    <BehaviorTree ID="locate_person">
+        <Sequence>
+            <ReactiveFallback>
+                <Condition ID="IsInView" detection="patient_1"/>
+                <ForceFailure>
+                    <Action ID="DeactivateAttention" what="base"/>
+                </ForceFailure>
+                <Sequence>
+                    <Action ID="NavigateTo" distance_tolerance="0.5" tf_frame="patient_1" will_finish="yes" x="" y=""/>
+                    <Action ID="ActivateAttention" frame_id="patient_1" what="base"/>
+                </Sequence>
+            </ReactiveFallback>
+            <ReactiveFallback>
+                <Action ID="Identify" detection="{patient_detection}" entity_to_identify="patient_1"/>
+                <Action ID="Spin" angle="-1" forever="true" speed="0.3"/>
+            </ReactiveFallback>
+        </Sequence>
+    </BehaviorTree>
+    <!-- ////////// -->
+    <BehaviorTree ID="measure_gait_speed">
+        <ReactiveSequence>
+            <SubTree ID="locate_person" __shared_blackboard="true"/>
+            <Action ID="Identify" detection="{patient_detection}" entity_to_identify="patient_1"/>
+            <Action ID="CheckEndTest" frame_name="patient_1" mode="distance"/>
+            <Action ID="EndTest" time="{time}"/>
+            <Action ID="Speak" params="{time}" speech_text="Has tardado [] segundos en completar la prueba"/>
+        </ReactiveSequence>
+    </BehaviorTree>
+    <!-- ////////// -->
+    <TreeNodesModel>
+        <Action ID="ActivateAttention">
+            <input_port name="frame_id"/>
+            <input_port name="what"/>
+        </Action>
+        <Action ID="CheckEndTest">
+            <input_port name="frame_name"/>
+            <input_port name="mode"/>
+        </Action>
+        <Action ID="DeactivateAttention">
+            <input_port name="what"/>
+        </Action>
+        <Action ID="DialogConfirmation">
+            <input_port default="en" name="language"/>
+        </Action>
+        <Condition ID="DistanceReached">
+            <input_port name="distance"/>
+        </Condition>
+        <Action ID="EndTest">
+            <output_port name="time">Time needed to complete the gait speed test</output_port>
+        </Action>
+        <Action ID="FilterEntity">
+            <inout_port name="frame"/>
+            <inout_port name="lambda"/>
+        </Action>
+        <Action ID="FollowPerson"/>
+        <Action ID="GetDetectionFromBB">
+            <output_port name="detection"/>
+            <input_port name="key"/>
+        </Action>
+        <Action ID="GetDetectionFromTF">
+            <output_port name="detection"/>
+            <input_port name="frame"/>
+        </Action>
+        <Condition ID="HasPersonStarted">
+            <input_port default="0.2" name="min_distance"/>
+            <input_port name="person_frame"/>
+        </Condition>
+        <Action ID="Identify">
+            <input_port name="detection"/>
+            <input_port name="entity_to_identify"/>
+        </Action>
+        <Condition ID="IsDetected">
+            <input_port default="0.6" name="confidence"/>
+            <output_port name="frames"/>
+            <input_port default="person" name="interest"/>
+            <input_port default="2" name="max_depth"/>
+            <input_port default="1" name="max_entities"/>
+            <input_port default="depth_nearest" name="order"/>
+        </Condition>
+        <Condition ID="IsInFront">
+            <input_port name="confidence"/>
+            <output_port name="direction"/>
+            <input_port name="entity_to_identify"/>
+            <input_port name="target"/>
+            <input_port name="what"/>
+        </Condition>
+        <Condition ID="IsInView">
+            <input_port name="detection"/>
+        </Condition>
+        <Condition ID="IsPointing">
+            <output_port name="detection"/>
+            <input_port name="high_pointing_limit"/>
+            <input_port name="low_pointing_limit"/>
+            <output_port name="output_frame"/>
+            <output_port name="pointing_direction"/>
+            <input_port default="0.7" name="threshold"/>
+        </Condition>
+        <Action ID="IsWaving">
+            <input_port name="cam_frame"/>
+            <output_port name="person_frame"/>
+        </Action>
+        <Action ID="Listen">
+            <inout_port name="listened_text"/>
+        </Action>
+        <Action ID="LookAt">
+            <inout_port name="tf_frame"/>
+        </Action>
+        <Action ID="MoveTo">
+            <input_port name="distance_tolerance"/>
+            <input_port name="is_truncated"/>
+            <input_port name="tf_frame"/>
+        </Action>
+        <Action ID="NavigateTo">
+            <input_port name="distance_tolerance"/>
+            <input_port name="tf_frame"/>
+            <input_port name="will_finish"/>
+            <input_port name="x"/>
+            <input_port name="y"/>
+        </Action>
+        <Action ID="Pan">
+            <inout_port name="period"/>
+            <inout_port name="pitch_angle"/>
+            <inout_port name="range"/>
+        </Action>
+        <Action ID="PublishCurrentInterestPose">
+            <input_port name="interest">Current interest of the robot. A static transform in relation to odom will be published</input_port>
+        </Action>
+        <Action ID="Speak">
+            <input_port name="params"/>
+            <input_port name="speech_text"/>
+        </Action>
+        <Action ID="Spin">
+            <input_port name="angle"/>
+            <input_port name="forever"/>
+            <input_port name="speed"/>
+        </Action>
+        <Action ID="StartTest">
+            <input_port name="frame_name"/>
+        </Action>
+        <Condition ID="TargetReached"/>
+        <Condition ID="TargetReachedStatic"/>
+        <SubTree ID="check_test_started">
+            <input_port default="true" name="__shared_blackboard">If false (default), the Subtree has an isolated blackboard and needs port remapping</input_port>
+        </SubTree>
+        <SubTree ID="confirm"/>
+        <SubTree ID="confirm_old">
+            <input_port default="false" name="__shared_blackboard">If false (default), the Subtree has an isolated blackboard and needs port remapping</input_port>
+        </SubTree>
+        <SubTree ID="find_patient_rotating">
+            <input_port default="true" name="__shared_blackboard">If false  , the Subtree has an isolated blackboard and needs port remapping</input_port>
+        </SubTree>
+        <SubTree ID="find_person"/>
+        <SubTree ID="find_person_rotating">
+            <input_port default="true" name="__shared_blackboard">If false  , the Subtree has an isolated blackboard and needs port remapping</input_port>
+        </SubTree>
+        <SubTree ID="find_waving_person"/>
+        <SubTree ID="find_waving_person_rotating">
+            <input_port default="true" name="__shared_blackboard">If false (default), the Subtree has an isolated blackboard and needs port remapping</input_port>
+        </SubTree>
+        <SubTree ID="gait_speed_dist"/>
+        <SubTree ID="gait_speed_dist_following">
+            <input_port default="false" name="__shared_blackboard">If false (default), the Subtree has an isolated blackboard and needs port remapping</input_port>
+        </SubTree>
+        <Condition ID="isMyPerson">
+            <input_port name="person_frame"/>
+        </Condition>
+        <SubTree ID="listen"/>
+        <SubTree ID="locate_person">
+            <input_port default="true" name="__shared_blackboard">If false (default), the Subtree has an isolated blackboard and needs port remapping</input_port>
+        </SubTree>
+        <SubTree ID="measure_gait_speed">
+            <input_port default="true" name="__shared_blackboard">If false (default), the Subtree has an isolated blackboard and needs port remapping</input_port>
+        </SubTree>
+        <SubTree ID="provide_instructions">
+            <input_port default="true" name="__shared_blackboard">If false (default), the Subtree has an isolated blackboard and needs port remapping</input_port>
+        </SubTree>
+    </TreeNodesModel>
+    <!-- ////////// -->
+</root>
