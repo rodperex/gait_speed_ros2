@@ -82,8 +82,13 @@ GaitSpeed::control_cycle()
       break;
     case State::EXPLAIN:
       if (check_behavior_finished()) {
-        RCLCPP_INFO(get_logger(), "[State - EXPLAIN]: Instructions given");
-        go_to_state(State::MEASURE);
+        if (last_status_ == "FAILURE") {
+          RCLCPP_INFO(get_logger(), "[State - EXPLAIN]: Error providing  instructions");
+          go_to_state(State::ERROR);
+        } else {
+          RCLCPP_INFO(get_logger(), "[State - EXPLAIN]: Instructions given");
+          go_to_state(State::MEASURE);
+        }
       }
       break;
     case State::MEASURE:
@@ -101,6 +106,8 @@ GaitSpeed::control_cycle()
     case State::STOP:
       break;
     default:
+      RCLCPP_INFO(get_logger(), "[State - ERROR]: Cleaning up");
+      go_to_state(State::CLEAN);
       break;
   }
 }
@@ -150,7 +157,7 @@ GaitSpeed::go_to_state(State state)
 bool
 GaitSpeed::check_behavior_finished()
 {
-  RCLCPP_DEBUG(get_logger(), "State %d. Checking behavior finished: %s",  static_cast<int>(state_), last_status_.c_str());
+  RCLCPP_INFO(get_logger(), "State %d. Checking behavior finished: %s",  static_cast<int>(state_), last_status_.c_str());
   return last_status_ == "FAILURE" || last_status_ == "SUCCESS";
 }
 
