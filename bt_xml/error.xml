@@ -2,7 +2,7 @@
 <root main_tree_to_execute="BehaviorTree">
     <!-- ////////// -->
     <BehaviorTree ID="BehaviorTree">
-        <Action ID="Speak" params="" speech_text="Lo siento, ha habido un error"/>
+        <Action ID="Speak" params="" speech_text="Lo siento, ha habido un error realizando el test"/>
     </BehaviorTree>
     <!-- ////////// -->
     <TreeNodesModel>

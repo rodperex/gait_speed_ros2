@@ -8,6 +8,7 @@
                     <Condition ID="IsDetected" best_detection="{patient_detection}" confidence="0.6" frame="" frame_name="patient" interest="person" max_depth="50" max_entities="1" model="people" n_detections="" order="depth"/>
                 </RetryUntilSuccessful>
             </Timeout>
+            <Action ID="Identify" detection="{patient_detection}" entity_to_identify="patient_1"/>
             <Action ID="SaveDetectionInBB" detection="{patient_detection}" key="detection"/>
         </Sequence>
     </BehaviorTree>
@@ -37,7 +38,6 @@
             <input_port name="person_frame"/>
         </Condition>
         <Action ID="Identify">
-            <input_port name="confidence"/>
             <input_port name="detection"/>
             <input_port name="entity_to_identify"/>
         </Action>
