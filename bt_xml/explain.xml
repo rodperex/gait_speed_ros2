@@ -14,26 +14,29 @@
     <!-- ////////// -->
     <BehaviorTree ID="confirm">
         <Fallback>
-            <Action ID="DialogConfirmation" language="es"/>
+            <ReactiveSequence>
+                <Action ID="Identify" detection="{patient}" entity_to_identify="patient_1"/>
+                <Action ID="DialogConfirmation" language="es"/>
+            </ReactiveSequence>
             <ForceFailure>
-                <Action ID="Speak" params="" speech_text=""/>
+                <Action ID="Speak" params="" speech_text="Simplemente tienes que caminar cuando yo te lo indique. ¿Has entendido ahora?"/>
             </ForceFailure>
         </Fallback>
     </BehaviorTree>
     <!-- ////////// -->
     <BehaviorTree ID="provide_instructions">
-        <Sequence>
-            <Action ID="Speak" params="" speech_text="Hola, vamos a medir tu velocidad de la marcha. Cuando diga ¡YA! tienes que comenzar a caminar"/>
-            <Action ID="Speak" params="" speech_text="¿Has entendido lo que hay que hacer?"/>
-            <Fallback>
-                <RetryUntilSuccessful num_attempts="5">
+        <Parallel failure_threshold="1" success_threshold="2">
+            <Action ID="Identify" detection="{patient}" entity_to_identify="patient_1"/>
+            <Sequence>
+                <Action ID="Speak" params="" speech_text="Hola, vamos a medir tu velocidad de la marcha. Cuando diga ¡YA! tienes que comenzar a caminar"/>
+                <Action ID="Identify" detection="{patient}" entity_to_identify="patient_1"/>
+                <Action ID="Speak" params="" speech_text="¿Has entendido lo que hay que hacer?"/>
+                <Action ID="Identify" detection="{patient}" entity_to_identify="patient_1"/>
+                <RetryUntilSuccessful num_attempts="2">
                     <SubTree ID="confirm" __shared_blackboard="true"/>
                 </RetryUntilSuccessful>
-                <ForceFailure>
-                    <Action ID="Speak" params="" speech_text="Simplemente tienes que comenzar a caminar cuando te lo indique"/>
-                </ForceFailure>
-            </Fallback>
-        </Sequence>
+            </Sequence>
+        </Parallel>
     </BehaviorTree>
     <!-- ////////// -->
     <TreeNodesModel>
