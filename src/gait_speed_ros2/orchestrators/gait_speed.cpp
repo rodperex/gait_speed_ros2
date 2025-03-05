@@ -93,9 +93,20 @@ GaitSpeed::control_cycle()
       break;
     case State::MEASURE:
       if (check_behavior_finished()) {
-        blackboard_->get("gait_speed_result", result_msg.data);
-        RCLCPP_INFO(get_logger(), "[State - MEASURE]: Gait speed test finished (%.2f)", result_msg.data);
-        result_pub_->publish(result_msg);
+        if (last_status_ == "FAILURE") {
+          RCLCPP_INFO(get_logger(), "[State - MEASURE]: Error measuring gait speed");
+          go_to_state(State::ERROR);
+        } else {
+          blackboard_->get("gait_speed_result", result_msg.data);
+          RCLCPP_INFO(get_logger(), "[State - MEASURE]: Gait speed test finished (%.2f)", result_msg.data);
+          result_pub_->publish(result_msg);
+          go_to_state(State::CLEAN);
+        }
+      }
+      break;
+    case State::ERROR:
+      if (check_behavior_finished()) {
+        RCLCPP_INFO(get_logger(), "[State - ERROR]: Error detected");
         go_to_state(State::CLEAN);
       }
       break;
@@ -138,6 +149,7 @@ GaitSpeed::go_to_state(State state)
     case State::CLEAN:
       RCLCPP_INFO(get_logger(), "State: CLEAN");
       remove_activation("measure_gait_speed");
+      remove_activation("error");
       break;
     case State::ERROR:
       clear_activation();
@@ -157,7 +169,7 @@ GaitSpeed::go_to_state(State state)
 bool
 GaitSpeed::check_behavior_finished()
 {
-  RCLCPP_INFO(get_logger(), "State %d. Checking behavior finished: %s",  static_cast<int>(state_), last_status_.c_str());
+  RCLCPP_DEBUG(get_logger(), "State %d. Checking behavior finished: %s",  static_cast<int>(state_), last_status_.c_str());
   return last_status_ == "FAILURE" || last_status_ == "SUCCESS";
 }
 
