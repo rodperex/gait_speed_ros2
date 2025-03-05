@@ -30,6 +30,7 @@ int main(int argc, char * argv[])
   node->trigger_transition(lifecycle_msgs::msg::Transition::TRANSITION_ACTIVATE);
 
   auto blackboard = BT::Blackboard::create();
+  blackboard->clear();
   blackboard->set("node", node);
 
   // orchestrator
@@ -61,9 +62,10 @@ int main(int argc, char * argv[])
     "dialog_confirmation_bt_node",
     "identify_bt_node",
     "is_in_front_bt_node",
-    "save_detection_in_bb_bt_node",
     "activate_attention_bt_node",
     "deactivate_attention_bt_node",
+    "get_detection_from_bb_bt_node",
+    "save_detection_in_bb_bt_node"
   };
 
   auto explain_gait_speed_node = std::make_shared<gait_speed::BehaviorRunner>(
@@ -112,9 +114,8 @@ int main(int argc, char * argv[])
 
   exec.add_node(gait_speed_node->get_node_base_interface());
   
-  exec.add_node(node->get_node_base_interface());
+  // exec.add_node(node->get_node_base_interface());
 
-  exec.add_node(gait_speed_node->get_node_base_interface());
   exec.add_node(find_person_node->get_node_base_interface());
   exec.add_node(explain_gait_speed_node->get_node_base_interface());
   exec.add_node(measure_node->get_node_base_interface());
@@ -125,6 +126,12 @@ int main(int argc, char * argv[])
   explain_gait_speed_node->trigger_transition(lifecycle_msgs::msg::Transition::TRANSITION_CONFIGURE);
   measure_node->trigger_transition(lifecycle_msgs::msg::Transition::TRANSITION_CONFIGURE);
   error_node->trigger_transition(lifecycle_msgs::msg::Transition::TRANSITION_CONFIGURE);
+
+  RCLCPP_INFO(node->get_logger(), "gait_speed_node state: %s", gait_speed_node->get_current_state().label().c_str());
+  RCLCPP_INFO(node->get_logger(), "find_person_node state: %s", find_person_node->get_current_state().label().c_str());
+  RCLCPP_INFO(node->get_logger(), "explain_gait_speed_node state: %s", explain_gait_speed_node->get_current_state().label().c_str());
+  RCLCPP_INFO(node->get_logger(), "measure_node state: %s", measure_node->get_current_state().label().c_str());
+  RCLCPP_INFO(node->get_logger(), "error_node state: %s", error_node->get_current_state().label().c_str());
   
   while (rclcpp::ok()) {
     exec.spin_some();
@@ -137,6 +144,19 @@ int main(int argc, char * argv[])
       break;
     }
   }
+  RCLCPP_INFO(node->get_logger(), "gait_speed_node state: %s", gait_speed_node->get_current_state().label().c_str());
+  RCLCPP_INFO(node->get_logger(), "find_person_node state: %s", find_person_node->get_current_state().label().c_str());
+  RCLCPP_INFO(node->get_logger(), "explain_gait_speed_node state: %s", explain_gait_speed_node->get_current_state().label().c_str());
+  RCLCPP_INFO(node->get_logger(), "measure_node state: %s", measure_node->get_current_state().label().c_str());
+  RCLCPP_INFO(node->get_logger(), "error_node state: %s", error_node->get_current_state().label().c_str());
+
+  try {
+    float result = blackboard->get<float>("gait_speed_result");
+    RCLCPP_INFO(node->get_logger(), "\n*************************************************************\nGait speed result: %.2f seconds", result);
+  } catch (const std::exception& e) {
+    RCLCPP_ERROR(node->get_logger(), "Gait speed result not calculated");
+  }
+  
   rclcpp::shutdown();
 
   return 0;

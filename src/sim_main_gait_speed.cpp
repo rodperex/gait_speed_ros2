@@ -150,9 +150,12 @@ int main(int argc, char * argv[])
   RCLCPP_INFO(node->get_logger(), "measure_node state: %s", measure_node->get_current_state().label().c_str());
   RCLCPP_INFO(node->get_logger(), "error_node state: %s", error_node->get_current_state().label().c_str());
 
-  float result = blackboard->get<float>("gait_speed_result");
-
-  RCLCPP_INFO(node->get_logger(), "\n*************************************************************\nGait speed result: %.2f seconds", result);
+  try {
+    float result = blackboard->get<float>("gait_speed_result");
+    RCLCPP_INFO(node->get_logger(), "\n*************************************************************\nGait speed result: %.2f seconds", result);
+  } catch (const std::exception& e) {
+    RCLCPP_ERROR(node->get_logger(), "Gait speed result not calculated");
+  }
   
   rclcpp::shutdown();
 
