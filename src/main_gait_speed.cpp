@@ -43,6 +43,7 @@ int main(int argc, char * argv[])
   
   plugins = {
     "is_pointing_bt_node",
+    "is_detected_bt_node", // Remove when using find_patient.xml
     "spin_bt_node",
     "identify_bt_node",
     "navigate_to_bt_node",
@@ -52,7 +53,7 @@ int main(int argc, char * argv[])
   auto find_person_node = std::make_shared<gait_speed::BehaviorRunner>(
     blackboard,
     "find_patient",
-    "/bt_xml/find_patient.xml",
+    "/bt_xml/find_person_simple.xml", // replace with find_patient.xml when using the pointing plugin
     plugins
   );
 
