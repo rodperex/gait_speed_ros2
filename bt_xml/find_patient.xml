@@ -5,16 +5,10 @@
         <Sequence>
             <SubTree ID="find_waving_person_rotating" __shared_blackboard="true"/>
             <Action ID="Identify" detection="{patient}" entity_to_identify="patient_1"/>
-            <Action ID="NavigateTo" distance_tolerance="0.5" tf_frame="patient_1" will_finish="true" x="" y=""/>
+            <Action ID="NavigateTo" distance_tolerance="2.0" tf_frame="patient_1" will_finish="true" x="" y=""/>
+            <SubTree ID="focus_on_patient" __shared_blackboard="true"/>
             <Action ID="SaveDetectionInBB" detection="{patient}" key="detection"/>
         </Sequence>
-    </BehaviorTree>
-    <!-- ////////// -->
-    <BehaviorTree ID="find_person_rotating">
-        <ReactiveFallback>
-            <Condition ID="IsDetected" confidence="0.6" frames="" interest="person" max_depth="2" max_entities="1" order="depth_nearest"/>
-            <Action ID="Spin" angle="360" forever="" speed="0.1"/>
-        </ReactiveFallback>
     </BehaviorTree>
     <!-- ////////// -->
     <BehaviorTree ID="find_waving_person">
@@ -33,12 +27,19 @@
     </BehaviorTree>
     <!-- ////////// -->
     <BehaviorTree ID="find_waving_person_rotating">
-        <Timeout msec="30000">
+        <RetryUntilSuccessful num_attempts="-1">
             <ReactiveFallback>
                 <Condition ID="IsPointing" detection="{patient}" high_pointing_limit="7" low_pointing_limit="5" output_frame="" pointing_direction="" threshold="0.7"/>
                 <Action ID="Spin" angle="-1" forever="true" speed="0.5"/>
             </ReactiveFallback>
-        </Timeout>
+        </RetryUntilSuccessful>
+    </BehaviorTree>
+    <!-- ////////// -->
+    <BehaviorTree ID="focus_on_patient">
+        <ReactiveFallback>
+            <Action ID="Identify" detection="{detection}" entity_to_identify="patient_1"/>
+            <Action ID="Spin" angle="360" forever="true" speed="0.5"/>
+        </ReactiveFallback>
     </BehaviorTree>
     <!-- ////////// -->
     <BehaviorTree ID="gait_speed_dist">
@@ -151,12 +152,12 @@
             <input_port default="true" name="__shared_blackboard">If false  , the Subtree has an isolated blackboard and needs port remapping</input_port>
         </SubTree>
         <SubTree ID="find_person"/>
-        <SubTree ID="find_person_rotating">
-            <input_port default="true" name="__shared_blackboard">If false  , the Subtree has an isolated blackboard and needs port remapping</input_port>
-        </SubTree>
         <SubTree ID="find_waving_person"/>
         <SubTree ID="find_waving_person_rotating">
             <input_port default="true" name="__shared_blackboard">If false (default), the Subtree has an isolated blackboard and needs port remapping</input_port>
+        </SubTree>
+        <SubTree ID="focus_on_patient">
+            <input_port default="true" name="__shared_blackboard">If false  , the Subtree has an isolated blackboard and needs port remapping</input_port>
         </SubTree>
         <SubTree ID="gait_speed_dist"/>
         <SubTree ID="gait_speed_dist_following">
