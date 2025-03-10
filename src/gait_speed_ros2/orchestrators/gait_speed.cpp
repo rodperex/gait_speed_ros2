@@ -72,12 +72,14 @@ GaitSpeed::control_cycle()
         RCLCPP_INFO_ONCE(get_logger(), "BT not started yet");
         break;
       }
-      if (last_status_ == "SUCCESS") {
-        RCLCPP_INFO(get_logger(), "[State - FIND]: Patient found");
-        go_to_state(State::EXPLAIN);
-      } else {
-        RCLCPP_INFO(get_logger(), "[State - FIND]: Stopping FSM");
-        go_to_state(State::CLEAN);
+      if (check_behavior_finished()) {
+        if (last_status_ == "SUCCESS") {
+          RCLCPP_INFO(get_logger(), "[State - FIND]: Patient found");
+          go_to_state(State::EXPLAIN);
+        } else {
+          RCLCPP_INFO(get_logger(), "[State - FIND]: Stopping FSM");
+          go_to_state(State::CLEAN);
+        }
       }
       break;
     case State::EXPLAIN:
