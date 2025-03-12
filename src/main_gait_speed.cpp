@@ -47,13 +47,14 @@ int main(int argc, char * argv[])
     "spin_bt_node",
     "identify_bt_node",
     "navigate_to_bt_node",
-    "save_detection_in_bb_bt_node"
+    "save_detection_in_bb_bt_node",
+    "speak_bt_node"
   };
 
   auto find_person_node = std::make_shared<gait_speed::BehaviorRunner>(
     blackboard,
     "find_patient",
-    "/bt_xml/find_person_simple.xml", // replace with find_patient.xml when using the pointing plugin
+    "/bt_xml/find_patient.xml", // replace with find_patient.xml when using the pointing plugin
     plugins
   );
 

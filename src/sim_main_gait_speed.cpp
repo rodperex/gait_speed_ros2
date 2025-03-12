@@ -42,7 +42,7 @@ int main(int argc, char * argv[])
   std::vector<std::string> plugins;
   
   plugins = {
-    "is_pointing_bt_node", // Do not look for a person to wave in this example
+    "is_detected_bt_node", // Do not look for a person to wave in this example
     "spin_bt_node",
     "identify_bt_node",
     "navigate_to_bt_node",
@@ -53,7 +53,7 @@ int main(int argc, char * argv[])
   auto find_person_node = std::make_shared<gait_speed::BehaviorRunner>(
     blackboard,
     "find_patient",
-    "/bt_xml/find_patient.xml",
+    "/bt_xml/find_person_simple.xml",
     plugins
   );
 
