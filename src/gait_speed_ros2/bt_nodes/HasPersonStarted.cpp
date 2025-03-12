@@ -38,7 +38,8 @@ HasPersonStarted::tick()
   RCLCPP_INFO_ONCE(node_->get_logger(), "HAS_PERSON_STARTED");
 
   if (get_distance_travelled() < min_distance_) {
-    RCLCPP_INFO(node_->get_logger(), "[HAS_PERSON_STARTED]: Test has NOT started yet. Initial movement: %.2f/%.2f", distance_travelled_, min_distance_);
+    RCLCPP_DEBUG(node_->get_logger(), "[HAS_PERSON_STARTED]: Test has NOT started yet. Initial movement: %.2f/%.2f", distance_travelled_, min_distance_);
+    RCLCPP_INFO_ONCE(node_->get_logger(), "[HAS_PERSON_STARTED]: Test has NOT started yet");
     // config().blackboard->set("start_time", node_->now());
     config().blackboard->set("start_time", tf_time_);
     return BT::NodeStatus::FAILURE;
