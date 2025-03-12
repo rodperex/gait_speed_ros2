@@ -57,15 +57,13 @@ def generate_launch_description():
 
     
     params = os.path.join(pkg_dir, 'config', 'params.yaml')
-    # with open(params_file, 'r') as f:
-    #     params = yaml.safe_load(f)['gait_speed_node']['ros__parameters']
 
     ld = LaunchDescription()
 
 
     robot_cmd = Node(
         package='gait_speed_ros2',
-        executable='gait_speed',
+        executable='gait_speed_mocap',
         output='screen',
         remappings=[
         ],

@@ -49,7 +49,7 @@ private:
   on_deactivate(const rclcpp_lifecycle::State & previous_state);
 
   State state_;
-  int n_tries_;
+  int n_tries_, n_tries_counter_;
 
   rclcpp::TimerBase::SharedPtr timer_;
   rclcpp::Subscription<std_msgs::msg::String>::SharedPtr status_sub_;

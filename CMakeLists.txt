@@ -110,6 +110,10 @@ add_executable(mocap_gait_speed_simple src/main_gait_speed_simple_mocap.cpp)
 ament_target_dependencies(mocap_gait_speed_simple ${dependencies})
 target_link_libraries(mocap_gait_speed_simple ${PROJECT_NAME})
 
+add_executable(gait_speed_mocap src/main_gait_speed_mocap.cpp)
+ament_target_dependencies(gait_speed_mocap ${dependencies})
+target_link_libraries(gait_speed_mocap ${PROJECT_NAME})
+
 install(TARGETS
   ${plugin_libs}
   ${PROJECT_NAME}
@@ -122,6 +126,7 @@ install(TARGETS
   gait_speed
   sim_gait_speed
   gait_speed_simple
+  gait_speed_mocap
   mocap_gait_speed_simple
   ARCHIVE DESTINATION lib
   LIBRARY DESTINATION lib

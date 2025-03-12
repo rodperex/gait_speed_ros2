@@ -22,15 +22,18 @@ namespace gait_speed
 GaitSpeed::GaitSpeed(BT::Blackboard::Ptr blackboard)
 : CascadeLifecycleNode("gait_speed_node"),
   state_(State::INIT),
-  n_tries_(0),
+  n_tries_(1),
+  n_tries_counter_(1),
   last_status_(""),
   blackboard_(blackboard)
 {
   this->declare_parameter<float>("value", 4.0);
   this->declare_parameter<std::string>("mode", "distance");
+  this->declare_parameter<int>("n_tries", 1);
 
   double value = this->get_parameter("value").as_double();
   std::string mode = this->get_parameter("mode").as_string();
+  n_tries_ = this->get_parameter("n_tries").as_int();
 
   if (mode == "distance") {
     RCLCPP_INFO(get_logger(), "GaitSpeed constructor: %f meters", value);
@@ -107,8 +110,8 @@ GaitSpeed::control_cycle()
       }
       break;
     case State::ERROR:
-      if (check_behavior_finished()) {
-        RCLCPP_INFO(get_logger(), "[State - ERROR]: Error detected");
+      if (check_behavior_finished() && n_tries_counter_ >= n_tries_) { // In case the control cycle is faster than go_to_state
+        RCLCPP_INFO(get_logger(), "[State - ERROR]: Error measuring gait speed");
         go_to_state(State::CLEAN);
       }
       break;
@@ -132,10 +135,12 @@ GaitSpeed::go_to_state(State state)
 
   switch (state_) {
     case State::INIT:
-      RCLCPP_INFO(get_logger(), "State: INIT");
+      clear_activation();
+      RCLCPP_INFO(get_logger(), "State: INIT. Attempt %d", n_tries_counter_);
       break;
     case State::FIND:
       RCLCPP_INFO(get_logger(), "State: FIND");
+      n_tries_counter_++;
       add_activation("find_patient");
       break;
     case State::EXPLAIN:
@@ -154,9 +159,14 @@ GaitSpeed::go_to_state(State state)
       remove_activation("error");
       break;
     case State::ERROR:
-      clear_activation();
-      RCLCPP_INFO(get_logger(), "State: ERROR");
-      add_activation("error");
+      if (n_tries_counter_ <= n_tries_) {
+        RCLCPP_INFO(get_logger(), "State: ERROR. Retrying. Attempt %d", n_tries_counter_);
+        go_to_state(State::INIT);
+      } else {
+        clear_activation();
+        RCLCPP_INFO(get_logger(), "State: ERROR. Stopping robot");
+        add_activation("error");
+      }
       break;
     case State::STOP:
       RCLCPP_INFO(get_logger(), "State: STOP");

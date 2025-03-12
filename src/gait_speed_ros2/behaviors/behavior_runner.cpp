@@ -98,14 +98,14 @@ BehaviorRunner::on_activate(const rclcpp_lifecycle::State & previous_state)
 
   for (const auto & plugin : plugins_) {
     factory.registerFromPlugin(loader.getOSName(plugin));
-    RCLCPP_INFO(get_logger(), "Plugin loaded: %s", plugin.c_str());
+    RCLCPP_DEBUG(get_logger(), "Plugin loaded: %s", plugin.c_str());
   }
 
-  RCLCPP_INFO(get_logger(), "Getting node from blackboard");
+  RCLCPP_DEBUG(get_logger(), "Getting node from blackboard");
   blackboard_->get("node", node_);
-  RCLCPP_INFO(get_logger(), "Creating BT from XML");
+  RCLCPP_DEBUG(get_logger(), "Creating BT from XML");
   tree_ = factory.createTreeFromFile(xml_file, blackboard_);
-  RCLCPP_INFO(get_logger(), "BT created from XML");
+  RCLCPP_DEBUG(get_logger(), "BT created from XML");
 
   status_pub_->on_activate();
 
@@ -128,6 +128,8 @@ BehaviorRunner::on_deactivate(const rclcpp_lifecycle::State & previous_state)
 
   timer_ = nullptr;
   status_pub_->on_deactivate();
+
+  refresh();
 
   return rclcpp_lifecycle::node_interfaces::LifecycleNodeInterface::CallbackReturn::SUCCESS;
 }

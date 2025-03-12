@@ -104,6 +104,7 @@ int main(int argc, char * argv[])
 
   plugins = {
     "speak_bt_node",
+    "deactivate_attention_bt_node"
   };
 
   auto error_node = std::make_shared<gait_speed::BehaviorRunner>(
