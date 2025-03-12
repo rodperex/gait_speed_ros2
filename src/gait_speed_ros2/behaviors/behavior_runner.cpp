@@ -35,8 +35,8 @@ BehaviorRunner::BehaviorRunner(
   xml_path_ = xml_path;
   plugins_ = plugins;
 
-  RCLCPP_INFO(get_logger(), "XML path: %s", xml_path_.c_str());
-  RCLCPP_INFO(get_logger(), "# plugins: %ld", plugins_.size());
+  RCLCPP_DEBUG(get_logger(), "XML path: %s", xml_path_.c_str());
+  RCLCPP_DEBUG(get_logger(), "# plugins: %ld", plugins_.size());
 
   status_pub_ = create_publisher<std_msgs::msg::String>("behavior_status", 10);
 
