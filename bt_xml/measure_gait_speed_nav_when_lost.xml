@@ -22,11 +22,11 @@
                     <Sequence>
                         <SubTree ID="locate_person" __shared_blackboard="true"/>
                         <Action ID="Identify" confidence="0.0" detection="{patient_detection}" entity_to_identify="patient_1"/>
-                        <Action ID="Speak" params="" speech_text="Camina"/>
+                        <!-- <Action ID="Speak" params="" speech_text="Camina"/> -->
                         <Condition ID="HasPersonStarted" min_distance="0.1" person_frame="patient_1"/>
                     </Sequence>
                 </RetryUntilSuccessful>
-                <Action ID="Speak" params="" speech_text="Muy bien, continúa"/>
+                <!-- <Action ID="Speak" params="" speech_text="Muy bien, continúa"/> -->
             </Sequence>
         </Timeout>
     </BehaviorTree>
@@ -72,9 +72,12 @@
                 <ForceFailure>
                     <Action ID="DeactivateAttention" what="base"/>
                 </ForceFailure>
-                <Action ID="Speak" params="" speech_text="No te veo"/>
+                <ForceFailure>
+                    <Action ID="Speak" params="" speech_text="Te he perdido. Voy en tu busca"/>
+                </ForceFailure>
+                <Action ID="NavigateTo" distance_tolerance="0.2" tf_frame="patient_1" will_finish="yes" x="" y=""/>
             </Fallback>
-            <Timeout msec="10000">
+            <Timeout msec="20000">
                 <ReactiveFallback>
                     <Action ID="Identify" confidence="0.0" detection="{patient_detection}" entity_to_identify="patient_1"/>
                     <Action ID="Spin" angle="-1" forever="true" speed="0.3"/>
@@ -87,7 +90,7 @@
     <BehaviorTree ID="measure_gait_speed">
         <ReactiveSequence>
             <SubTree ID="locate_person" __shared_blackboard="true"/>
-            <Action ID="Speak" params="" speech_text="Sigue caminando"/>
+            <!-- <Action ID="Speak" params="" speech_text="Sigue caminando"/> -->
             <ForceSuccess>
                 <Action ID="Identify" confidence="0.0" detection="{patient_detection}" entity_to_identify="patient_1"/>
             </ForceSuccess>

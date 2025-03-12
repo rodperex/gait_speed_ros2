@@ -3,9 +3,12 @@
     <!-- ////////// -->
     <BehaviorTree ID="BehaviorTree">
         <Sequence>
+            <Action ID="Speak" params="" speech_text="Comenzamos. Levanta la mano para que te encuentre"/>
             <SubTree ID="find_waving_person_rotating" __shared_blackboard="true"/>
             <Action ID="Identify" detection="{patient}" entity_to_identify="patient_1"/>
+            <Action ID="Speak" params="" speech_text="Ya te veo. Voy hacia ti"/>
             <Action ID="NavigateTo" distance_tolerance="2.0" tf_frame="patient_1" will_finish="true" x="" y=""/>
+            <Action ID="Speak" params="" speech_text="Espera un poco, voy a enfocarte bien"/>
             <SubTree ID="focus_on_patient" __shared_blackboard="true"/>
             <Action ID="SaveDetectionInBB" detection="{patient}" key="detection"/>
         </Sequence>
@@ -29,7 +32,8 @@
     <BehaviorTree ID="find_waving_person_rotating">
         <RetryUntilSuccessful num_attempts="-1">
             <ReactiveFallback>
-                <Condition ID="IsPointing" detection="{patient}" high_pointing_limit="7" low_pointing_limit="5" output_frame="" pointing_direction="" threshold="0.7"/>
+                <!-- <Condition ID="IsPointing" detection="{patient}" high_pointing_limit="7" low_pointing_limit="5" output_frame="" pointing_direction="" threshold="0.7"/>                     -->
+                <Condition ID="IsPointing" detection="{patient}" high_pointing_limit="9" low_pointing_limit="-1" output_frame="" pointing_direction="" threshold="0.7"/>
                 <Action ID="Spin" angle="-1" forever="true" speed="0.5"/>
             </ReactiveFallback>
         </RetryUntilSuccessful>
@@ -37,7 +41,7 @@
     <!-- ////////// -->
     <BehaviorTree ID="focus_on_patient">
         <ReactiveFallback>
-            <Action ID="Identify" detection="{detection}" entity_to_identify="patient_1"/>
+            <Action ID="Identify" detection="{patient}" entity_to_identify="patient_1"/>
             <Action ID="Spin" angle="360" forever="true" speed="0.5"/>
         </ReactiveFallback>
     </BehaviorTree>
