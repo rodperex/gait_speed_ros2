@@ -25,36 +25,7 @@ def generate_launch_description():
     # Get the launch directory
     pkg_dir = get_package_share_directory('gait_speed_ros2')
     
-    # Get the launch directories for other packages
-    # navigation_dir = get_package_share_directory('navigation_system')
-    whisper_dir = get_package_share_directory('whisper_bringup')
-
-    # HRI
-    launch_hri = False
-    whisper_cmd = IncludeLaunchDescription(
-        PythonLaunchDescriptionSource(
-            os.path.join(whisper_dir, 'launch', 'whisper.launch.py')
-        )
-    )
-    audio_common_player_cmd = Node(
-        package='audio_common',
-        executable='audio_player_node',
-        parameters=[
-            {'channels': 2},
-            {'device': -1}]
-    )
-    audio_common_tts_cmd = Node(
-        package='tts_ros',
-        executable='tts_node',
-        parameters=[
-            {'chunk': 4096},
-            {'frame_id': ''},
-            {'model': 'tts_models/en/ljspeech/vits'},
-            {'speaker_wav': ''},
-            {'device': 'cuda'}]
-    )
-
-
+  
     
     params_file = os.path.join(pkg_dir, 'config', 'params_sim.yaml')
     with open(params_file, 'r') as f:
@@ -63,16 +34,12 @@ def generate_launch_description():
     ld = LaunchDescription()
     robot_cmd = Node(
         package='gait_speed_ros2',
-        executable='sim_gait_speed',
+        executable='gait_speed',
         output='screen',
         remappings=[
         ],
         parameters=[params]
     )
-    if (launch_hri):
-        ld.add_action(whisper_cmd)
-        ld.add_action(audio_common_player_cmd)
-        ld.add_action(audio_common_tts_cmd)
     ld.add_action(robot_cmd)
 
     return ld
