@@ -6,4 +6,5 @@ gait_speed_node:
     tf_frame_camera: head_front_camera_optical_frame # oak_rgb_camera_optical_frame / head_front_camera_optical_frame / camera_rgb_optical_frame
     robot_moves: false # true or false
     mode: "distance" # "time" or "distance"
+    n_tries: 2
     value: 0.5 # seconds or meters
