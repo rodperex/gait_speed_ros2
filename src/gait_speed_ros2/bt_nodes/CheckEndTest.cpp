@@ -22,11 +22,16 @@ CheckEndTest::CheckEndTest(
   const BT::NodeConfiguration & conf)
 : BT::ActionNodeBase(xml_tag_name, conf),
   target_(0.0),
+  source_frame_("map"),
   tf_buffer_(),
   tf_listener_(tf_buffer_)
 {
   config().blackboard->get("node", node_);
   config().blackboard->get("target", target_); // aquí está el error
+
+  // node_->declare_parameter("source_frame_gait_speed", "map");
+  node_->get_parameter("source_frame_gait_speed", source_frame_);
+  // source_frame_ = "map";
 
   getInput("frame_name", frame_name_);
   getInput("mode", mode_);
@@ -67,7 +72,7 @@ CheckEndTest::get_distance_travelled()
       tf2::Stamped<tf2::Transform> map2person_at_start;
       config().blackboard->get("map2start", map2person_at_start);
 
-      auto map2person_msg = tf_buffer_.lookupTransform("map", frame_name_, tf2::TimePointZero);
+      auto map2person_msg = tf_buffer_.lookupTransform(source_frame_, frame_name_, tf2::TimePointZero);
       tf2::Stamped<tf2::Transform> map2person;
       tf2::fromMsg(map2person_msg, map2person);
 

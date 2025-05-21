@@ -1,0 +1,104 @@
+<?xml version="1.0"?>
+<root main_tree_to_execute="BehaviorTree">
+    <!-- ////////// -->
+    <BehaviorTree ID="BehaviorTree">
+        <Sequence>
+            <Action ID="Speak" params="" speech_text="Comenzamos un nuevo test"/>
+            <Action ID="Speak" params="" speech_text="Voy a buscarte"/>
+            <Timeout msec="20000">
+                <Sequence>
+                    <ReactiveFallback>
+                        <!-- <Condition ID="IsPointing" detection="{patient_detection}" high_pointing_limit="9" low_pointing_limit="-1" output_frame="" pointing_direction="" threshold="0.7"/> -->
+                        <Condition ID="IsDetected" best_detection="{patient_detection}" confidence="0.6" frame="" frame_name="patient" interest="person" max_depth="50" max_entities="1" model="people" n_detections="" order="depth"/>
+                        <Action ID="Spin" angle="-1" forever="true" speed="0.5"/>
+                    </ReactiveFallback>
+                </Sequence>
+            </Timeout>
+            
+            <Action ID="Identify" detection="{patient_detection}" entity_to_identify="patient_1"/>
+            <Action ID="SaveDetectionInBB" detection="{patient_detection}" key="detection"/>
+        </Sequence>
+    </BehaviorTree>
+    <!-- ////////// -->
+    <TreeNodesModel>
+        <Action ID="Identify">
+            <input_port name="detection"/>
+            <input_port name="entity_to_identify"/>
+        </Action>
+        <Condition ID="IsDetected">
+            <output_port name="best_detection"/>
+            <input_port default="0.6" name="confidence"/>
+            <output_port name="frame"/>
+            <input_port name="frame_name"/>
+            <input_port default="person" name="interest"/>
+            <input_port default="2" name="max_depth"/>
+            <input_port default="1" name="max_entities"/>
+            <input_port name="model"/>
+            <output_port name="n_detections"/>
+            <input_port default="depth_nearest" name="order"/>
+        </Condition>
+        <Condition ID="IsPointing">
+            <output_port name="detection"/>
+            <input_port name="high_pointing_limit"/>
+            <input_port name="low_pointing_limit"/>
+            <output_port name="output_frame"/>
+            <output_port name="pointing_direction"/>
+            <input_port default="0.7" name="threshold"/>
+        </Condition>
+        <Action ID="NavigateTo">
+            <input_port name="distance_tolerance"/>
+            <input_port name="tf_frame"/>
+            <input_port name="will_finish"/>
+            <input_port name="x"/>
+            <input_port name="y"/>
+        </Action>
+
+        <Action ID="SaveDetectionInBB">
+            <input_port name="detection"/>
+            <input_port name="key"/>
+        </Action>
+        <Action ID="Speak">
+            <input_port name="param"/>
+            <input_port name="speech_text"/>
+        </Action>
+        <Action ID="Spin">
+            <input_port name="angle"/>
+            <input_port name="forever"/>
+            <input_port name="speed"/>
+        </Action>
+        <SubTree ID="check_test_started">
+            <input_port default="true" name="__shared_blackboard">If false (default), the Subtree has an isolated blackboard and needs port remapping</input_port>
+        </SubTree>
+        <SubTree ID="confirm"/>
+        <SubTree ID="confirm_old">
+            <input_port default="false" name="__shared_blackboard">If false (default), the Subtree has an isolated blackboard and needs port remapping</input_port>
+        </SubTree>
+        <SubTree ID="find_patient_rotating">
+            <input_port default="true" name="__shared_blackboard">If false  , the Subtree has an isolated blackboard and needs port remapping</input_port>
+        </SubTree>
+        <SubTree ID="find_person"/>
+        <SubTree ID="find_person_rotating">
+            <input_port default="true" name="__shared_blackboard">If false  , the Subtree has an isolated blackboard and needs port remapping</input_port>
+        </SubTree>
+        <SubTree ID="find_waving_person"/>
+        <SubTree ID="find_waving_person_rotating">
+            <input_port default="true" name="__shared_blackboard">If false (default), the Subtree has an isolated blackboard and needs port remapping</input_port>
+        </SubTree>
+        <SubTree ID="gait_speed_dist"/>
+        <SubTree ID="gait_speed_dist_following">
+            <input_port default="false" name="__shared_blackboard">If false (default), the Subtree has an isolated blackboard and needs port remapping</input_port>
+        </SubTree>
+        <Condition ID="isMyPerson">
+            <input_port name="person_frame"/>
+        </Condition>
+        <SubTree ID="listen"/>
+        <SubTree ID="measure_gait_speed">
+            <input_port default="true" name="__shared_blackboard">If false (default), the Subtree has an isolated blackboard and needs port remapping</input_port>
+        </SubTree>
+        <SubTree ID="provide_instructions"/>
+        <SubTree ID="stay_aligned">
+            <input_port default="true" name="__shared_blackboard">If false (default), the Subtree has an isolated blackboard and needs port remapping</input_port>
+        </SubTree>
+    </TreeNodesModel>
+    <!-- ////////// -->
+</root>

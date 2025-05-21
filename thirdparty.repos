@@ -1,8 +1,4 @@
-repositories:
-  thirdparty/cascade_lifecycle:
-    type: git
-    url: https://github.com/fmrico/cascade_lifecycle
-    version: main
+
   thirdparty/bt_nodes:
     type: git
     url: https://github.com/rodperex/bt_nodes.git
@@ -23,12 +19,15 @@ repositories:
     type: git
     url: https://github.com/mgonzs13/tts_ros.git
     version: main
-
   subsystems/perception_system:
     type: git
     url: https://github.com/jmguerreroh/perception_system.git
-    version: jazzy
+    version: experimental
   subsystems/navigation_system:
     type: git
     url: https://github.com/Juancams/navigation_system.git
     version: main
+  subsystems/attention_system:
+    type: git
+    url: https://github.com/rodperex/attention_system.git
+    version: main 

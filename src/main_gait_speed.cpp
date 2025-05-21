@@ -26,6 +26,9 @@ int main(int argc, char * argv[])
   rclcpp::executors::SingleThreadedExecutor exec;
   // cambiar a eventExecutor
   auto node = std::make_shared<rclcpp_cascade_lifecycle::CascadeLifecycleNode>("bt_node");
+
+  node->declare_parameter("source_frame_gait_speed", "map");
+
   node->trigger_transition(lifecycle_msgs::msg::Transition::TRANSITION_CONFIGURE);
   node->trigger_transition(lifecycle_msgs::msg::Transition::TRANSITION_ACTIVATE);
 
@@ -54,7 +57,7 @@ int main(int argc, char * argv[])
   auto find_person_node = std::make_shared<gait_speed::BehaviorRunner>(
     blackboard,
     "find_patient",
-    "/bt_xml/find_patient.xml", // replace with find_patient.xml when using the pointing plugin
+    "/bt_xml/find_person_rot_nav.xml", // replace with find_patient.xml when using the pointing plugin
     plugins
   );
 

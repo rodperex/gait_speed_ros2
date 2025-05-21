@@ -6,8 +6,16 @@
             <Action ID="GetDetectionFromBB" detection="{patient_detection}" key="detection"/>
             <Action ID="Identify" confidence="0.0" detection="{patient_detection}" entity_to_identify="patient_1"/>
             <Action ID="ActivateAttention" frame_id="patient_1" what="base"/>
-            <Action ID="StartTest" frame_name="patient_1"/>
-            <Action ID="Speak" params="" speech_text="Ya puedes empezar!"/>
+            <RetryUntilSuccessful num_attempts="100">
+                <ReactiveSequence>
+                    <Action ID="Identify" confidence="0.0" detection="{patient_detection}" entity_to_identify="patient_1"/>
+                    <Action ID="StartTest" frame_name="patient_1"/>
+                </ReactiveSequence>
+            </RetryUntilSuccessful>
+            <ReactiveSequence>
+                <Action ID="Identify" confidence="0.0" detection="{patient_detection}" entity_to_identify="patient_1"/>
+                <Action ID="Speak" params="" speech_text="Comienza a caminar cuando oigas los pitidos. Para cuando te lo indique"/>
+            </ReactiveSequence>
             <SubTree ID="check_test_started" __shared_blackboard="true"/>
             <SubTree ID="measure_gait_speed" __shared_blackboard="true"/>
             <Action ID="DeactivateAttention" what="base"/>
@@ -22,11 +30,9 @@
                     <Sequence>
                         <SubTree ID="locate_person" __shared_blackboard="true"/>
                         <Action ID="Identify" confidence="0.0" detection="{patient_detection}" entity_to_identify="patient_1"/>
-                        <Action ID="Speak" params="" speech_text="Camina"/>
                         <Condition ID="HasPersonStarted" min_distance="0.1" person_frame="patient_1"/>
                     </Sequence>
                 </RetryUntilSuccessful>
-                <Action ID="Speak" params="" speech_text="Muy bien, continúa"/>
             </Sequence>
         </Timeout>
     </BehaviorTree>
@@ -87,7 +93,6 @@
     <BehaviorTree ID="measure_gait_speed">
         <ReactiveSequence>
             <SubTree ID="locate_person" __shared_blackboard="true"/>
-            <Action ID="Speak" params="" speech_text="Sigue caminando"/>
             <ForceSuccess>
                 <Action ID="Identify" confidence="0.0" detection="{patient_detection}" entity_to_identify="patient_1"/>
             </ForceSuccess>

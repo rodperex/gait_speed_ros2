@@ -26,7 +26,9 @@ HasPersonStarted::HasPersonStarted(
   tf_listener_(tf_buffer_)
 {
   config().blackboard->get("node", node_);
-  // config().blackboard->get("person_frame", frame_);
+
+  // node_->declare_parameter("source_frame_gait_speed", "map");
+  node_->get_parameter("source_frame_gait_speed", source_frame_);
 
   getInput("min_distance", min_distance_);
   getInput("person_frame", frame_);
@@ -36,8 +38,12 @@ BT::NodeStatus
 HasPersonStarted::tick()
 {
   RCLCPP_INFO_ONCE(node_->get_logger(), "HAS_PERSON_STARTED");
+  
 
   if (get_distance_travelled() < min_distance_) {
+    const char* mp3_file = "/home/roi/robots/ros2/geriabot_ws/beep.mp3"; // remove hardcoded path
+    std::string command = "mpg123 " + std::string(mp3_file) + " > /dev/null 2>&1";
+    system(command.c_str());
     RCLCPP_DEBUG(node_->get_logger(), "[HAS_PERSON_STARTED]: Test has NOT started yet. Initial movement: %.2f/%.2f", distance_travelled_, min_distance_);
     RCLCPP_INFO_ONCE(node_->get_logger(), "[HAS_PERSON_STARTED]: Test has NOT started yet");
     // config().blackboard->set("start_time", node_->now());
@@ -59,7 +65,7 @@ HasPersonStarted::get_distance_travelled()
 
       RCLCPP_DEBUG(node_->get_logger(), "Getting distance travelled for frame %s", frame_.c_str());
 
-      auto map2person_msg = tf_buffer_.lookupTransform("map", frame_, tf2::TimePointZero);
+      auto map2person_msg = tf_buffer_.lookupTransform(source_frame_, frame_, tf2::TimePointZero);
       tf2::Stamped<tf2::Transform> map2person; // Current position of the person
       tf2::fromMsg(map2person_msg, map2person);
 

@@ -24,6 +24,7 @@ int main(int argc, char * argv[])
   rclcpp::executors::SingleThreadedExecutor exec;
 
   auto node = std::make_shared<rclcpp_cascade_lifecycle::CascadeLifecycleNode>("bt_node");
+  node->declare_parameter("source_frame_gait_speed", "map");
   node->trigger_transition(lifecycle_msgs::msg::Transition::TRANSITION_CONFIGURE);
   node->trigger_transition(lifecycle_msgs::msg::Transition::TRANSITION_ACTIVATE);
 
@@ -68,12 +69,13 @@ int main(int argc, char * argv[])
     "activate_attention_bt_node",
     "deactivate_attention_bt_node",
     "get_detection_from_bb_bt_node",
+    "speak_bt_node"
   };
 
   auto measure_node = std::make_shared<gait_speed::BehaviorRunner>(
     blackboard,
     "measure_gait_speed",
-    "/bt_xml/measure_gait_speed_no_hri.xml",
+    "/bt_xml/measure_gait_speed.xml",
     plugins
   );
 

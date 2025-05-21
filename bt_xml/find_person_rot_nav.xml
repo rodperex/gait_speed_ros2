@@ -4,31 +4,26 @@
     <BehaviorTree ID="BehaviorTree">
         <Sequence>
             <Action ID="Speak" params="" speech_text="Comenzamos un nuevo test"/>
-            <Action ID="Speak" params="" speech_text="Levanta la mano para que pueda encontrarte"/>
-            <SubTree ID="find_waving_person_rotating" __shared_blackboard="true"/>
-            <Action ID="Identify" detection="{patient}" entity_to_identify="patient_1"/>
-            <!-- <Action ID="Speak" params="" speech_text="Ya te veo. Voy hacia ti"/>
-            <Action ID="NavigateTo" distance_tolerance="3.0" tf_frame="patient_1" will_finish="true" x="" y=""/> -->
-            <Action ID="Speak" params="" speech_text="Espera un momento que te enfoque correctamente"/>
-            <SubTree ID="focus_on_patient" __shared_blackboard="true"/>
-            <Action ID="SaveDetectionInBB" detection="{patient}" key="detection"/>
-        </Sequence>
-    </BehaviorTree>
-    <!-- ////////// -->
-    <BehaviorTree ID="find_waving_person_rotating">
-        <RetryUntilSuccessful num_attempts="-1">
+            <Action ID="Speak" params="" speech_text="Levanta la mano que te encuentre"/>
+            <Timeout msec="60000">
+                <Sequence>
+                    <ReactiveFallback>
+                        <Condition ID="IsPointing" detection="{patient_detection}" high_pointing_limit="9" low_pointing_limit="-1" output_frame="{person_pointing}" pointing_direction="{dir}" threshold="0.7"/>
+                        <!-- <Condition ID="IsDetected" best_detection="{patient_detection}" confidence="0.6" frame="" frame_name="patient" interest="person" max_depth="50" max_entities="1" model="people" n_detections="" order="depth"/> -->
+                        <Action ID="Spin" angle="-1" forever="true" speed="0.5"/>
+                    </ReactiveFallback>
+                    <Action ID="Identify" detection="{patient_detection}" entity_to_identify="patient_1"/>
+                    <!-- <Action ID="Speak" params="" speech_text="Me voy a acercar a ti"/>
+                    <Action ID="NavigateTo" distance_tolerance="3.0" tf_frame="patient_1" will_finish="true" x="" y=""/> -->
+                    <Action ID="Speak" params="" speech_text="Espera un momento que te enfoque bien"/>
+                </Sequence>
+            </Timeout>
             <ReactiveFallback>
-                <Condition ID="IsPointing" detection="{patient}" high_pointing_limit="9" low_pointing_limit="-1" output_frame="{pointer}" pointing_direction="{dir}" threshold="0.7"/>
+                <Action ID="Identify" detection="{patient_detection}" entity_to_identify="patient_1"/>
                 <Action ID="Spin" angle="-1" forever="true" speed="0.5"/>
             </ReactiveFallback>
-        </RetryUntilSuccessful>
-    </BehaviorTree>
-    <!-- ////////// -->
-    <BehaviorTree ID="focus_on_patient">
-        <ReactiveFallback>
-            <Action ID="Identify" detection="{patient}" entity_to_identify="patient_1"/>
-            <Action ID="Spin" angle="360" forever="true" speed="0.5"/>
-        </ReactiveFallback>
+            <Action ID="SaveDetectionInBB" detection="{patient_detection}" key="detection"/>
+        </Sequence>
     </BehaviorTree>
     <!-- ////////// -->
     <TreeNodesModel>
@@ -76,12 +71,6 @@
             <input_port name="forever"/>
             <input_port name="speed"/>
         </Action>
-        <SubTree ID="find_waving_person_rotating">
-            <input_port default="true" name="__shared_blackboard">If false (default), the Subtree has an isolated blackboard and needs port remapping</input_port>
-        </SubTree>
-        <SubTree ID="focus_on_patient">
-            <input_port default="true" name="__shared_blackboard">If false  , the Subtree has an isolated blackboard and needs port remapping</input_port>
-        </SubTree>
     </TreeNodesModel>
     <!-- ////////// -->
 </root>

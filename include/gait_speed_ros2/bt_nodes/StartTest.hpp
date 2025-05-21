@@ -54,7 +54,7 @@ private:
   std::shared_ptr<rclcpp_cascade_lifecycle::CascadeLifecycleNode> node_;
 
   float distance_;
-  std::string frame_name_;
+  std::string frame_name_, source_frame_;
   tf2::BufferCore tf_buffer_;
   tf2_ros::TransformListener tf_listener_;
   

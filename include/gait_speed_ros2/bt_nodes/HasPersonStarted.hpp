@@ -26,6 +26,8 @@
 #include <tf2_ros/buffer.h>
 #include "tf2_geometry_msgs/tf2_geometry_msgs.hpp"
 
+#include <cstdlib>
+
 namespace gait_speed
 {
 
@@ -53,7 +55,7 @@ private:
 
   std::shared_ptr<rclcpp_cascade_lifecycle::CascadeLifecycleNode> node_;
   
-  std::string frame_;
+  std::string frame_, source_frame_;
   float min_distance_, distance_travelled_;
   
   tf2::BufferCore tf_buffer_;

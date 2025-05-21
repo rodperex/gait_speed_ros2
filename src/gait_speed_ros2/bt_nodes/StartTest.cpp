@@ -20,33 +20,43 @@ namespace gait_speed
 StartTest::StartTest(const std::string & xml_tag_name, const BT::NodeConfiguration & conf)
 : BT::ActionNodeBase(xml_tag_name, conf),
   distance_(0.0),
+  source_frame_("map"),
   tf_buffer_(),
   tf_listener_(tf_buffer_)
 {
     config().blackboard->get("node", node_);
     getInput("frame_name", frame_name_);
+
+    // node_->declare_parameter("source_frame_gait_speed", "map");
+    node_->get_parameter("source_frame_gait_speed", source_frame_);
+
 }
 
 BT::NodeStatus
 StartTest::tick()
 {
-    RCLCPP_INFO_ONCE(node_->get_logger(), "START_TEST");
+    RCLCPP_INFO_ONCE(node_->get_logger(), "START_TEST. Source frame: %s. Frame name: %s", source_frame_.c_str(), frame_name_.c_str());
     rclcpp::spin_some(node_->get_node_base_interface());
 
-    RCLCPP_DEBUG(node_->get_logger(), "Frame name: %s", frame_name_.c_str());
     try
     {
-        auto map2start_msg = tf_buffer_.lookupTransform("map", frame_name_, tf2::TimePointZero);
+        if (!tf_buffer_.canTransform(source_frame_, frame_name_, tf2::TimePointZero)) {
+            RCLCPP_INFO_ONCE(node_->get_logger(), "Waiting for transform from %s to %s", source_frame_.c_str(), frame_name_.c_str());
+            return BT::NodeStatus::RUNNING;
+        }
+        
+        auto map2start_msg = tf_buffer_.lookupTransform(source_frame_, frame_name_, tf2::TimePointZero);
         tf2::Stamped<tf2::Transform> map2start;
         tf2::fromMsg(map2start_msg, map2start);
         
-        RCLCPP_INFO(node_->get_logger(), "[START_TEST]: Patient at %.2f meters from the map frame.", map2start.getOrigin().length());
+        RCLCPP_INFO(node_->get_logger(), "[START_TEST]: Patient at %.2f meters from the %s frame.", map2start.getOrigin().length(), source_frame_.c_str());
         config().blackboard->set("map2start", map2start);
         config().blackboard->set("map2initial", map2start);
 
+        config().blackboard->set("start_time", rclcpp::Time(map2start_msg.header.stamp, RCL_STEADY_TIME));
+
         RCLCPP_INFO(node_->get_logger(), "[START_TEST]: Setting start time to %.2f seconds", map2start_msg.header.stamp.nanosec/1e9);
         // config().blackboard->set("start_time", node_->now());
-        config().blackboard->set("start_time", rclcpp::Time(map2start_msg.header.stamp, RCL_STEADY_TIME));
 
         return BT::NodeStatus::SUCCESS;
     }

@@ -30,7 +30,8 @@
             <Sequence>
                 <Action ID="Speak" params="" speech_text="Hola, vamos a medir tu velocidad de la marcha"/>
                 <Action ID="Identify" detection="{patient}" entity_to_identify="patient_1"/>
-                <Action ID="Speak" params="" speech_text="Cuando diga ¡YA! tienes que comenzar a caminar"/>
+                <!-- <Action ID="Speak" params="" speech_text="Cuando diga ¡YA! tienes que comenzar a caminar"/> -->
+                <Action ID="Speak" params="" speech_text="Cuando escuches unos pitidos tienes que comenzar a caminar"/>
                 <Action ID="Identify" detection="{patient}" entity_to_identify="patient_1"/>
                 <Action ID="Speak" params="" speech_text="¿Has entendido lo que hay que hacer?"/>
                 <Action ID="Identify" detection="{patient}" entity_to_identify="patient_1"/>

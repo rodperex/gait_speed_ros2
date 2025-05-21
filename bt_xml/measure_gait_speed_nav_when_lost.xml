@@ -6,7 +6,12 @@
             <Action ID="GetDetectionFromBB" detection="{patient_detection}" key="detection"/>
             <Action ID="Identify" confidence="0.0" detection="{patient_detection}" entity_to_identify="patient_1"/>
             <Action ID="ActivateAttention" frame_id="patient_1" what="base"/>
-            <Action ID="StartTest" frame_name="patient_1"/>
+            <RetryUntilSuccessful num_attempts="100">
+                <ReactiveSequence>
+                    <Action ID="Identify" confidence="0.0" detection="{patient_detection}" entity_to_identify="patient_1"/>
+                    <Action ID="StartTest" frame_name="patient_1"/>
+                </ReactiveSequence>
+            </RetryUntilSuccessful>
             <Action ID="Speak" params="" speech_text="Ya puedes empezar!"/>
             <SubTree ID="check_test_started" __shared_blackboard="true"/>
             <SubTree ID="measure_gait_speed" __shared_blackboard="true"/>
