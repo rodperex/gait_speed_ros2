@@ -4,18 +4,18 @@
     <BehaviorTree ID="BehaviorTree">
         <Sequence>
             <Action ID="GetDetectionFromBB" detection="{patient_detection}" key="detection"/>
-            <Action ID="Identify" confidence="0.0" detection="{patient_detection}" entity_to_identify="patient_1"/>
+            <SubTree ID="locate_person" __shared_blackboard="true"/>
             <Action ID="ActivateAttention" frame_id="patient_1" what="base"/>
+            <ReactiveSequence>
+                <SubTree ID="locate_person" __shared_blackboard="true"/>
+                <Action ID="Speak" params="" speech_text="Cuando comienzen los pitidos, empieza a caminar en línea recta. Detente cuando te lo indique"/>
+            </ReactiveSequence>
             <RetryUntilSuccessful num_attempts="100">
                 <ReactiveSequence>
                     <Action ID="Identify" confidence="0.0" detection="{patient_detection}" entity_to_identify="patient_1"/>
                     <Action ID="StartTest" frame_name="patient_1"/>
                 </ReactiveSequence>
             </RetryUntilSuccessful>
-            <ReactiveSequence>
-                <Action ID="Identify" confidence="0.0" detection="{patient_detection}" entity_to_identify="patient_1"/>
-                <Action ID="Speak" params="" speech_text="Comienza a caminar cuando oigas los pitidos. Para cuando te lo indique"/>
-            </ReactiveSequence>
             <SubTree ID="check_test_started" __shared_blackboard="true"/>
             <SubTree ID="measure_gait_speed" __shared_blackboard="true"/>
             <Action ID="DeactivateAttention" what="base"/>
